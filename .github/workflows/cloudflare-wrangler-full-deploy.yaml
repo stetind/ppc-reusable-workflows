@@ -1,0 +1,31 @@
+name: Cloudflare_Deploy
+
+on:
+  workflow_call:
+    secrets:
+      NPM_TOKEN:
+        required: true
+      CF_API_TOKEN:
+        required: true
+    inputs:
+      deploy_environment:
+        description: 'Choose an environment'
+        required: true
+        type: string
+      debug:
+        description: 'Enable debug?'
+        required: false
+        default: false
+        type: boolean
+jobs:
+  analysis:
+    uses: stetind/stem-reusable-workflows/.github/workflows/typescript.yaml@main
+    secrets: inherit
+
+  deploy:
+    needs: analysis
+    uses: stetind/stem-reusable-workflows/.github/workflows/cloudflare-wrangler-deploy.yaml@main
+    secrets: inherit
+    with:
+      deploy_environment: ${{ inputs.deploy_environment }}
+      debug: ${{ inputs.debug }}
