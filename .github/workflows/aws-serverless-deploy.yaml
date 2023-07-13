@@ -1,0 +1,120 @@
+name: AWS_Serverless_Deploy
+
+on:
+  workflow_call:
+    secrets:
+      NPM_TOKEN:
+        required: true
+      SERVERLESS_ACCESS_KEY:
+        required: true
+      AWS_SECRET_ACCESS_KEY:
+        required: true
+      AWS_ACCESS_KEY_ID:
+        required: true
+    inputs:
+      deploy_environment:
+        description: 'Choose an environment'
+        required: true
+        default: "staging"
+        type: string
+      region:
+        description: 'Choose the region you want to deploy'
+        required: false
+        default: 'us-east-1'
+        type: string
+      debug:
+        description: 'Enable debug?'
+        required: false
+        default: false
+        type: boolean
+      dot_env_params:
+        description: 'A comma separated string with the names of the secrets or environment variables which we want to pass to .env'
+        required: false
+        default: ''
+        type: string
+env:
+  AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1,
+  AWS_SDK_LOAD_CONFIG: 1
+  AWS_REGION: ${{ inputs.region }}
+  debugMode: ${{ inputs.debug }}
+  DOT_ENV_PARAMS: ${{ inputs.dot_env_params }}
+  NODE_ENV: production
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    name: Deploy
+    environment: ${{ inputs.deploy_environment }}
+    steps:
+      - name: 🛫 Checkout
+        uses: actions/checkout@v3
+
+      - name: 🔧 Secret to Environment
+        uses: oNaiPs/secrets-to-env-action@v1
+        with:
+          secrets: ${{ toJSON(secrets) }}
+          
+      - name: 📓 Fill [dot] Env (Generic)
+        uses: CallePuzzle/envvar-to-dotenv-action@v1.1.5
+        with:
+          variableNamesByFilter: ^[A-Za-z].*
+
+      - name: 🔧 Vars to Environment
+        run: |
+          declare -A obj
+          echo '${{ toJSON(vars) }}' > ${{github.workspace}}/.vars_json
+          
+          while read -r key value; do
+            obj[$key]=$value
+          done <<< $(jq -r 'to_entries[] | "\(.key) \(.value)"' ${{github.workspace}}/.vars_json)
+
+          echo '' >> ${{github.workspace}}/.env
+
+          for key in "${!obj[@]}"; do
+            value=${obj[$key]}
+            echo "$key=${obj[$key]}" >> ${{github.workspace}}/.env
+          done
+
+      - name: 🧙 Install Node 18.x
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18.x
+
+      - name: 🔧 Setup Npm Token
+        # we need ~/.npmrc in order to avaoid errors on sls deploy
+        run: |
+          npm config set //registry.npmjs.org/:_authToken ${{ secrets.NPM_TOKEN }} &&
+          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ./.npmrc &&
+          cp ./.npmrc ~/.npmrc
+
+      - name: Install Deployment Dependencies
+        run: |
+          npm install -g npm@9.1.1 &&
+          npm install -g browserslist@4.21.3 &&
+          npm install -g typescript@4.9.5 &&
+          npm install -g envsub@4.0.7 &&
+          npm install -g dotenv@16.0.3 &&
+          npm install -g dotenv-cli@6.0.0 &&
+          npm install -g webpack@5.75.0 &&
+          npm install -g webpack-cli@4.10.0 &&
+          npm install -g webpack-node-externals@3.0.0 &&
+          npm install -g serverless@3.25.1 &&
+          npm install -g @serverless/utils@6.8.2 &&
+          npm install -g serverless-dotenv-plugin@4.0.2 &&
+          npm install -g serverless-plugin-typescript@2.1.4 &&
+          npm install -g serverless-webpack@5.11.0 &&
+          npm install -g ts-node@10.9.1
+      
+      - name: Install Dependencies
+        run:  npm install && npm cache clean --force --quite
+        
+      - name: Prepare Deploy
+        run: |
+          npm run compile-serverless &&
+          sls config credentials --provider aws --key "${{ secrets.AWS_ACCESS_KEY_ID }}" --secret "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+
+      - name: Deploy Serverless
+        run: |
+          sls deploy -s ${{ vars.PPC_STAGE }} -r ${{ inputs.region }} --verbose
+        env:
+          SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
