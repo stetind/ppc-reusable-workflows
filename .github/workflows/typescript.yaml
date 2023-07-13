@@ -1,0 +1,104 @@
+name: Typescript CI
+
+on:
+  workflow_call:
+    secrets:
+      NPM_TOKEN:
+        required: true
+      SONAR_TOKEN:
+        required: true
+
+env:
+  NODE_VERSION: 18.x
+
+jobs:
+  eslint:
+    name: Run EsLint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🛫 Checkout
+        uses: actions/checkout@v3
+
+      - name: 🧙 Install Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+        env:
+          TZ: UTC
+
+      - name: 🔧 Npm Configure
+        run: npm config set //registry.npmjs.org/:_authToken ${{ secrets.NPM_TOKEN }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: 🔧 Install Dependencies
+        run: npm ci
+
+      - name: 🚀 Run Eslint
+        uses: sibiraj-s/action-eslint@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }} # Optional
+          eslint-args: '--ignore-path=.eslintignore'
+          extensions: 'ts'
+          annotations: true
+
+  testing:
+    name: Run Jest Tests
+    needs: eslint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🛫 Checkout
+        uses: actions/checkout@v3
+
+      - name: 🧙 Install Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+        env:
+          TZ: UTC
+
+      - name: 🔧 Setup Npm
+        run: npm config set //registry.npmjs.org/:_authToken ${{ secrets.NPM_TOKEN }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: 🔧 Install Dependencies
+        run: npm ci
+
+      - name: 🔧 Building Environment
+        run: npm run build --if-present && npx browserslist@latest --update-db
+
+      - name: 🔧 Run Tests
+        id: run_test
+        run: npm run test:ci
+
+      - name: ✅ Tests (Success) - Create Artifact
+        id: artifact_creation
+        if: ${{ success() }}
+        uses: actions/upload-artifact@v3.1.2
+        with:
+          name: code
+          path: |
+            ${{github.workspace}}/*
+            !${{github.workspace}}/node_modules
+
+  sonar:
+    name: Sonar Checks
+    runs-on: ubuntu-latest
+    needs: testing
+    steps:
+      - name: 🛫 Checkout
+        uses: actions/download-artifact@master
+        with:
+          name: code
+          path: ${{github.workspace}}/
+
+      - name: 🔨 SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@v1.8
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
