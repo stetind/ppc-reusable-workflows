@@ -1,0 +1,36 @@
+#
+# Avoid execution of sonar test for a PL using the label `skip_sonar`
+# Also, using PL actions like adding/removing a lable we can manual trigger the job, so we can achieve an on demand execution of sonar.
+#
+
+name: SONARCLOUD_MANUAL
+
+on:
+  workflow_call:
+        
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    steps:
+      - id: check_label
+        name: Check PL labels
+        uses: docker://agilepathway/pull-request-label-checker:latest
+        with:
+          none_of: skip_sonar
+          repo_token: ${{ secrets.GITHUB_TOKEN }}  
+      - if: steps.check_label.outputs.label_check == 'success'
+        name: Checkout Repository
+        uses: actions/checkout@v2
+        with:
+          # Disabling shallow clone is recommended for improving relevancy of reporting
+          fetch-depth: 0
+      - if: steps.check_label.outputs.label_check == 'success'
+        name: SonarCloud Scan
+        uses: sonarsource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      - if: steps.check_label.outputs.label_check == 'failure'
+        name: Skip Sonar
+        run: echo "::notice::Sonar Skipped"
+        
