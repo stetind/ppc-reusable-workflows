@@ -25,7 +25,7 @@ jobs:
         uses: stetind/web-setup-node-npm-action@v1
 
       - name: 🚀 Update version
-        run: npm --no-git-tag-version version ${{ github.event.release.tag_name }}
+        run: npm --no-git-tag-version --force version ${{ github.event.release.tag_name }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
