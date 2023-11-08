@@ -2,8 +2,6 @@ name: Npm - Publish
 
 on:
   workflow_call:
-  release:
-    types: [ 'published' ]
 
 env:
   NODE_VERSION: 18.x
