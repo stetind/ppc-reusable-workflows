@@ -1,0 +1,41 @@
+name: Npm - Publish
+
+on:
+  release:
+    types: [ 'published' ]
+
+env:
+  NODE_VERSION: 18.x
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    env:
+      NODE_ENV: production
+
+    steps:
+      - name: 🛫 Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Node and NPM
+        uses: stetind/web-setup-node-npm-action@v1
+
+      - name: 🚀 Update version
+        run: npm --no-git-tag-version version ${{ github.event.release.tag_name }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: 🐱‍🚀 Publish Dev
+        if: "github.event.release.prerelease"
+        run: npm publish --tag "dev"
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: 🐱‍🚀 Publish Release
+        if: "!github.event.release.prerelease"
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
