@@ -2,6 +2,12 @@ name: Npm - Publish
 
 on:
   workflow_call:
+    inputs:
+      prerelease_tag_name:
+        description: The name of the tag that will be used to publish a dev release on NPM.
+        type: string
+        default: dev
+        required: false
 
 env:
   NODE_VERSION: 18.x
@@ -26,7 +32,7 @@ jobs:
 
       - name: 🐱‍🚀 Publish Dev
         if: "github.event.release.prerelease"
-        run: npm publish --tag "dev"
+        run: npm publish --tag ${{ inputs.prerelease_tag_name }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
