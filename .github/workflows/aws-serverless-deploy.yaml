@@ -113,11 +113,11 @@ jobs:
       - name: Prepare Deploy
         run: |
           npm run compile-serverless &&
-          sls config credentials --provider aws --key "${{ secrets.AWS_ACCESS_KEY_ID }}" --secret "${{ secrets.AWS_SECRET_ACCESS_KEY }}" &&
-          sls plugin install -n serverless-prune-plugin
+          sls config credentials --provider aws --key "${{ secrets.AWS_ACCESS_KEY_ID }}" --secret "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
 
       - name: Deploy Serverless
         run: |
+          sls plugin install -n serverless-prune-plugin &&
           sls deploy -s ${{ vars.PPC_STAGE }} -r ${{ inputs.region }} --verbose
         env:
           SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
