@@ -102,19 +102,19 @@ jobs:
           npm install -g @serverless/utils@6.8.2 &&
           npm install -g serverless-dotenv-plugin@4.0.2 &&
           npm install -g serverless-plugin-typescript@2.1.4 &&
+          npm install -g serverless-prune-plugin@2.0.2 &&
           npm install -g serverless-webpack@5.11.0 &&
           npm install -g ts-node@10.9.1
       
       - name: Install Dependencies
         run:  |
-          npm install && npm cache clean --force --quite &&
-          npm install --save-dev serverless-prune-plugin
+          npm install && npm cache clean --force --quite
         
       - name: Prepare Deploy
         run: |
-          sls plugin install -n serverless-prune-plugin &&
           npm run compile-serverless &&
-          sls config credentials --provider aws --key "${{ secrets.AWS_ACCESS_KEY_ID }}" --secret "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+          sls config credentials --provider aws --key "${{ secrets.AWS_ACCESS_KEY_ID }}" --secret "${{ secrets.AWS_SECRET_ACCESS_KEY }}" &&
+          sls plugin install -n serverless-prune-plugin
 
       - name: Deploy Serverless
         run: |
