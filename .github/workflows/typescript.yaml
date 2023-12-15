@@ -79,7 +79,7 @@ jobs:
       - name: ✅ Tests (Success) - Create Artifact
         id: artifact_creation
         if: ${{ success() }}
-        uses: actions/upload-artifact@main
+        uses: actions/upload-artifact@v4.0.0
         with:
           name: code
           path: |
@@ -92,7 +92,7 @@ jobs:
     needs: testing
     steps:
       - name: 🛫 Checkout
-        uses: actions/download-artifact@main
+        uses: actions/download-artifact@v4.0.0
         with:
           name: code
           path: ${{github.workspace}}/
