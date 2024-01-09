@@ -3,8 +3,8 @@ name: Npm - Publish
 on:
   workflow_call:
     inputs:
-      publish_code_path:
-        description: The path (inside the artifact) that code exists
+      artifact_name:
+        description: The artifact name, that contains the code which is being to be published
         type: string
         required: true
       dev_release_tag_name:
