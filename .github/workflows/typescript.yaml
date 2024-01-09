@@ -43,6 +43,15 @@ jobs:
           eslint-args: '--ignore-path=.eslintignore'
           extensions: 'ts'
           annotations: true
+      
+      - name: ✅ Artifact creation
+        if: ${{ success() }}
+        uses: actions/upload-artifact@v4.0.0
+        with:
+          name: code_1
+          retention-days: 1
+          path: |
+            ${{github.workspace}}/*
 
   testing:
     name: Run Jest Tests
@@ -51,7 +60,10 @@ jobs:
 
     steps:
       - name: 🛫 Checkout
-        uses: actions/checkout@v3
+        uses: actions/download-artifact@v4.0.0
+        with:
+          name: code_1
+          path: ${{github.workspace}}/
 
       - name: 🧙 Install Node
         uses: actions/setup-node@v3
@@ -77,11 +89,11 @@ jobs:
         run: npm run test:ci
 
       - name: ✅ Tests (Success) - Create Artifact
-        id: artifact_creation
         if: ${{ success() }}
         uses: actions/upload-artifact@v4.0.0
         with:
-          name: code
+          name: code_2
+          retention-days: 1
           path: |
             ${{github.workspace}}/*
             !${{github.workspace}}/node_modules
@@ -94,7 +106,7 @@ jobs:
       - name: 🛫 Checkout
         uses: actions/download-artifact@v4.0.0
         with:
-          name: code
+          name: code_2
           path: ${{github.workspace}}/
 
       - name: 🔨 SonarCloud Scan
