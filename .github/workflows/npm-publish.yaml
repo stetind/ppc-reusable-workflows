@@ -31,7 +31,7 @@ jobs:
       - name: 🛫 Checkout
         uses: actions/download-artifact@v4.0.0
         with:
-          name: ${{ inputs.publish_code_path }}
+          name: ${{ inputs.artifact_name }}
           path: ${{github.workspace}}/
 
       - name: Setup Node and NPM
