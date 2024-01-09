@@ -25,7 +25,10 @@ jobs:
 
     steps:
       - name: 🛫 Checkout
-        uses: actions/checkout@v3
+        uses: actions/download-artifact@v4.0.0
+        with:
+          name: code_to_publish
+          path: ${{github.workspace}}/
 
       - name: Setup Node and NPM
         uses: stetind/web-setup-node-npm-action@v1
