@@ -61,7 +61,7 @@ jobs:
       - name: 🛫 Checkout
         uses: actions/download-artifact@v4
         with:
-          name: code_1
+          name: code_eslint
           path: ${{github.workspace}}/
 
       - name: 🧙 Install Node
