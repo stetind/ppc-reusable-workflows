@@ -18,10 +18,10 @@ jobs:
 
     steps:
       - name: 🛫 Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: 🧙 Install Node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
@@ -37,7 +37,7 @@ jobs:
         run: npm ci
 
       - name: 🚀 Run Eslint
-        uses: sibiraj-s/action-eslint@v2
+        uses: sibiraj-s/action-eslint@v3
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }} # Optional
           eslint-args: '--ignore-path=.eslintignore'
