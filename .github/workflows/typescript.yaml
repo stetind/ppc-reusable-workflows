@@ -9,7 +9,7 @@ on:
         required: true
 
 env:
-  NODE_VERSION: 18.x
+  NODE_VERSION: 20
 
 jobs:
   eslint:
@@ -37,7 +37,7 @@ jobs:
         run: npm ci
 
       - name: 🚀 Run Eslint
-        uses: sibiraj-s/action-eslint@v3
+        uses: sibiraj-s/action-eslint@v3.0.1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }} # Optional
           eslint-args: '--ignore-path=.eslintignore'
@@ -65,7 +65,7 @@ jobs:
           path: ${{github.workspace}}/
 
       - name: 🧙 Install Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v4.0.2
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
