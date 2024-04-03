@@ -33,7 +33,7 @@ on:
         default: ''
         type: string
 env:
-  NODE_VERSION: 20,
+  NODE_VERSION: 20
   AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1,
   AWS_SDK_LOAD_CONFIG: 1
   AWS_REGION: ${{ inputs.region }}
