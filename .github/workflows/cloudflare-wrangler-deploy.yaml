@@ -19,6 +19,7 @@ on:
         type: boolean
 env:
   WRANGLER_SECRETS: ''
+  NODE_VERSION: 20
 
 jobs:
   deploy:
@@ -30,10 +31,10 @@ jobs:
       - name: 🛫 Checkout
         uses: actions/checkout@v4
 
-      - name: 🧙 Install Node 18.x
+      - name: 🧙 Install Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: ${{ env.NODE_VERSION }}
 
       - name: 🔧 Setup Npm
         run: npm config set //registry.npmjs.org/:_authToken ${{ secrets.NPM_TOKEN }}
