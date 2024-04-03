@@ -33,6 +33,7 @@ on:
         default: ''
         type: string
 env:
+  NODE_VERSION: 20,
   AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1,
   AWS_SDK_LOAD_CONFIG: 1
   AWS_REGION: ${{ inputs.region }}
@@ -78,7 +79,7 @@ jobs:
       - name: 🧙 Install Node 18.x
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: ${{ env.NODE_VERSION }}
 
       - name: 🔧 Setup Npm Token
         # we need ~/.npmrc in order to avoid errors on sls deploy
@@ -89,22 +90,22 @@ jobs:
 
       - name: Install Deployment Dependencies
         run: |
-          npm install -g npm@9.1.1 &&
-          npm install -g browserslist@4.21.3 &&
-          npm install -g typescript@4.9.5 &&
-          npm install -g envsub@4.0.7 &&
-          npm install -g dotenv@16.0.3 &&
-          npm install -g dotenv-cli@6.0.0 &&
-          npm install -g webpack@5.75.0 &&
-          npm install -g webpack-cli@4.10.0 &&
+          npm install -g npm@10.5.0 &&
+          npm install -g browserslist@4.23.0 &&
+          npm install -g typescript@5.4.0 &&
+          npm install -g envsub@4.1.0 &&
+          npm install -g dotenv@16.3.1 &&
+          npm install -g dotenv-cli@7.4.1 &&
+          npm install -g webpack@5.91.0 &&
+          npm install -g webpack-cli@5.1.4 &&
           npm install -g webpack-node-externals@3.0.0 &&
-          npm install -g serverless@3.25.1 &&
-          npm install -g @serverless/utils@6.8.2 &&
-          npm install -g serverless-dotenv-plugin@4.0.2 &&
-          npm install -g serverless-plugin-typescript@2.1.4 &&
+          npm install -g serverless@3.28.1 &&
+          npm install -g @serverless/utils@6.15.0 &&
+          npm install -g serverless-dotenv-plugin@6.0.0 &&
+          npm install -g serverless-plugin-typescript@2.1.5 &&
           npm install -g serverless-apigateway-service-proxy@2.2.1 &&
-          npm install -g serverless-webpack@5.11.0 &&
-          npm install -g ts-node@10.9.1
+          npm install -g serverless-webpack@5.13.0 &&
+          npm install -g ts-node@10.9.2
       
       - name: Install Dependencies
         run:  |
