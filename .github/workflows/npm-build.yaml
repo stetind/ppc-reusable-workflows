@@ -32,7 +32,6 @@ jobs:
       - name: 🔧 Install Global Deployment Dependencies
         uses: stetind/ppc-npm-global-dependencies-action@v1
 
-
       - name: 🏍 Building Environment
         run: npm run build --if-present && npx browserslist@latest --update-db
 
