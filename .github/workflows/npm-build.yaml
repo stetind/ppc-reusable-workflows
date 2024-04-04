@@ -3,7 +3,7 @@ name: Npm - Build
 on:
   workflow_call:
     inputs:
-      node_environemtn:
+      node_environment:
         description: Set the node environemtn (dev|production)
         type: string
         default: production
@@ -17,7 +17,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      NODE_ENV: ${{ inputs.node_environemtn }}
+      NODE_ENV: ${{ inputs.node_environment }}
 
     steps:
       - name: 🛫 Checkout
