@@ -30,14 +30,8 @@ jobs:
         uses: stetind/web-setup-node-npm-action@v1
 
       - name: 🔧 Install Global Deployment Dependencies
-        run: |
-          npm install -g npm@10.5.0 &&
-          npm install -g browserslist@4.23.0 &&
-          npm install -g typescript@5.4.3 &&
-          npm install -g envsub@4.1.0 &&
-          npm install -g dotenv@16.3.1 &&
-          npm install -g dotenv-cli@7.4.1 &&
-          npm install -g ts-node@10.9.2
+        uses: stetind/ppc-npm-global-dependencies-action@v1
+
 
       - name: 🏍 Building Environment
         run: npm run build --if-present && npx browserslist@latest --update-db
