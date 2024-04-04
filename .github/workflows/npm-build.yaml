@@ -13,9 +13,6 @@ on:
         type: string
         required: true
 
-env:
-  NODE_VERSION: 20
-
 jobs:
   build:
     runs-on: ubuntu-latest
