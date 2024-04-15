@@ -113,6 +113,7 @@ jobs:
         
       - name: Prepare Deploy
         run: |
+          serverless plugin install -n serverless-dotenv-plugin &&
           npm run compile-serverless &&
           sls config credentials --provider aws --key "${{ secrets.AWS_ACCESS_KEY_ID }}" --secret "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
 
