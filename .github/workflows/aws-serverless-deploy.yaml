@@ -77,10 +77,13 @@ jobs:
           done
 
       - name: 🧙 Setup Node and NPM
-        uses: stetind/web-setup-node-npm-action@v1
+        uses: stetind/web-setup-node-npm-action@v3-dev
 
       - name: 🔧 Install Global Deployment Dependencies
         uses: stetind/ppc-npm-global-dependencies-serverless-action@v1
+        with:
+          key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          token: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
 #      - name: 🧙 Install Node 18.x
 #        uses: actions/setup-node@v4
@@ -113,14 +116,14 @@ jobs:
 #          npm install -g serverless-webpack@5.13.0 &&
 #          npm install -g ts-node@10.9.2
 #
-      - name: Install Dependencies
-        run:  |
-          npm install && npm cache clean --force --quite
-
-      - name: Prepare Deploy
-        run: |
-          npm run compile-serverless &&
-          sls config credentials --provider aws --key "${{ secrets.AWS_ACCESS_KEY_ID }}" --secret "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+#      - name: Install Dependencies
+#        run:  |
+#          npm install && npm cache clean --force --quite
+#
+#      - name: Prepare Deploy
+#        run: |
+#          npm run compile-serverless &&
+#          sls config credentials --provider aws --key "${{ secrets.AWS_ACCESS_KEY_ID }}" --secret "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
 
       - name: Deploy Serverless
         run: |
