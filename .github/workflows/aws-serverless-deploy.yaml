@@ -77,7 +77,7 @@ jobs:
           done
 
       - name: 🧙 Setup Node and NPM
-        uses: stetind/web-setup-node-npm-action@v3-dev
+        uses: stetind/web-setup-node-npm-action@v3-dev-1
         with:
           bypass_install: true
 
