@@ -90,33 +90,38 @@ jobs:
 
       - name: Install Deployment Dependencies
         run: |
-          npm install -g npm@10.5.0 &&
-          npm install -g browserslist@4.23.0 &&
-          npm install -g typescript@5.4.3 &&
-          npm install -g envsub@4.1.0 &&
-          npm install -g dotenv@16.3.1 &&
-          npm install -g dotenv-cli@7.4.1 &&
-          npm install -g webpack@5.91.0 &&
-          npm install -g webpack-cli@5.1.4 &&
-          npm install -g webpack-node-externals@3.0.0 &&
-          npm install -g serverless@3.28.1 &&
-          npm install -g @serverless/utils@6.15.0 &&
-          npm install -g serverless-dotenv-plugin@6.0.0 &&
-          npm install -g serverless-plugin-typescript@2.1.5 &&
-          npm install -g serverless-apigateway-service-proxy@2.2.1 &&
-          npm install -g serverless-webpack@5.13.0 &&
+          npm install -g npm@10.5.0 && \
+          npm install -g browserslist@4.23.0 && \
+          npm install -g typescript@5.4.3 && \
+          npm install -g envsub@4.1.0 && \
+          npm install -g dotenv@16.3.1 && \
+          npm install -g dotenv-cli@7.4.1 && \
+          npm install -g webpack@5.91.0 && \
+          npm install -g webpack-cli@5.1.4 && \
+          npm install -g webpack-node-externals@3.0.0 && \
+          npm install -g serverless@3.28.1 && \
+          npm install -g @serverless/utils@6.15.0 && \
+          npm install -g serverless-dotenv-plugin@6.0.0 && \
+          npm install -g serverless-plugin-typescript@2.1.5 && \
+          npm install -g serverless-apigateway-service-proxy@2.2.1 && \
+          npm install -g serverless-webpack@5.13.0 && \
           npm install -g ts-node@10.9.2
       
       - name: Install Dependencies
         run:  |
-          npm install && npm cache clean --force --quite
+          npm install && \
+          npm cache clean --force --quite && \
+          npm install serverless-dotenv-plugin@6.0.0 --save-dev && \
+          npm install serverless-plugin-typescript@2.1.5 --save-dev && \
+          npm install serverless-apigateway-service-proxy@2.2.1 --save-dev && \
+          npm install serverless-webpack@5.13.0 --save-dev
         
       - name: Prepare Deploy
         run: |
-          serverless plugin install -n serverless-dotenv-plugin &&
-          serverless plugin install -n serverless-webpack &&
-          serverless plugin install -n serverless-apigateway-service-proxy &&
-          npm run compile-serverless &&
+          sls plugin install -n serverless-dotenv-plugin && \
+          sls plugin install -n serverless-webpack && \
+          sls plugin install -n serverless-apigateway-service-proxy && \
+          npm run compile-serverless && \
           sls config credentials --provider aws --key "${{ secrets.AWS_ACCESS_KEY_ID }}" --secret "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
 
       - name: Deploy Serverless
