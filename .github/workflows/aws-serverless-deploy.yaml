@@ -81,24 +81,28 @@ jobs:
         with:
           bypass_install: true
 
-      - name: 🔧 Setup Npm Token
-        # we need ~/.npmrc in order to avoid errors on sls deploy
-        run: |
-          npm config set //registry.npmjs.org/:_authToken ${{ secrets.NPM_TOKEN }} &&
-          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ./.npmrc &&
-          cp ./.npmrc ~/.npmrc
+      # - name: 🔧 Setup Npm Token
+      #   # we need ~/.npmrc in order to avoid errors on sls deploy
+      #   run: |
+      #     npm config set //registry.npmjs.org/:_authToken ${{ secrets.NPM_TOKEN }} &&
+      #     echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ./.npmrc &&
+      #     cp ./.npmrc ~/.npmrc
 
       - name: 🔧 Install Global Deployment Dependencies
-        uses: stetind/ppc-npm-global-dependencies-serverless-action@v2-1
+        uses: stetind/ppc-npm-global-dependencies-serverless-action@v2.1
+        with:
+          key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          token: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          npm_token: ${{ secrets.NPM_TOKEN }}
 
-      - name: Install Dependencies
-        run:  |
-          npm install && npm cache clean --force --quite
+      # - name: Install Dependencies
+      #   run:  |
+      #     npm install && npm cache clean --force --quite
 
-      - name: Prepare Deploy
-        run: |
-          npm run compile-serverless &&
-          sls config credentials --provider aws --key "${{ secrets.AWS_ACCESS_KEY_ID }}" --secret "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+      # - name: Prepare Deploy
+      #   run: |
+      #     npm run compile-serverless &&
+      #     sls config credentials --provider aws --key "${{ secrets.AWS_ACCESS_KEY_ID }}" --secret "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
 
       - name: Deploy Serverless
         run: |
