@@ -82,7 +82,7 @@ jobs:
       #     bypass_install: true
 
       - name: 🧙 Setup Node & 🔧 Install Global Dependencies
-        uses: stetind/ppc-npm-global-dependencies-serverless-action@v2.1
+        uses: stetind/ppc-npm-global-dependencies-serverless-action@v2.2
         with:
           key: ${{ secrets.AWS_ACCESS_KEY_ID }}
           token: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
