@@ -61,6 +61,7 @@ jobs:
       - name: 🛫 Checkout
         uses: actions/download-artifact@v4.1.7
         with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           name: code_eslint
           path: ${{github.workspace}}/
 
@@ -106,6 +107,7 @@ jobs:
       - name: 🛫 Checkout
         uses: actions/download-artifact@v4.1.7
         with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           name: code_test
           path: ${{github.workspace}}/
 
