@@ -32,12 +32,12 @@ env:
 
 jobs:
   analysis:
-    uses: stetind/ppc-reusable-workflows/.github/workflows/typescript.yaml@master
+    uses: stetind/ppc-reusable-workflows/.github/workflows/typescript.yaml@v2.1
     secrets: inherit
 
   deploy:
     needs: analysis
-    uses: stetind/ppc-reusable-workflows/.github/workflows/aws-serverless-deploy.yaml@master
+    uses: stetind/ppc-reusable-workflows/.github/workflows/aws-serverless-deploy.yaml@v2.1
     secrets: inherit
     with:
       deploy_environment: ${{ inputs.deploy_environment }}
