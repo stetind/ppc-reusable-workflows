@@ -37,7 +37,7 @@ jobs:
 
       - name: ✅ Artifact creation
         if: ${{ success() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v4.3.3
         with:
           name: ${{ inputs.artifact_name }}
           retention-days: 1
