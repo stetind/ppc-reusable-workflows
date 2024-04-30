@@ -50,6 +50,28 @@ jobs:
       - name: 🛫 Checkout
         uses: actions/checkout@v4
 
+      - name: 🧙 Install Node
+        uses: stetind/ppc-npm-global-dependencies-action@v2
+        with:
+          npm_token: ${{ secrets.NPM_TOKEN }}
+          bypass_install: true
+
+      - name: 🔧 Install Global Dependencies
+        run: npm install -g \
+            webpack@5.91.0 \
+            webpack-cli@5.1.4 \
+            webpack-node-externals@3.0.0 \
+            serverless@3.28.1 \
+            @serverless/utils@6.15.0 \
+            serverless-dotenv-plugin@6.0.0 \
+            serverless-plugin-typescript@2.1.5 \
+            serverless-prune-plugin@2.0.2 \
+            serverless-apigateway-service-proxy@2.2.1 \
+            serverless-webpack@5.13.0
+
+      - name: 🔧 Npm Install
+        run: npm ci --ignore-scripts  --force --quite
+
       - name: 🔧 Secret to Environment
         uses: oNaiPs/secrets-to-env-action@v1
         with:
@@ -76,12 +98,10 @@ jobs:
             echo "$key=${obj[$key]}" >> ${{github.workspace}}/.env
           done
 
-      - name: 🧙 Setup Node & 🔧 Install Global Dependencies
-        uses: stetind/ppc-npm-global-dependencies-serverless-action@v2.2
-        with:
-          key: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          token: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          npm_token: ${{ secrets.NPM_TOKEN }}
+      - name: 🏗️ Prepare Deploy
+        run: |
+          npm run compile-serverless &&
+          sls config credentials --provider aws --key "${{ secrets.AWS_ACCESS_KEY_ID }}" --secret "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
 
       - name: 🚅 Deploy to AWS
         run: |
