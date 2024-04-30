@@ -27,7 +27,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup Node and NPM
-        uses: stetind/web-setup-node-npm-action@v1
+        uses: stetind/web-setup-node-npm-action@v2
 
       - name: 🔧 Install Global Deployment Dependencies
         uses: stetind/ppc-npm-global-dependencies-action@v1.1
