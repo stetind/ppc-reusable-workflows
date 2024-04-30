@@ -26,13 +26,13 @@ jobs:
       - name: 🛫 Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node and NPM
+      - name: 🔧 Setup Node and NPM
         uses: stetind/web-setup-node-npm-action@v2
 
-      - name: 🔧 Install Global Deployment Dependencies
+      - name: 🏗️ Install Global Deployment Dependencies
         uses: stetind/ppc-npm-global-dependencies-action@v1.1
 
-      - name: 🏍 Building Environment
+      - name: 🏗️ Building Environment
         run: npm run build --if-present && npx browserslist@latest --update-db
 
       - name: ✅ Artifact creation
