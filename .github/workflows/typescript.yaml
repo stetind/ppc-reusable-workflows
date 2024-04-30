@@ -22,35 +22,9 @@ jobs:
       
       - name: 🔧 Setup Node and NPM
         uses: stetind/web-setup-node-npm-action@v2
-        
-      # - name: 🧙 Install Node
-      #   uses: actions/setup-node@v4
-      #   with:
-      #     node-version: ${{ env.NODE_VERSION }}
-      #     cache: npm
-      #   env:
-      #     TZ: UTC
-
-      # - name: 🔧 Npm Configure
-      #   run: npm config set //registry.npmjs.org/:_authToken ${{ secrets.NPM_TOKEN }}
-      #   env:
-      #     NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      # - name: 🔧 Install Dependencies
-      #   run: npm ci
 
       - name: 🚀 Run Eslint
-        uses: reviewdog/action-eslint@v1.24.0
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: ✅ Artifact creation
-        if: ${{ success() }}
-        uses: actions/upload-artifact@v4.3.3
-        with:
-          name: code_eslint
-          retention-days: 1
-          path: ${{github.workspace}}/*
+        run: npm run lint-quiet
 
   testing:
     name: Run Jest Tests
@@ -59,26 +33,10 @@ jobs:
 
     steps:
       - name: 🛫 Checkout
-        uses: actions/download-artifact@v4.1.7
-        with:
-          name: code_eslint
-          path: ${{github.workspace}}/
+        uses: actions/checkout@v4
 
-      - name: 🧙 Install Node
-        uses: actions/setup-node@v4.0.2
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: npm
-        env:
-          TZ: UTC
-
-      - name: 🔧 Setup Npm
-        run: npm config set //registry.npmjs.org/:_authToken ${{ secrets.NPM_TOKEN }}
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      - name: 🔧 Install Dependencies
-        run: npm ci
+      - name: 🔧 Setup Node and NPM
+        uses: stetind/web-setup-node-npm-action@v2
 
       - name: 🔧 Building Environment
         run: npm run build --if-present && npx browserslist@latest --update-db
@@ -103,10 +61,10 @@ jobs:
     needs: testing
     steps:
       - name: 🛫 Checkout
-        uses: actions/download-artifact@v4.1.7
-        with:
-          name: code_test
-          path: ${{github.workspace}}/
+        uses: actions/checkout@v4
+
+      - name: 🔧 Setup Node and NPM
+        uses: stetind/web-setup-node-npm-action@v2
 
       - name: 🔨 SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v2.1
