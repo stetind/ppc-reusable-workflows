@@ -51,7 +51,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: 🧙 Install Node
-        uses: stetind/ppc-npm-global-dependencies-action@v2
+        uses: stetind/ppc-npm-global-dependencies-action@v3
         with:
           npm_token: ${{ secrets.NPM_TOKEN }}
           bypass_install: true
