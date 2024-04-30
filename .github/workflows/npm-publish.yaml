@@ -34,7 +34,7 @@ jobs:
           name: ${{ inputs.artifact_name }}
           path: ${{github.workspace}}/
 
-      - name: Setup Node and NPM
+      - name: 🔧 Setup Node and NPM
         uses: stetind/web-setup-node-npm-action@v2
 
       - name: 🚀 Update version
