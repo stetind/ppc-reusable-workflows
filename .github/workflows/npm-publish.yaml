@@ -3,10 +3,6 @@ name: Npm - Publish
 on:
   workflow_call:
     inputs:
-      artifact_name:
-        description: The artifact name, that contains the code which is being to be published
-        type: string
-        required: true
       dev_release_tag_name:
         description: The name of the tag that will be used to publish a dev release on NPM.
         type: string
@@ -29,11 +25,8 @@ jobs:
 
     steps:
       - name: 🛫 Checkout
-        uses: actions/download-artifact@v4.1.7
-        with:
-          name: ${{ inputs.artifact_name }}
-          path: ${{github.workspace}}/
-
+        uses: actions/checkout@v4
+        
       - name: 🔧 Setup Node and NPM
         uses: stetind/web-setup-node-npm-action@v2
 
