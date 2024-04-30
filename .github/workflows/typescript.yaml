@@ -42,7 +42,7 @@ jobs:
       - name: 🚀 Run Eslint
         uses: reviewdog/action-eslint@v1.24.0
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }} # Optional
+          github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: ✅ Artifact creation
         if: ${{ success() }}
