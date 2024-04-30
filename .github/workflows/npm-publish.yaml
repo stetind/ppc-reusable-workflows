@@ -29,7 +29,7 @@ jobs:
 
     steps:
       - name: 🛫 Checkout
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v4.1.7
         with:
           name: ${{ inputs.artifact_name }}
           path: ${{github.workspace}}/

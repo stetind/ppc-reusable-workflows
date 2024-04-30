@@ -46,7 +46,7 @@ jobs:
       
       - name: ✅ Artifact creation
         if: ${{ success() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v4.3.3
         with:
           name: code_eslint
           retention-days: 1
@@ -59,7 +59,7 @@ jobs:
 
     steps:
       - name: 🛫 Checkout
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v4.1.7
         with:
           name: code_eslint
           path: ${{github.workspace}}/
@@ -89,7 +89,7 @@ jobs:
 
       - name: ✅ Tests (Success) - Create Artifact
         if: ${{ success() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v4.3.3
         with:
           name: code_test
           retention-days: 1
@@ -103,7 +103,7 @@ jobs:
     needs: testing
     steps:
       - name: 🛫 Checkout
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v4.1.7
         with:
           name: code_test
           path: ${{github.workspace}}/
