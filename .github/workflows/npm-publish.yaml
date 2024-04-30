@@ -35,7 +35,7 @@ jobs:
           path: ${{github.workspace}}/
 
       - name: Setup Node and NPM
-        uses: stetind/web-setup-node-npm-action@v1
+        uses: stetind/web-setup-node-npm-action@v2
 
       - name: 🚀 Update version
         run: npm --no-git-tag-version version ${{ inputs.release_version_name }}
