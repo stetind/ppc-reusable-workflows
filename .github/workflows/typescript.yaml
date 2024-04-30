@@ -21,7 +21,7 @@ jobs:
         uses: actions/checkout@v4
       
       - name: 🔧 Setup Node and NPM
-        uses: stetind/web-setup-node-npm-action@v2
+        uses: stetind/ppc-npm-global-dependencies-action@v2
 
       - name: 🚀 Run Eslint
         run: npm run lint-quiet
@@ -36,7 +36,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: 🔧 Setup Node and NPM
-        uses: stetind/web-setup-node-npm-action@v2
+        uses: stetind/ppc-npm-global-dependencies-action@v2
 
       - name: 🔧 Building Environment
         run: npm run build --if-present && npx browserslist@latest --update-db
@@ -64,7 +64,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: 🔧 Setup Node and NPM
-        uses: stetind/web-setup-node-npm-action@v2
+        uses: stetind/ppc-npm-global-dependencies-action@v2
 
       - name: 🔨 SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v2.1
