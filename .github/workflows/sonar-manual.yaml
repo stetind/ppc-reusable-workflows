@@ -19,8 +19,8 @@ jobs:
           none_of: skip_sonar
           repo_token: ${{ secrets.GITHUB_TOKEN }}  
       - if: steps.check_label.outputs.label_check == 'success'
-        name: Checkout Repository
-        uses: actions/checkout@v2
+        name: 🛫 Checkout Repository
+        uses: actions/checkout@v4
         with:
           # Disabling shallow clone is recommended for improving relevancy of reporting
           fetch-depth: 0
