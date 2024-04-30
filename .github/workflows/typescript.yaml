@@ -65,12 +65,10 @@ jobs:
     needs: testing
     steps:
       - name: 🛫 Checkout
-        uses: actions/checkout@v4
-
-      - name: 🔧 Setup Node and NPM
-        uses: stetind/ppc-npm-global-dependencies-action@v3
+        uses: actions/download-artifact@v4.1.7
         with:
-          npm_token: ${{ secrets.NPM_TOKEN }}
+          name: code_test
+          path: ${{github.workspace}}/
 
       - name: 🔨 SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v2.1
