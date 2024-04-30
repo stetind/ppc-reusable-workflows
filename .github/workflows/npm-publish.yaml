@@ -26,10 +26,16 @@ jobs:
     steps:
       - name: 🛫 Checkout
         uses: actions/checkout@v4
-        
+
       - name: 🔧 Setup Node and NPM
         uses: stetind/web-setup-node-npm-action@v2
 
+      - name: 🏗️ Install Global Deployment Dependencies
+        uses: stetind/ppc-npm-global-dependencies-action@v1.1
+
+      - name: 🏗️ Building Environment
+        run: npm run build --if-present && npx browserslist@latest --update-db
+      
       - name: 🚀 Update version
         run: npm --no-git-tag-version version ${{ inputs.release_version_name }}
         env:
