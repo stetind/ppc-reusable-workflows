@@ -58,16 +58,16 @@ jobs:
 
       - name: 🔧 Install Global Dependencies
         run: npm install -g \
-            webpack@5.91.0 \
-            webpack-cli@5.1.4 \
-            webpack-node-externals@3.0.0 \
-            serverless@3.28.1 \
-            @serverless/utils@6.15.0 \
-            serverless-dotenv-plugin@6.0.0 \
-            serverless-plugin-typescript@2.1.5 \
-            serverless-prune-plugin@2.0.2 \
-            serverless-apigateway-service-proxy@2.2.1 \
-            serverless-webpack@5.13.0
+          webpack@5.91.0 \
+          webpack-cli@5.1.4 \
+          webpack-node-externals@3.0.0 \
+          serverless@3.28.1 \
+          @serverless/utils@6.15.0 \
+          serverless-dotenv-plugin@6.0.0 \
+          serverless-plugin-typescript@2.1.5 \
+          serverless-prune-plugin@2.0.2 \
+          serverless-apigateway-service-proxy@2.2.1 \
+          serverless-webpack@5.13.0
 
       - name: 🔧 Npm Install
         run: npm ci --ignore-scripts  --force --quite
