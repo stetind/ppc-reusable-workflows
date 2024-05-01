@@ -57,8 +57,7 @@ jobs:
           bypass_install: true
 
       - name: 🔧 Install Global Dependencies
-        run: npm install -g \
-         webpack@5.91.0 \
+        run: npm install -g webpack@5.91.0 \
          webpack-cli@5.1.4 \
          webpack-node-externals@3.0.0 \
          serverless@3.28.1 \
