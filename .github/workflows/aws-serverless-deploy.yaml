@@ -112,7 +112,7 @@ jobs:
       - name: 🏗️ Prepare Deploy
         run: |
           npm run compile-serverless &&
-          sls config credentials --provider aws --key "${{ secrets.AWS_ACCESS_KEY_ID }}" --secret "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+          sls config credentials --overwrite --provider aws --key "${{ secrets.AWS_ACCESS_KEY_ID }}" --secret "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
 
       - name: 🚅 Deploy to AWS
         run: |
