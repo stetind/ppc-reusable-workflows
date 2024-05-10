@@ -23,23 +23,38 @@ on:
         required: false
         default: false
         type: boolean
+      node_version:
+        description: 'The desired node version'
+        required: false
+        default: '20'
+        type: string
+      runner:
+        description: 'Choose the runner'
+        required: false
+        default: 'self-hosted'
+        type: string
 env:
   AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1,
   AWS_SDK_LOAD_CONFIG: 1
+  NODE_VERSION: ${{ inputs.node_version }}
   AWS_REGION: ${{ inputs.region }}
   debugMode: ${{ inputs.debug }}
   NODE_ENV: production
 
 jobs:
   analysis:
-    uses: stetind/ppc-reusable-workflows/.github/workflows/typescript.yaml@v2.2
+    uses: stetind/ppc-reusable-workflows/.github/workflows/typescript.yaml@v3
     secrets: inherit
-
+    with:
+      node_version: ${{ inputs.node_version }}
+      runner: ${{ inputs.runner }}
   deploy:
     needs: analysis
-    uses: stetind/ppc-reusable-workflows/.github/workflows/aws-serverless-deploy.yaml@v2.2
+    uses: stetind/ppc-reusable-workflows/.github/workflows/aws-serverless-deploy.yaml@v3
     secrets: inherit
     with:
       deploy_environment: ${{ inputs.deploy_environment }}
       region: ${{ inputs.region }}
       debug: ${{ inputs.debug }}
+      node_version: ${{ inputs.node_version }}
+      runner: ${{ inputs.runner }}

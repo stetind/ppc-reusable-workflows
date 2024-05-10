@@ -17,15 +17,30 @@ on:
         required: false
         default: false
         type: boolean
+      node_version:
+        description: 'The desired node version'
+        required: false
+        default: '20'
+        type: string
+      runner:
+        description: 'Choose the runner'
+        required: false
+        default: 'self-hosted'
+        type: string
 jobs:
   analysis:
-    uses: stetind/ppc-reusable-workflows/.github/workflows/typescript.yaml@v2.2
+    uses: stetind/ppc-reusable-workflows/.github/workflows/typescript.yaml@v3
     secrets: inherit
+    with:
+      node_version: ${{ inputs.node_version }}
+      runner: ${{ inputs.runner }}
 
   deploy:
     needs: analysis
-    uses: stetind/ppc-reusable-workflows/.github/workflows/cloudflare-wrangler-deploy.yaml@v2.2
+    uses: stetind/ppc-reusable-workflows/.github/workflows/cloudflare-wrangler-deploy.yaml@v3
     secrets: inherit
     with:
       deploy_environment: ${{ inputs.deploy_environment }}
       debug: ${{ inputs.debug }}
+      node_version: ${{ inputs.node_version }}
+      runner: ${{ inputs.runner }}

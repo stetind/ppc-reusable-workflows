@@ -1,0 +1,36 @@
+name: Typescript eslint
+
+on:
+  workflow_call:
+    secrets:
+      NPM_TOKEN:
+        required: true
+    inputs:
+      node_version:
+        description: 'The desired node version'
+        required: false
+        default: '20'
+        type: string
+      runner:
+        description: 'Choose the runner'
+        required: false
+        default: 'self-hosted'
+        type: string
+
+jobs:
+  eslint:
+    name: Run EsLint
+    runs-on: ${{ inputs.runner }}
+
+    steps:
+      - name: 🛫 Checkout
+        uses: actions/checkout@v4
+      
+      - name: 🔧 Setup Node and NPM
+        uses: stetind/ppc-npm-global-dependencies-action@v3.1
+        with:
+          npm_token: ${{ secrets.NPM_TOKEN }}
+          node_version: ${{ inputs.node_version }}
+
+      - name: 🚀 Run Eslint
+        run: npm run lint-quiet

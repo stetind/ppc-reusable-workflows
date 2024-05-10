@@ -1,0 +1,55 @@
+name: Cypress Test
+on:
+  workflow_call:
+    secrets:
+      CYPRESS_PPC_AWS_ACCESS_KEY_ID:
+        required: true
+      CYPRESS_PPC_AWS_SECRET_ACCESS_KEY:
+        required: true
+      NPM_TOKEN:
+        required: true
+    inputs:
+      host:
+        description: 'Define teh host to test'
+        required: true
+        type: string
+      node_version:
+        description: 'The desired node version'
+        required: false
+        default: '20'
+        type: string
+      runner:
+        description: 'Choose the runner'
+        required: false
+        default: 'ubuntu-latest'
+        type: string
+jobs:
+  cypress-run:
+    runs-on: ${{ inputs.runner }}
+    concurrency:
+      group: ${{ github.workflow }}
+      cancel-in-progress: true
+    steps:
+      - name: 🛫 Checkout
+        uses: actions/checkout@v4
+
+      - name: 🔧 Setup Node and NPM
+        uses: stetind/ppc-npm-global-dependencies-action@v3.1
+        with:
+          npm_token: ${{ secrets.NPM_TOKEN }}
+          node_version: ${{ inputs.node_version }}
+
+      - name: 🔧 Npm Configure
+        run: npm config set //registry.npmjs.org/:_authToken ${{ secrets.NPM_TOKEN }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Cypress run
+        uses: cypress-io/github-action@v6
+        with:
+          command: npx cypress run --config-file cypress.config.github.ts
+        env:
+          awsAccessKeyId: ${{ secrets.CYPRESS_PPC_AWS_ACCESS_KEY_ID }}
+          awsSecretAccessKey: ${{ secrets.CYPRESS_PPC_AWS_SECRET_ACCESS_KEY }}
+          awsHost: ${{ inputs.host }}
+          awsRegion: 'us-east-1'
+

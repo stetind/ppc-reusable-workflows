@@ -32,10 +32,21 @@ on:
         required: false
         default: ''
         type: string
+      node_version:
+        description: 'The desired node version'
+        required: false
+        default: '20'
+        type: string
+      runner:
+        description: 'Choose the runner'
+        required: false
+        default: 'self-hosted'
+        type: string
+
 env:
-  NODE_VERSION: 20
   AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1,
   AWS_SDK_LOAD_CONFIG: 1
+  NODE_VERSION: ${{ inputs.node_version }}
   AWS_REGION: ${{ inputs.region }}
   debugMode: ${{ inputs.debug }}
   DOT_ENV_PARAMS: ${{ inputs.dot_env_params }}
@@ -43,7 +54,7 @@ env:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runner }}
     name: Deploy
     environment: ${{ inputs.deploy_environment }}
     steps:
@@ -51,9 +62,10 @@ jobs:
         uses: actions/checkout@v4
 
       - name: 🧙 Install Node
-        uses: stetind/ppc-npm-global-dependencies-action@v3
+        uses: stetind/ppc-npm-global-dependencies-action@v3.1
         with:
           npm_token: ${{ secrets.NPM_TOKEN }}
+          node_version: ${{ inputs.node_version }}
           bypass_install: true
 
       - name: 🔧 Install Global Dependencies

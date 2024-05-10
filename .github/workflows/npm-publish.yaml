@@ -13,13 +13,22 @@ on:
         type: string
         default: ${{ github.event.release.tag_name }}
         required: false
-
+      node_version:
+        description: 'The desired node version'
+        required: false
+        default: '20'
+        type: string
+      runner:
+        description: 'Choose the runner'
+        required: false
+        default: 'self-hosted'
+        type: string
 env:
-  NODE_VERSION: 20
+  NODE_VERSION: ${{ inputs.node_version }}
 
 jobs:
   publish:
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runner }}
     env:
       NODE_ENV: production
 
@@ -28,9 +37,10 @@ jobs:
         uses: actions/checkout@v4
 
       - name: 🔧 Setup Node and NPM
-        uses: stetind/ppc-npm-global-dependencies-action@v3
+        uses: stetind/ppc-npm-global-dependencies-action@v3.1
         with:
           npm_token: ${{ secrets.NPM_TOKEN }}
+          node_version: ${{ inputs.node_version }}
 
       - name: 🏗️ Building Environment
         run: npm run build --if-present && npx browserslist@latest --update-db
