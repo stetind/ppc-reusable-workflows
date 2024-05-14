@@ -78,6 +78,7 @@ jobs:
          npm install -g serverless-plugin-typescript@2.1.5 &&
          npm install -g serverless-prune-plugin@2.0.2 &&
          npm install -g serverless-apigateway-service-proxy@2.2.1 &&
+         npm install -g serverless-api-gateway-throttling@2.0.3 &&
          npm install -g serverless-webpack@5.13.0
 
       - name: 🔧 Npm Install
