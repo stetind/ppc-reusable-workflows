@@ -25,11 +25,11 @@ on:
       runner:
         description: 'Choose the runner'
         required: false
-        default: 'self-hosted'
+        default: 'ubuntu-latest'
         type: string
 jobs:
   analysis:
-    uses: stetind/ppc-reusable-workflows/.github/workflows/typescript.yaml@v3.1
+    uses: stetind/ppc-reusable-workflows/.github/workflows/typescript.yaml@v3.2
     secrets: inherit
     with:
       node_version: ${{ inputs.node_version }}
@@ -37,7 +37,7 @@ jobs:
 
   deploy:
     needs: analysis
-    uses: stetind/ppc-reusable-workflows/.github/workflows/cloudflare-wrangler-deploy.yaml@v3.1
+    uses: stetind/ppc-reusable-workflows/.github/workflows/cloudflare-wrangler-deploy.yaml@v3.2
     secrets: inherit
     with:
       deploy_environment: ${{ inputs.deploy_environment }}

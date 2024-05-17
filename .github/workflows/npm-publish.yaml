@@ -21,7 +21,7 @@ on:
       runner:
         description: 'Choose the runner'
         required: false
-        default: 'self-hosted'
+        default: 'ubuntu-latest'
         type: string
 env:
   NODE_VERSION: ${{ inputs.node_version }}
