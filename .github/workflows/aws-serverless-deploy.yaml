@@ -101,15 +101,14 @@ jobs:
           npm install -g webpack-cli@5.1.4 &&
           npm install -g webpack-node-externals@3.0.0 &&
           npm install -g serverless@3.28.1 &&
-          npm install -g @serverless/utils@6.15.0 &&
-          npm install -g serverless-dotenv-plugin@6.0.0 &&
-          npm install -g serverless-plugin-typescript@2.1.5 &&
-          npm install -g serverless-prune-plugin@2.0.2 &&
-          npm install -g serverless-apigateway-service-proxy@2.2.1 &&
-          npm install -g serverless-api-gateway-throttling@2.0.3 &&
-          npm install -g serverless-webpack@5.13.0 &&
-          npm install -g serverless-layers@2.7.0 &&
-          sls plugin install serverless-webpack@5.13.0
+          npm install @serverless/utils@6.15.0 --save-dev &&
+          npm install serverless-dotenv-plugin@6.0.0 --save-dev &&
+          npm install serverless-plugin-typescript@2.1.5 --save-dev &&
+          npm install serverless-prune-plugin@2.0.2 --save-dev &&
+          npm install serverless-apigateway-service-proxy@2.2.1 --save-dev &&
+          npm install serverless-api-gateway-throttling@2.0.3 --save-dev &&
+          npm install serverless-webpack@5.13.0 --save-dev &&
+          npm install serverless-layers@2.7.0 --save-dev
 
       - name: 🔧 Npm Install
         run: npm ci --ignore-scripts  --force --quite
