@@ -81,8 +81,8 @@ jobs:
           serverless-prune-plugin@2.0.2 \
           serverless-apigateway-service-proxy@2.2.1 \
           serverless-layers@2.7.0 \
-          serverless-api-gateway-throttling@2.0.3 \
-          serverless-webpack@5.13.0 
+          serverless-api-gateway-throttling@2.0.3 &&
+          serverless plugin install -n serverless-webpack
 
       - name: 🔧 Npm Install
         run: npm ci --ignore-scripts  --force --quite
