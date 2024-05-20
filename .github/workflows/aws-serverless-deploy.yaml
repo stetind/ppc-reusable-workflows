@@ -104,12 +104,12 @@ jobs:
           npm install @serverless/utils@6.15.0 --save-dev &&
           npm install serverless-dotenv-plugin@6.0.0 --save-dev &&
           npm install serverless-plugin-typescript@2.1.5 --save-dev &&
-          npm install serverless-prune-plugin@2.0.2 --save-dev &&
-          npm install serverless-apigateway-service-proxy@2.2.1 --save-dev &&
-          npm install serverless-api-gateway-throttling@2.0.3 --save-dev &&
-          npm install serverless-webpack@5.13.0 --save-dev &&
-          npm install serverless-layers@2.7.0 --save-dev
-
+          serverless plugin install -n serverless-prune-plugin@2.0.2 &&
+          serverless plugin install -n serverless-apigateway-service-proxy@2.2.1 &&
+          serverless plugin install -n serverless-api-gateway-throttling@2.0.3&&
+          serverless plugin install -n serverless-webpack@5.13.0 &&
+          serverless plugin install -n serverless-layers@2.7.0
+          
       - name: 🔧 Npm Install
         run: npm ci --ignore-scripts  --force --quite
       - name: 🏗️ Prepare Deploy
