@@ -108,7 +108,8 @@ jobs:
           npm install -g serverless-apigateway-service-proxy@2.2.1 &&
           npm install -g serverless-api-gateway-throttling@2.0.3 &&
           npm install -g serverless-webpack@5.13.0 &&
-          npm install -g serverless-layers@2.7.0
+          npm install -g serverless-layers@2.7.0 &&
+          sls plugin install serverless-webpack@5.13.0
 
       - name: 🔧 Npm Install
         run: npm ci --ignore-scripts  --force --quite
@@ -122,4 +123,3 @@ jobs:
           sls deploy -s ${{ vars.PPC_STAGE }} -r ${{ inputs.region }} --verbose
         env:
           SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
-
