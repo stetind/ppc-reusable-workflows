@@ -23,8 +23,6 @@ on:
         required: false
         default: 'node:20.13'
         type: string
-env:
-  NODE_VERSION: ${{ inputs.node_version }}
 
 jobs:
   publish:

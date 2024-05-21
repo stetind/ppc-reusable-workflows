@@ -6,11 +6,6 @@ on:
       NPM_TOKEN:
         required: true
     inputs:
-      node_version:
-        description: 'The desired node version'
-        required: false
-        default: '20'
-        type: string
       runner:
         description: 'Choose the runner'
         required: false
