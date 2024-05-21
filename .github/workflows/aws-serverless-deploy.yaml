@@ -92,29 +92,12 @@ jobs:
             value=${obj[$key]}
             echo "$key=${obj[$key]}" >> ${{github.workspace}}/.env
           done
-          
-      # - name: 🔧 Install Global Dependencies
-      #   #serverless-layer@2.7.0 is the latest stable version 2.8 has issues
-      #   run: npm install -g webpack@5.91.0 &&
-      #     npm install -g webpack-cli@5.1.4 &&
-      #     npm install -g webpack-node-externals@3.0.0 &&
-      #     npm install -g serverless@3.28.1 &&
-      #     sls plugin install -n @serverless/utils@6.15.0 &&
-      #     sls plugin install -n serverless-dotenv-plugin@6.0.0 &&
-      #     sls plugin install -n serverless-plugin-typescript@2.1.5 &&
-      #     sls plugin install -n serverless-prune-plugin@2.0.2 &&
-      #     sls plugin install -n serverless-apigateway-service-proxy@2.2.1 &&
-      #     sls plugin install -n serverless-api-gateway-throttling@2.0.3 &&
-      #     sls plugin install -n serverless-webpack@5.13.0 &&
-      #     sls plugin install -n serverless-layers@2.7.0
 
       - name: 🏗️ Prepare Deploy
-        run: |
-          npm run compile-serverless &&
-          sls config credentials --overwrite --provider aws --key "${{ secrets.AWS_ACCESS_KEY_ID }}" --secret "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+        run: AWS_ACCESS_KEY="${{ secrets.AWS_ACCESS_KEY_ID }}" AWS_SECRET="${{ secrets.AWS_SECRET_ACCESS_KEY }}" npm sls-configure
 
       - name: 🚅 Deploy to AWS
         run: |
-          export SLS_DEBUG=true && sls deploy -s ${{ vars.PPC_STAGE }} -r ${{ inputs.region }} --verbose
+          PPC_STAGE=${{ vars.PPC_STAGE }} REGION=${{ inputs.region }} npm run sls-deploy
         env:
           SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
