@@ -56,6 +56,7 @@ jobs:
     runs-on: ${{ inputs.runner }}
     name: Deploy
     environment: ${{ inputs.deploy_environment }}
+    container: ubuntu:24.04
     steps:
       - name: 🛫 Checkout
         uses: actions/checkout@v4

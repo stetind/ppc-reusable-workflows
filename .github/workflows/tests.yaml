@@ -24,6 +24,7 @@ jobs:
   testing:
     name: Run Jest Tests
     runs-on: ${{ inputs.runner }}
+    container: ubuntu:24.04
 
     steps:
       - name: 🛫 Checkout
