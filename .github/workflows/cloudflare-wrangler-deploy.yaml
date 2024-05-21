@@ -17,36 +17,34 @@ on:
         required: false
         default: false
         type: boolean
-      node_version:
-        description: 'The desired node version'
-        required: false
-        default: '20'
-        type: string
       runner:
         description: 'Choose the runner'
         required: false
         default: 'self-hosted'
         type: string
+      job_container:
+        description: 'Select the docker container for the action'
+        required: false
+        default: 'node:20.13'
+        type: string
 env:
   WRANGLER_SECRETS: ''
-  NODE_VERSION: ${{ inputs.node_version }}
 
 jobs:
   deploy:
-    runs-on: ${{ inputs.runner }}
+    runs-on: ${{ inputs.runner || vars.default_runner }}
     name: Deploy
     environment: ${{ inputs.deploy_environment }}
-    container: node:20.13
+    container: ${{ inputs.job_container || vars.default_node_container }}
 
     steps:
       - name: 🛫 Checkout
         uses: actions/checkout@v4
 
       - name: 🧙 Install Node
-        uses: stetind/ppc-npm-global-dependencies-action@v3.1
+        uses: stetind/ppc-npm-global-dependencies-action@v4.0
         with:
           npm_token: ${{ secrets.NPM_TOKEN }}
-          node_version: ${{ inputs.node_version }}
 
       - name: 🔧 Building Environment
         run: npm run build --if-present

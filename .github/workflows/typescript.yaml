@@ -6,15 +6,15 @@ on:
       NPM_TOKEN:
         required: true
     inputs:
-      node_version:
-        description: 'The desired node version'
-        required: false
-        default: '20'
-        type: string
       runner:
         description: 'Choose the runner'
         required: false
         default: 'ubuntu-latest'
+        type: string
+      job_container:
+        description: 'Select the docker container for the action'
+        required: false
+        default: 'node:20.13'
         type: string
 
 jobs:
@@ -22,7 +22,7 @@ jobs:
     uses: stetind/ppc-reusable-workflows/.github/workflows/eslint.yaml@v4.0
     secrets: inherit
     with:
-      node_version: ${{ inputs.node_version }}
+      job_container: ${{ inputs.job_container }}
       runner: ${{ inputs.runner }}
 
   testing:
@@ -30,5 +30,5 @@ jobs:
     uses: stetind/ppc-reusable-workflows/.github/workflows/tests.yaml@v4.0
     secrets: inherit
     with:
-      node_version: ${{ inputs.node_version }}
+      job_container: ${{ inputs.job_container }}
       runner: ${{ inputs.runner }}

@@ -13,36 +13,32 @@ on:
         type: string
         default: ${{ github.event.release.tag_name }}
         required: false
-      node_version:
-        description: 'The desired node version'
-        required: false
-        default: '20'
-        type: string
       runner:
         description: 'Choose the runner'
         required: false
         default: 'ubuntu-latest'
+        type: string
+      job_container:
+        description: 'Select the docker container for the action'
+        required: false
+        default: 'node:20.13'
         type: string
 env:
   NODE_VERSION: ${{ inputs.node_version }}
 
 jobs:
   publish:
-    runs-on: ${{ inputs.runner }}
-    container: node:20.13
-
-    env:
-      NODE_ENV: production
+    runs-on: ${{ inputs.runner || vars.default_runner }}
+    container: ${{ inputs.job_container || vars.default_node_container }}
 
     steps:
       - name: 🛫 Checkout
         uses: actions/checkout@v4
 
       - name: 🔧 Setup Node and NPM
-        uses: stetind/ppc-npm-global-dependencies-action@v3.1
+        uses: stetind/ppc-npm-global-dependencies-action@v4.0
         with:
           npm_token: ${{ secrets.NPM_TOKEN }}
-          node_version: ${{ inputs.node_version }}
 
       - name: 🏗️ Building Environment
         run: npm run build --if-present && npx browserslist@latest --update-db

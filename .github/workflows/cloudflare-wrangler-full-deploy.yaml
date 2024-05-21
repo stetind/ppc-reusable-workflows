@@ -17,22 +17,22 @@ on:
         required: false
         default: false
         type: boolean
-      node_version:
-        description: 'The desired node version'
-        required: false
-        default: '20'
-        type: string
       runner:
         description: 'Choose the runner'
         required: false
         default: 'ubuntu-latest'
+        type: string
+      job_container:
+        description: 'Select the docker container for the action'
+        required: false
+        default: 'node:20.13'
         type: string
 jobs:
   analysis:
     uses: stetind/ppc-reusable-workflows/.github/workflows/typescript.yaml@v4.0
     secrets: inherit
     with:
-      node_version: ${{ inputs.node_version }}
+      job_container: ${{ inputs.job_container }}
       runner: ${{ inputs.runner }}
 
   deploy:
@@ -42,5 +42,5 @@ jobs:
     with:
       deploy_environment: ${{ inputs.deploy_environment }}
       debug: ${{ inputs.debug }}
-      node_version: ${{ inputs.node_version }}
       runner: ${{ inputs.runner }}
+      job_container: ${{ inputs.job_container }}

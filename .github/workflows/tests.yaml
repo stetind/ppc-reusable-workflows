@@ -16,22 +16,24 @@ on:
         required: false
         default: 'self-hosted'
         type: string
-
-env:
-  NODE_VERSION: ${{ inputs.node_version }}
+      job_container:
+        description: 'Select the docker container for the action'
+        required: false
+        default: 'node:20.13'
+        type: string
 
 jobs:
   testing:
     name: Run Jest Tests
-    runs-on: ${{ inputs.runner }}
-    container: node:20.13
+    runs-on: ${{ inputs.runner || vars.default_runner }}
+    container: ${{ inputs.job_container || vars.default_node_container }}
 
     steps:
       - name: 🛫 Checkout
         uses: actions/checkout@v4
 
       - name: 🔧 Setup Node and NPM
-        uses: stetind/ppc-npm-global-dependencies-action@v3.1
+        uses: stetind/ppc-npm-global-dependencies-action@v4.0
         with:
           npm_token: ${{ secrets.NPM_TOKEN }}
           node_version: ${{ inputs.node_version }}

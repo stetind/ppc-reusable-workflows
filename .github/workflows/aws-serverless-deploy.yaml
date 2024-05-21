@@ -32,40 +32,38 @@ on:
         required: false
         default: ''
         type: string
-      node_version:
-        description: 'The desired node version'
-        required: false
-        default: '20'
-        type: string
       runner:
         description: 'Choose the runner'
         required: false
         default: 'self-hosted'
         type: string
+      job_container:
+        description: 'Select the docker container for the action'
+        required: false
+        default: 'node:20.13'
+        type: string
 
 env:
   AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1,
   AWS_SDK_LOAD_CONFIG: 1
-  NODE_VERSION: ${{ inputs.node_version }}
   AWS_REGION: ${{ inputs.region }}
   debugMode: ${{ inputs.debug }}
   DOT_ENV_PARAMS: ${{ inputs.dot_env_params }}
 
 jobs:
   deploy:
-    runs-on: ${{ inputs.runner }}
+    runs-on: ${{ inputs.runner || vars.default_runner }}
     name: Deploy
     environment: ${{ inputs.deploy_environment }}
-    container: node:20.13
+    container: ${{ inputs.job_container || vars.default_node_container }}
     steps:
       - name: 🛫 Checkout
         uses: actions/checkout@v4
 
       - name: 🧙 Install Node
-        uses: stetind/ppc-npm-global-dependencies-action@v3.1
+        uses: stetind/ppc-npm-global-dependencies-action@v4.0
         with:
           npm_token: ${{ secrets.NPM_TOKEN }}
-          node_version: ${{ inputs.node_version }}
 
       - name: 🔧 Secret to Environment
         uses: oNaiPs/secrets-to-env-action@v1
@@ -79,6 +77,7 @@ jobs:
 
       - name: 🔧 Vars to Environment
         run: |
+          apk update && apk add bash
           declare -A obj
           echo '${{ toJSON(vars) }}' > ${{github.workspace}}/.vars_json
           
