@@ -39,7 +39,6 @@ env:
   NODE_VERSION: ${{ inputs.node_version }}
   AWS_REGION: ${{ inputs.region }}
   debugMode: ${{ inputs.debug }}
-  NODE_ENV: production
 
 jobs:
   analysis:
