@@ -94,7 +94,7 @@ jobs:
           done
 
       - name: 🏗️ Prepare Deploy
-        run: AWS_ACCESS_KEY="${{ secrets.AWS_ACCESS_KEY_ID }}" AWS_SECRET="${{ secrets.AWS_SECRET_ACCESS_KEY }}" npm sls-configure
+        run: AWS_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY_ID }} AWS_SECRET=${{ secrets.AWS_SECRET_ACCESS_KEY }} npm run sls-configure
 
       - name: 🚅 Deploy to AWS
         run: |
