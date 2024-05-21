@@ -32,10 +32,10 @@ env:
 
 jobs:
   deploy:
-    runs-on: ${{ inputs.runner || vars.default_runner }}
+    runs-on: ${{ inputs.runner }}
     name: Deploy
     environment: ${{ inputs.deploy_environment }}
-    container: ${{ inputs.job_container || vars.default_node_container }}
+    container: ${{ inputs.job_container }}
 
     steps:
       - name: 🛫 Checkout

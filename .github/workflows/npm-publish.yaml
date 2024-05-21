@@ -28,8 +28,8 @@ env:
 
 jobs:
   publish:
-    runs-on: ${{ inputs.runner || vars.default_runner }}
-    container: ${{ inputs.job_container || vars.default_node_container }}
+    runs-on: ${{ inputs.runner  }}
+    container: ${{ inputs.job_container }}
 
     steps:
       - name: 🛫 Checkout
