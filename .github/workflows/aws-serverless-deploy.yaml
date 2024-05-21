@@ -50,7 +50,6 @@ env:
   AWS_REGION: ${{ inputs.region }}
   debugMode: ${{ inputs.debug }}
   DOT_ENV_PARAMS: ${{ inputs.dot_env_params }}
-  NODE_ENV: production
 
 jobs:
   deploy:
