@@ -29,7 +29,7 @@ env:
 jobs:
   publish:
     runs-on: ${{ inputs.runner }}
-    container: ubuntu:24.04
+    container: node:20.13
 
     env:
       NODE_ENV: production
