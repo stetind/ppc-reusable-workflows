@@ -75,6 +75,7 @@ jobs:
       - name: 🔧 Vars to Environment
         shell: bash
         run: |
+          apt-get install jq
           declare -A obj
           echo '${{ toJSON(vars) }}' > /workspace/.vars_json
           
