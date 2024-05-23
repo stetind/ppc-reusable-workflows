@@ -49,8 +49,9 @@ jobs:
     runs-on: ${{ inputs.runner }}
     name: Deploy
     environment: ${{ inputs.deploy_environment }}
-    container: ${{ inputs.job_container }}
-    volumes:
+    container:
+      image: ${{ inputs.job_container }}
+      volumes:
         - ${{ github.workspace }}:/workspace
     steps:
       - name: 🛫 Checkout
