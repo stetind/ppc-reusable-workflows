@@ -74,7 +74,7 @@ jobs:
 
       - name: 🔧 Install jq
         shell: bash
-        run: apt-get update && apt-get install -f jq
+        run: apt-get update && apt-get install -y -f jq
 
       - name: 🔧 Vars to Environment
         shell: bash
