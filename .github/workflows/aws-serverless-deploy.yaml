@@ -50,6 +50,8 @@ jobs:
     name: Deploy
     environment: ${{ inputs.deploy_environment }}
     container: ${{ inputs.job_container }}
+    volumes:
+        - ${{ github.workspace }}:/workspace
     steps:
       - name: 🛫 Checkout
         uses: actions/checkout@v4
@@ -73,17 +75,17 @@ jobs:
         shell: bash
         run: |
           declare -A obj
-          echo '${{ toJSON(vars) }}' > ${{github.workspace}}/.vars_json
+          echo '${{ toJSON(vars) }}' > workspace/.vars_json
           
           while read -r key value; do
             obj[$key]=$value
-          done <<< $(jq -r 'to_entries[] | "\(.key) \(.value)"' ${{github.workspace}}/.vars_json)
+          done <<< $(jq -r 'to_entries[] | "\(.key) \(.value)"' workspace/.vars_json)
 
-          echo '' >> ${{github.workspace}}/.env
+          echo '' >> workspace/.env
 
           for key in "${!obj[@]}"; do
             value=${obj[$key]}
-            echo "$key=${obj[$key]}" >> ${{github.workspace}}/.env
+            echo "$key=${obj[$key]}" >> workspace/.env
           done
 
       - name: 🏗️ Prepare Deploy
