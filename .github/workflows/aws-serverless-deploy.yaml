@@ -72,10 +72,13 @@ jobs:
         with:
           variableNamesByFilter: ^[A-Za-z].*
 
+      - name: 🔧 Install jq
+        shell: bash
+        run: apt-get install jq
+
       - name: 🔧 Vars to Environment
         shell: bash
         run: |
-          apt-get install jq
           declare -A obj
           echo '${{ toJSON(vars) }}' > /workspace/.vars_json
           
