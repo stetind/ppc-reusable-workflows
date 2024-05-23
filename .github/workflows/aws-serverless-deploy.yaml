@@ -70,9 +70,8 @@ jobs:
           variableNamesByFilter: ^[A-Za-z].*
 
       - name: 🔧 Vars to Environment
+        shell: bash
         run: |
-          apt-get update && apt-get install bash
-          bash 
           declare -A obj
           echo '${{ toJSON(vars) }}' > ${{github.workspace}}/.vars_json
           
