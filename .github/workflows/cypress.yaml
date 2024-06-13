@@ -2,8 +2,6 @@ name: Cypress Test
 on:
   workflow_call:
     secrets:
-      CYPRESS_USER_EMAIL:
-        required: true
       CYPRESS_USER_PASSWORD:
         required: true
       NPM_TOKEN:
@@ -45,7 +43,7 @@ jobs:
         with:
           command: npx cypress run --config-file cypress.config.github.ts
         env:
-          cypressUserEmail: ${{ secrets.CYPRESS_USER_EMAIL }}
+          cypressUserEmail: ${{ vars.CYPRESS_USER_EMAIL }}
           cypressUserPassword: ${{ secrets.CYPRESS_USER_PASSWORD }}
           awsHost: ${{ inputs.host }}
           awsRegion: 'us-east-1'
