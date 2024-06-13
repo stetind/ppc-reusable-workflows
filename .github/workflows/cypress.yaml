@@ -2,9 +2,9 @@ name: Cypress Test
 on:
   workflow_call:
     secrets:
-      CYPRESS_PPC_AWS_ACCESS_KEY_ID:
+      CYPRESS_USER_EMAIL:
         required: true
-      CYPRESS_PPC_AWS_SECRET_ACCESS_KEY:
+      CYPRESS_USER_PASSWORD:
         required: true
       NPM_TOKEN:
         required: true
@@ -45,8 +45,8 @@ jobs:
         with:
           command: npx cypress run --config-file cypress.config.github.ts
         env:
-          awsAccessKeyId: ${{ secrets.CYPRESS_PPC_AWS_ACCESS_KEY_ID }}
-          awsSecretAccessKey: ${{ secrets.CYPRESS_PPC_AWS_SECRET_ACCESS_KEY }}
+          cypressUserEmail: ${{ secrets.CYPRESS_USER_EMAIL }}
+          cypressUserPassword: ${{ secrets.CYPRESS_USER_PASSWORD }}
           awsHost: ${{ inputs.host }}
           awsRegion: 'us-east-1'
 
