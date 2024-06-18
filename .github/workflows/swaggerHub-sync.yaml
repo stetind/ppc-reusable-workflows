@@ -27,8 +27,8 @@ on:
         description: 'Set the swagger hub project owner'
         required: true
         type: string
-      api_version:
-        description: 'Set the API version'
+      api_name:
+        description: 'Set the API name'
         required: true
         type: string
 
@@ -44,7 +44,7 @@ jobs:
 
       - name: Sync with SwaggerHub
         run: |
-          curl -X POST "https://api.swaggerhub.com/apis/${{ inputs.owner }}/${{ inputs.api_version }}" \
+          curl -X POST "https://api.swaggerhub.com/apis/${{ inputs.owner }}/${{ inputs.api_name }}" \
           -H "Authorization: Bearer ${{ secrets.API_KEY }}" \
           -H "Content-Type: application/yaml" \
           --data-binary @swagger.yaml
