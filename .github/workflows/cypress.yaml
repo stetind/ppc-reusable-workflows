@@ -7,6 +7,11 @@ on:
       NPM_TOKEN:
         required: true
     inputs:
+      deploy_environment:
+        description: 'Choose an environment'
+        required: true
+        default: "staging"
+        type: string
       host:
         description: 'Define teh host to test'
         required: true
@@ -19,6 +24,7 @@ on:
 jobs:
   cypress-run:
     runs-on: ${{ inputs.runner }}
+    environment: ${{ inputs.deploy_environment }}
     container:
       image: cypress/browsers:node-20.9.0-chrome-118.0.5993.88-1-ff-118.0.2-edge-118.0.2088.46-1
       options: --user root
