@@ -1,0 +1,50 @@
+name: SwaggerHub
+run-name: >-
+  ${{
+  format('Swagger Hub sync `{0}` & container `{1}`', 
+      github.event.inputs.runner || vars.DEFAULT_RUNNER,
+      github.event.inputs.job_container || vars.DEFAULT_NODE_CONTAINER
+      )
+  }}
+
+on:
+  workflow_call:
+    secrets:
+      API_KEY:
+        required: true
+    inputs:
+      runner:
+        description: 'Choose the runner'
+        required: false
+        default: 'ubuntu-latest'
+        type: string
+      job_container:
+        description: 'Select the docker container for the action'
+        required: false
+        default: 'node:20.13'
+        type: string
+      owner:
+        description: 'Set the swagger hub project owner'
+        required: true
+        type: string
+      api_version:
+        description: 'Set the API version'
+        required: true
+        type: string
+
+jobs:
+  sync:
+    name: Run Swagger Hub Sync
+    runs-on: ${{ inputs.runner }}
+    container: ${{ inputs.job_container }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Sync with SwaggerHub
+        run: |
+          curl -X POST "https://api.swaggerhub.com/apis/${{ inputs.owner }}/${{ inputs.api_version }}" \
+          -H "Authorization: Bearer ${{ secrets.API_KEY }}" \
+          -H "Content-Type: application/yaml" \
+          --data-binary @swagger.yaml
