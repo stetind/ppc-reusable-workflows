@@ -21,6 +21,11 @@ on:
         required: false
         default: 'ubuntu-latest'
         type: string
+      configuration:
+        description: 'Set the configuration file name'
+        required: false
+        default: 'cypress.config.github.ts'
+        type: string
 jobs:
   cypress-run:
     runs-on: ${{ inputs.runner }}
@@ -47,7 +52,7 @@ jobs:
       - name: Cypress run
         uses: cypress-io/github-action@v6
         with:
-          command: npx cypress run --config-file cypress.config.github.ts
+          command: npx cypress run --config-file ${{ inputs.configuration }}
         env:
           cypressUserEmail: ${{ vars.CYPRESS_USER_EMAIL }}
           cypressUserPassword: ${{ secrets.CYPRESS_USER_PASSWORD }}
