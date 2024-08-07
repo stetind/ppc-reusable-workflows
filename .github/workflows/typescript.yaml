@@ -5,111 +5,30 @@ on:
     secrets:
       NPM_TOKEN:
         required: true
-      SONAR_TOKEN:
-        required: true
-
-env:
-  NODE_VERSION: 18.x
+    inputs:
+      runner:
+        description: 'Choose the runner'
+        required: false
+        default: 'ubuntu-latest'
+        type: string
+      job_container:
+        description: 'Select the docker container for the action'
+        required: false
+        default: 'node:20.13'
+        type: string
 
 jobs:
   eslint:
-    name: Run EsLint
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: 🛫 Checkout
-        uses: actions/checkout@v4
-
-      - name: 🧙 Install Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: npm
-        env:
-          TZ: UTC
-
-      - name: 🔧 Npm Configure
-        run: npm config set //registry.npmjs.org/:_authToken ${{ secrets.NPM_TOKEN }}
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      - name: 🔧 Install Dependencies
-        run: npm ci
-
-      - name: 🚀 Run Eslint
-        uses: sibiraj-s/action-eslint@v3
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }} # Optional
-          eslint-args: '--ignore-path=.eslintignore'
-          extensions: 'ts'
-          annotations: true
-      
-      - name: ✅ Artifact creation
-        if: ${{ success() }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: code_eslint
-          retention-days: 1
-          path: ${{github.workspace}}/*
+    uses: stetind/ppc-reusable-workflows/.github/workflows/eslint.yaml@v5.2
+    secrets: inherit
+    with:
+      job_container: ${{ inputs.job_container }}
+      runner: ${{ inputs.runner }}
 
   testing:
-    name: Run Jest Tests
     needs: eslint
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: 🛫 Checkout
-        uses: actions/download-artifact@v4
-        with:
-          name: code_eslint
-          path: ${{github.workspace}}/
-
-      - name: 🧙 Install Node
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: npm
-        env:
-          TZ: UTC
-
-      - name: 🔧 Setup Npm
-        run: npm config set //registry.npmjs.org/:_authToken ${{ secrets.NPM_TOKEN }}
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      - name: 🔧 Install Dependencies
-        run: npm ci
-
-      - name: 🔧 Building Environment
-        run: npm run build --if-present && npx browserslist@latest --update-db
-
-      - name: 🔧 Run Tests
-        id: run_test
-        run: npm run test:ci
-
-      - name: ✅ Tests (Success) - Create Artifact
-        if: ${{ success() }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: code_test
-          retention-days: 1
-          path: |
-            ${{github.workspace}}/*
-            !${{github.workspace}}/node_modules
-
-  sonar:
-    name: Sonar Checks
-    runs-on: ubuntu-latest
-    needs: testing
-    steps:
-      - name: 🛫 Checkout
-        uses: actions/download-artifact@v4
-        with:
-          name: code_test
-          path: ${{github.workspace}}/
-
-      - name: 🔨 SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+    uses: stetind/ppc-reusable-workflows/.github/workflows/tests.yaml@v5.2
+    secrets: inherit
+    with:
+      job_container: ${{ inputs.job_container }}
+      runner: ${{ inputs.runner }}

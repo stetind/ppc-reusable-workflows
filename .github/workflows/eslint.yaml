@@ -1,0 +1,36 @@
+name: Typescript eslint
+
+on:
+  workflow_call:
+    secrets:
+      NPM_TOKEN:
+        required: true
+    inputs:
+      runner:
+        description: 'Choose the runner'
+        required: false
+        default: 'self-hosted'
+        type: string
+      job_container:
+        description: 'Select the docker container for the action'
+        required: false
+        default: 'node:20.13'
+        type: string
+
+jobs:
+  eslint:
+    name: Run EsLint
+    runs-on: ${{ inputs.runner }}
+    container: ${{ inputs.job_container }}
+
+    steps:
+      - name: 🛫 Checkout
+        uses: actions/checkout@v4
+      
+      - name: 🔧 Setup Node and NPM
+        uses: stetind/ppc-npm-global-dependencies-action@v4.0
+        with:
+          npm_token: ${{ secrets.NPM_TOKEN }}
+
+      - name: 🚀 Run Eslint
+        run: npm run lint-quiet
