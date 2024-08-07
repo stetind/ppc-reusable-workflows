@@ -22,101 +22,91 @@ on:
         required: false
         default: 'us-east-1'
         type: string
+      force:
+        description: 'Execute force deployment, even if no changes exist'
+        required: false
+        default: 'false'
+        type: string
       debug:
         description: 'Enable debug?'
         required: false
         default: false
         type: boolean
-      dot_env_params:
-        description: 'A comma separated string with the names of the secrets or environment variables which we want to pass to .env'
+      runner:
+        description: 'Choose the runner'
         required: false
-        default: ''
+        default: 'self-hosted'
         type: string
+      job_container:
+        description: 'Select the docker container for the action'
+        required: false
+        default: 'node:20.13'
+        type: string
+
 env:
   AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1,
   AWS_SDK_LOAD_CONFIG: 1
   AWS_REGION: ${{ inputs.region }}
   debugMode: ${{ inputs.debug }}
-  DOT_ENV_PARAMS: ${{ inputs.dot_env_params }}
-  NODE_ENV: production
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runner }}
     name: Deploy
     environment: ${{ inputs.deploy_environment }}
+    container:
+      image: ${{ inputs.job_container }}
+      volumes:
+        - ${{ github.workspace }}:/workspace
     steps:
       - name: 🛫 Checkout
         uses: actions/checkout@v4
 
+      - name: 🧙 Install Node
+        uses: stetind/ppc-npm-global-dependencies-action@v4.0
+        with:
+          npm_token: ${{ secrets.NPM_TOKEN }}
+
       - name: 🔧 Secret to Environment
-        uses: oNaiPs/secrets-to-env-action@v1
+        uses: oNaiPs/secrets-to-env-action@v1.5
         with:
           secrets: ${{ toJSON(secrets) }}
-          
+
       - name: 📓 Fill [dot] Env (Generic)
         uses: CallePuzzle/envvar-to-dotenv-action@v1.1.9
         with:
           variableNamesByFilter: ^[A-Za-z].*
 
+      - name: 🔧 Install jq
+        shell: bash
+        run: apt-get update && apt-get install -y -f jq
+
       - name: 🔧 Vars to Environment
+        shell: bash
         run: |
           declare -A obj
-          echo '${{ toJSON(vars) }}' > ${{github.workspace}}/.vars_json
+          echo '${{ toJSON(vars) }}' > /workspace/.vars_json
           
           while read -r key value; do
             obj[$key]=$value
-          done <<< $(jq -r 'to_entries[] | "\(.key) \(.value)"' ${{github.workspace}}/.vars_json)
+          done <<< $(jq -r 'to_entries[] | "\(.key) \(.value)"' /workspace/.vars_json)
 
-          echo '' >> ${{github.workspace}}/.env
+          echo '' >> /workspace/.env
 
           for key in "${!obj[@]}"; do
             value=${obj[$key]}
-            echo "$key=${obj[$key]}" >> ${{github.workspace}}/.env
+            echo "$key=${obj[$key]}" >> /workspace/.env
           done
 
-      - name: 🧙 Install Node 18.x
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18.x
+      - name: 🏗️ Prepare Deploy
+        run: AWS_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY_ID }} AWS_SECRET=${{ secrets.AWS_SECRET_ACCESS_KEY }} npm run sls-configure
 
-      - name: 🔧 Setup Npm Token
-        # we need ~/.npmrc in order to avoid errors on sls deploy
+      - name: 🚅 Deploy to AWS
         run: |
-          npm config set //registry.npmjs.org/:_authToken ${{ secrets.NPM_TOKEN }} &&
-          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ./.npmrc &&
-          cp ./.npmrc ~/.npmrc
-
-      - name: Install Deployment Dependencies
-        run: |
-          npm install -g npm@9.1.1 &&
-          npm install -g browserslist@4.21.3 &&
-          npm install -g typescript@4.9.5 &&
-          npm install -g envsub@4.0.7 &&
-          npm install -g dotenv@16.0.3 &&
-          npm install -g dotenv-cli@6.0.0 &&
-          npm install -g webpack@5.75.0 &&
-          npm install -g webpack-cli@4.10.0 &&
-          npm install -g webpack-node-externals@3.0.0 &&
-          npm install -g serverless@3.25.1 &&
-          npm install -g @serverless/utils@6.8.2 &&
-          npm install -g serverless-dotenv-plugin@4.0.2 &&
-          npm install -g serverless-plugin-typescript@2.1.4 &&
-          npm install -g serverless-apigateway-service-proxy@2.2.1 &&
-          npm install -g serverless-webpack@5.11.0 &&
-          npm install -g ts-node@10.9.1
-      
-      - name: Install Dependencies
-        run:  |
-          npm install && npm cache clean --force --quite
-        
-      - name: Prepare Deploy
-        run: |
-          npm run compile-serverless &&
-          sls config credentials --provider aws --key "${{ secrets.AWS_ACCESS_KEY_ID }}" --secret "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
-
-      - name: Deploy Serverless
-        run: |
-          sls deploy -s ${{ vars.PPC_STAGE }} -r ${{ inputs.region }} --verbose
+          if [[ "${{ inputs.force }}" == "true" ]]; then
+            PPC_STAGE=${{ vars.PPC_STAGE }} REGION=${{ inputs.region }} npm run sls-deploy --force
+          else
+            PPC_STAGE=${{ vars.PPC_STAGE }} REGION=${{ inputs.region }} npm run sls-deploy
+          fi
         env:
           SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
