@@ -17,22 +17,32 @@ on:
         required: false
         default: false
         type: boolean
+      runner:
+        description: 'Choose the runner'
+        required: false
+        default: 'self-hosted'
+        type: string
+      job_container:
+        description: 'Select the docker container for the action'
+        required: false
+        default: 'node:20.13'
+        type: string
 env:
   WRANGLER_SECRETS: ''
-  NODE_VERSION: 20
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runner }}
     name: Deploy
     environment: ${{ inputs.deploy_environment }}
+    container: ${{ inputs.job_container }}
 
     steps:
       - name: 🛫 Checkout
         uses: actions/checkout@v4
 
       - name: 🧙 Install Node
-        uses: stetind/ppc-npm-global-dependencies-action@v3
+        uses: stetind/ppc-npm-global-dependencies-action@v4.0
         with:
           npm_token: ${{ secrets.NPM_TOKEN }}
 

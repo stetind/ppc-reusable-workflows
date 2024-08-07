@@ -13,22 +13,28 @@ on:
         type: string
         default: ${{ github.event.release.tag_name }}
         required: false
-
-env:
-  NODE_VERSION: 20
+      runner:
+        description: 'Choose the runner'
+        required: false
+        default: 'ubuntu-latest'
+        type: string
+      job_container:
+        description: 'Select the docker container for the action'
+        required: false
+        default: 'node:20.13'
+        type: string
 
 jobs:
   publish:
-    runs-on: ubuntu-latest
-    env:
-      NODE_ENV: production
+    runs-on: ${{ inputs.runner  }}
+    container: ${{ inputs.job_container }}
 
     steps:
       - name: 🛫 Checkout
         uses: actions/checkout@v4
 
       - name: 🔧 Setup Node and NPM
-        uses: stetind/ppc-npm-global-dependencies-action@v3
+        uses: stetind/ppc-npm-global-dependencies-action@v4.0
         with:
           npm_token: ${{ secrets.NPM_TOKEN }}
 

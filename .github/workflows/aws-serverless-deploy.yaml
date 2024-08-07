@@ -22,58 +22,53 @@ on:
         required: false
         default: 'us-east-1'
         type: string
+      force:
+        description: 'Execute force deployment, even if no changes exist'
+        required: false
+        default: 'false'
+        type: string
       debug:
         description: 'Enable debug?'
         required: false
         default: false
         type: boolean
-      dot_env_params:
-        description: 'A comma separated string with the names of the secrets or environment variables which we want to pass to .env'
+      runner:
+        description: 'Choose the runner'
         required: false
-        default: ''
+        default: 'self-hosted'
         type: string
+      job_container:
+        description: 'Select the docker container for the action'
+        required: false
+        default: 'node:20.13'
+        type: string
+
 env:
-  NODE_VERSION: 20
   AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1,
   AWS_SDK_LOAD_CONFIG: 1
   AWS_REGION: ${{ inputs.region }}
   debugMode: ${{ inputs.debug }}
-  DOT_ENV_PARAMS: ${{ inputs.dot_env_params }}
-  NODE_ENV: production
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runner }}
     name: Deploy
     environment: ${{ inputs.deploy_environment }}
+    container:
+      image: ${{ inputs.job_container }}
+      volumes:
+        - ${{ github.workspace }}:/workspace
     steps:
       - name: 🛫 Checkout
         uses: actions/checkout@v4
 
       - name: 🧙 Install Node
-        uses: stetind/ppc-npm-global-dependencies-action@v3
+        uses: stetind/ppc-npm-global-dependencies-action@v4.0
         with:
           npm_token: ${{ secrets.NPM_TOKEN }}
-          bypass_install: true
-
-      - name: 🔧 Install Global Dependencies
-        run: npm install -g \
-            webpack@5.91.0 \
-            webpack-cli@5.1.4 \
-            webpack-node-externals@3.0.0 \
-            serverless@3.28.1 \
-            @serverless/utils@6.15.0 \
-            serverless-dotenv-plugin@6.0.0 \
-            serverless-plugin-typescript@2.1.5 \
-            serverless-prune-plugin@2.0.2 \
-            serverless-apigateway-service-proxy@2.2.1 \
-            serverless-webpack@5.13.0
-
-      - name: 🔧 Npm Install
-        run: npm ci --ignore-scripts  --force --quite
 
       - name: 🔧 Secret to Environment
-        uses: oNaiPs/secrets-to-env-action@v1
+        uses: oNaiPs/secrets-to-env-action@v1.5
         with:
           secrets: ${{ toJSON(secrets) }}
 
@@ -82,29 +77,36 @@ jobs:
         with:
           variableNamesByFilter: ^[A-Za-z].*
 
+      - name: 🔧 Install jq
+        shell: bash
+        run: apt-get update && apt-get install -y -f jq
+
       - name: 🔧 Vars to Environment
+        shell: bash
         run: |
           declare -A obj
-          echo '${{ toJSON(vars) }}' > ${{github.workspace}}/.vars_json
+          echo '${{ toJSON(vars) }}' > /workspace/.vars_json
           
           while read -r key value; do
             obj[$key]=$value
-          done <<< $(jq -r 'to_entries[] | "\(.key) \(.value)"' ${{github.workspace}}/.vars_json)
+          done <<< $(jq -r 'to_entries[] | "\(.key) \(.value)"' /workspace/.vars_json)
 
-          echo '' >> ${{github.workspace}}/.env
+          echo '' >> /workspace/.env
 
           for key in "${!obj[@]}"; do
             value=${obj[$key]}
-            echo "$key=${obj[$key]}" >> ${{github.workspace}}/.env
+            echo "$key=${obj[$key]}" >> /workspace/.env
           done
 
       - name: 🏗️ Prepare Deploy
-        run: |
-          npm run compile-serverless &&
-          sls config credentials --provider aws --key "${{ secrets.AWS_ACCESS_KEY_ID }}" --secret "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+        run: AWS_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY_ID }} AWS_SECRET=${{ secrets.AWS_SECRET_ACCESS_KEY }} npm run sls-configure
 
       - name: 🚅 Deploy to AWS
         run: |
-          sls deploy -s ${{ vars.PPC_STAGE }} -r ${{ inputs.region }} --verbose
+          if [[ "${{ inputs.force }}" == "true" ]]; then
+            PPC_STAGE=${{ vars.PPC_STAGE }} REGION=${{ inputs.region }} npm run sls-deploy --force
+          else
+            PPC_STAGE=${{ vars.PPC_STAGE }} REGION=${{ inputs.region }} npm run sls-deploy
+          fi
         env:
           SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
