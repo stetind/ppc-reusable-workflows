@@ -56,6 +56,9 @@ jobs:
         env:
           cypressUserEmail: ${{ vars.CYPRESS_USER_EMAIL }}
           cypressUserPassword: ${{ secrets.CYPRESS_USER_PASSWORD }}
+          cypressTestClientUsername: ${{ vars.CYPRESS_TEST_CLIENT_USERNAME }}
+          cypressTestClientPassword: ${{ secrets.CYPRESS_TEST_CLIENT_PASSWORD }}
+          cypressAwsClientId: ${{ vars.CYPRESS_TEST_CLIENT_ID }}
           awsHost: ${{ inputs.host }}
           awsRegion: 'us-east-1'
 
