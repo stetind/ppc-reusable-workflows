@@ -2,13 +2,16 @@ name: Cypress Test
 on:
   workflow_call:
     secrets:
-      CYPRESS_PPC_AWS_ACCESS_KEY_ID:
-        required: true
-      CYPRESS_PPC_AWS_SECRET_ACCESS_KEY:
+      CYPRESS_USER_PASSWORD:
         required: true
       NPM_TOKEN:
         required: true
     inputs:
+      deploy_environment:
+        description: 'Choose an environment'
+        required: true
+        default: "staging"
+        type: string
       host:
         description: 'Define teh host to test'
         required: true
@@ -18,9 +21,15 @@ on:
         required: false
         default: 'ubuntu-latest'
         type: string
+      configuration:
+        description: 'Set the configuration file name'
+        required: false
+        default: 'cypress.config.github.ts'
+        type: string
 jobs:
   cypress-run:
     runs-on: ${{ inputs.runner }}
+    environment: ${{ inputs.deploy_environment }}
     container:
       image: cypress/browsers:node-20.9.0-chrome-118.0.5993.88-1-ff-118.0.2-edge-118.0.2088.46-1
       options: --user root
@@ -43,10 +52,13 @@ jobs:
       - name: Cypress run
         uses: cypress-io/github-action@v6
         with:
-          command: npx cypress run --config-file cypress.config.github.ts
+          command: npx cypress run --config-file ${{ inputs.configuration }}
         env:
-          awsAccessKeyId: ${{ secrets.CYPRESS_PPC_AWS_ACCESS_KEY_ID }}
-          awsSecretAccessKey: ${{ secrets.CYPRESS_PPC_AWS_SECRET_ACCESS_KEY }}
+          cypressUserEmail: ${{ vars.CYPRESS_USER_EMAIL }}
+          cypressUserPassword: ${{ secrets.CYPRESS_USER_PASSWORD }}
+          cypressTestClientUsername: ${{ vars.CYPRESS_TEST_CLIENT_USERNAME }}
+          cypressTestClientPassword: ${{ secrets.CYPRESS_TEST_CLIENT_PASSWORD }}
+          cypressAwsClientId: ${{ vars.CYPRESS_TEST_CLIENT_ID }}
           awsHost: ${{ inputs.host }}
           awsRegion: 'us-east-1'
 
