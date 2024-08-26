@@ -60,4 +60,4 @@ jobs:
           curl -X POST "https://api.swaggerhub.com/apis/${{ inputs.owner }}/${{ inputs.api_name }}?isPrivate=true" \
           -H "Authorization: Bearer ${{ secrets.API_KEY }}" \
           -H "Content-Type: application/yaml" \
-          --data-binary @swagger.yaml
+          --data-binary @swagger1.yaml
