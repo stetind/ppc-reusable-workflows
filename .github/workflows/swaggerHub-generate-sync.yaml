@@ -1,4 +1,4 @@
-name: SwaggerHub
+name: SwaggerHub Generate and Sync
 run-name: >-
   ${{
   format('Swagger Hub sync `{0}` & container `{1}`', 
@@ -33,7 +33,7 @@ on:
         type: string
 
 jobs:
-  sync:
+  generate_and_sync:
     name: Run Swagger Hub Sync
     runs-on: ${{ inputs.runner }}
     container: ${{ inputs.job_container }}
@@ -41,6 +41,19 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Install swagger-cli
+        run: npm install swagger-cli
+
+      - name: Generate Swagger file
+        run: npm run swagger-generate
+
+      - name: Verify Swagger file
+        run: |
+            if [ ! -f swagger.yaml ]; then
+              echo "swagger.yaml not found!"
+              exit 1
+            fi
 
       - name: Sync with SwaggerHub
         run: |
