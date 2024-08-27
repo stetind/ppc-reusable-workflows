@@ -31,10 +31,14 @@ on:
         description: 'Set the API name'
         required: true
         type: string
+      release_version:
+        description: 'Set the release version or tag name'
+        required: true
+        type: string
 
 jobs:
   generate_and_sync:
-    name: Run Swagger Hub Sync
+    name: Generate and Sync Swagger
     runs-on: ${{ inputs.runner }}
     container: ${{ inputs.job_container }}
 
@@ -50,14 +54,14 @@ jobs:
 
       - name: Verify Swagger file
         run: |
-            if [ ! -f swagger.yaml ]; then
-              echo "swagger.yaml not found!"
-              exit 1
-            fi
+          if [ ! -f swagger.yaml ]; then
+            echo "swagger.yaml not found!"
+            exit 1
+          fi
 
       - name: Sync with SwaggerHub
         run: |
-          curl -X POST "https://api.swaggerhub.com/apis/${{ inputs.owner }}/${{ inputs.api_name }}?isPrivate=true" \
+          curl -X POST "https://api.swaggerhub.com/apis/${{ inputs.owner }}/${{ inputs.api_name }}/${{ inputs.release_version }}?isPrivate=true" \
           -H "Authorization: Bearer ${{ secrets.API_KEY }}" \
           -H "Content-Type: application/yaml" \
           --data-binary @swagger.yaml
