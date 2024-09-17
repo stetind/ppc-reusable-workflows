@@ -19,7 +19,7 @@ on:
 
 jobs:
   testing:
-    name: Run Jest Tests
+    name: Run Sonar Cloud Coverage
     runs-on: ${{ inputs.runner }}
     container: ${{ inputs.job_container }}
 
