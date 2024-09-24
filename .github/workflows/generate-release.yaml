@@ -1,0 +1,85 @@
+name: 📖 Generate Release
+
+run-name: >-
+  ${{
+  format('📖 Generate Release using:  `{0}`',github.event.workflow_run.head_branch )
+  }}
+
+on:
+  workflow_call:
+    secrets:
+      GH_TOKEN:
+        required: true
+    inputs:
+      runner:
+        description: 'Choose the runner'
+        required: false
+        default: 'self-hosted'
+        type: string
+      job_container:
+        description: 'Select the docker container for the action'
+        required: false
+        default: 'node:20.13'
+        type: string
+
+jobs:
+  drafting-a-new-release:
+    runs-on: ${{ inputs.runner  }}
+    container: ${{ inputs.job_container }}
+
+    name: 📖 Generate Release
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 50
+
+      - name: Check or create first tag #we need to initialize tags, in order to proceed to the next job
+        run: |
+          TAG="0.0.0"
+          if [ $(git tag -l "${TAG}") ]; then
+            gh release create 0.0.0
+            echo "::notice::Creating ${TAG} tag"
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+
+      - name: Delete Old draft releases
+        run : |
+          gh release list --limit 10 |  while read -a line && [ ${line[1]} == Draft ] ; do
+             echo "deleting ${line[0]}" ;
+             gh release delete -y ${line[0]} ;
+             echo "Deleting ${line[0]} release"
+          done;
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+
+      - name: Get Latest tag for branch
+        id: find-tag
+        run : |
+          git fetch --force --tags -q
+          LATEST=$(git describe --abbrev=0 --always --tags remotes/origin/${{ github.event.workflow_run.head_branch }})
+          echo "::notice::Latest tag for "${{ github.event.workflow_run.head_branch }}" branch, is tag: ${LATEST}"
+          echo "latest-tag=${LATEST}" >> "$GITHUB_OUTPUT"
+
+
+
+      - name: Calculate Next Semver Version
+        id: semver
+        uses: ietf-tools/semver-action@v1
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+          fromTag: ${{ steps.find-tag.outputs.latest-tag}}
+          patchList: fix, bugfix, perf, ref, refactor, test, tests, chore, ci, docs, build
+          noVersionBumpBehavior: current
+
+      - name: Create Draft release
+        run: |
+          RESULT=$(gh release create ${{ steps.semver.outputs.nextStrict }}  --title ${{ steps.semver.outputs.nextStrict }} --draft --generate-notes)
+          echo "::notice::A draft release ${{ steps.semver.outputs.nextStrict }} was created. You can check it out at ${RESULT}"
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
