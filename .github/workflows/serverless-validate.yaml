@@ -1,0 +1,43 @@
+name: Serverless Validate
+
+on:
+  workflow_call:
+    secrets:
+      NPM_TOKEN:
+        required: true
+    inputs:
+      runner:
+        description: 'Choose the runner'
+        required: false
+        default: 'ubuntu-latest'
+        type: string
+      job_container:
+        description: 'Select the docker container for the action'
+        required: false
+        default: 'node:20.13'
+        type: string
+
+
+jobs:
+  validate_serverless:
+    runs-on: ${{ inputs.runner }}
+    container: ${{ inputs.job_container }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Validate Serverless configuration
+        run: npx serverless validate
+
+      - name: Validate Result Check
+        run: |
+          if [ $? -ne 0 ]; then
+            echo "Serverless validation failed!"
+            exit 1
+          else
+            echo "Serverless validation succeeded!"
+          fi
