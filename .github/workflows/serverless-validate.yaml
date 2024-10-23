@@ -17,7 +17,6 @@ on:
         default: 'node:20.13'
         type: string
 
-
 jobs:
   validate_serverless:
     runs-on: ${{ inputs.runner }}
@@ -31,10 +30,8 @@ jobs:
         run: npm install
 
       - name: Validate Serverless configuration
-        run: npx serverless validate
-
-      - name: Validate Result Check
         run: |
+          npx serverless validate
           if [ $? -ne 0 ]; then
             echo "Serverless validation failed!"
             exit 1
