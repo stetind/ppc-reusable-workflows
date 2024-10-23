@@ -51,6 +51,10 @@ jobs:
       - name: 🔧 Building Environment
         run: npm run build --if-present
 
+      - name: 🔧 Install jq
+        shell: bash
+        run: apt-get update && apt-get install -y -f jq
+
       - name: 🔧 Prepare wrangler environment variables
         shell: bash
         run: |
