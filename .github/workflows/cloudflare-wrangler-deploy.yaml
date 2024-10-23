@@ -53,16 +53,16 @@ jobs:
         shell: bash
         run: |
           declare -A obj
-          echo '${{ toJSON(secrets) }}' > ${{github.workspace}}/.secrets_json
-          echo '${{ toJSON(vars) }}' > ${{github.workspace}}/.vars_json
+          echo '${{ toJSON(secrets) }}' > /workspace/.secrets_json
+          echo '${{ toJSON(vars) }}' > /workspace/.vars_json
           
           while read -r key value; do
             obj[$key]=$value
-          done <<< $(jq -r 'to_entries[] | "\(.key) \(.value)"' ${{github.workspace}}/.secrets_json)
+          done <<< $(jq -r 'to_entries[] | "\(.key) \(.value)"' /workspace/.secrets_json)
           
           while read -r key value; do
             obj[$key]=$value
-          done <<< $(jq -r 'to_entries[] | "\(.key) \(.value)"' ${{github.workspace}}/.vars_json)
+          done <<< $(jq -r 'to_entries[] | "\(.key) \(.value)"' /workspace/.vars_json)
           
           filename="wrangler.template.temp"
           
@@ -85,11 +85,11 @@ jobs:
         shell: bash
         run: |
           declare -A obj
-          secret_variable_filename=${{github.workspace}}'/.secrets_variables'
+          secret_variable_filename=/workspace/.secrets_variables
           touch $secret_variable_filename
           while read -r key value; do
             obj[$key]=$value
-          done <<< $(jq -r 'to_entries[] | "\(.key) \(.value)"' ${{github.workspace}}/.secrets_json)
+          done <<< $(jq -r 'to_entries[] | "\(.key) \(.value)"' /workspace/.secrets_json)
 
           filename="wrangler.toml"
           for var_name in $(egrep -ohi '(\$SECRET_([A-Z_0-9]+))' ${filename} | cut -c 2-)
