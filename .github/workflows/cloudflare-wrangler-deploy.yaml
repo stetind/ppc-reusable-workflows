@@ -50,6 +50,7 @@ jobs:
         run: npm run build --if-present
 
       - name: 🔧 Prepare wrangler environment variables
+        shell: bash
         run: |
           declare -A obj
           echo '${{ toJSON(secrets) }}' > ${{github.workspace}}/.secrets_json
