@@ -1,0 +1,50 @@
+name: AWS_Serverless_Validate
+
+on:
+  workflow_call:
+    secrets:
+      SERVERLESS_ACCESS_KEY:
+        required: true
+    inputs:
+      deploy_environment:
+        description: 'Choose an environment to validate in'
+        required: true
+        type: string
+      region:
+        description: 'Choose the AWS region'
+        required: false
+        default: 'us-east-1'
+        type: string
+      runner:
+        description: 'Select runner'
+        required: false
+        default: 'ubuntu-latest'
+        type: string
+      job_container:
+        description: 'Select the docker container for the action'
+        required: false
+        default: 'node:20.13'
+        type: string
+
+jobs:
+  validate_serverless:
+    runs-on: ${{ inputs.runner }}
+    container: ${{ inputs.job_container }}
+    environment: ${{ inputs.deploy_environment }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Validate Serverless configuration
+        run: |
+          npx serverless validate
+          if [ $? -ne 0 ]; then
+            echo "Serverless validation failed!"
+            exit 1
+          else
+            echo "Serverless validation succeeded!"
+          fi
