@@ -1,13 +1,22 @@
-name: Serverless Validate
+name: AWS_Serverless_Validate
 
 on:
   workflow_call:
     secrets:
-      NPM_TOKEN:
+      SERVERLESS_ACCESS_KEY:
         required: true
     inputs:
+      environment:
+        description: 'Choose an environment to validate in'
+        required: true
+        type: string
+      region:
+        description: 'Choose the AWS region'
+        required: false
+        default: 'us-east-1'
+        type: string
       runner:
-        description: 'Choose the runner'
+        description: 'Select runner'
         required: false
         default: 'ubuntu-latest'
         type: string
