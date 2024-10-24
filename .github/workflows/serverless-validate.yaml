@@ -6,7 +6,7 @@ on:
       SERVERLESS_ACCESS_KEY:
         required: true
     inputs:
-      environment:
+      deploy_environment:
         description: 'Choose an environment to validate in'
         required: true
         type: string
@@ -30,6 +30,7 @@ jobs:
   validate_serverless:
     runs-on: ${{ inputs.runner }}
     container: ${{ inputs.job_container }}
+    environment: ${{ inputs.deploy_environment }}
 
     steps:
       - name: Checkout repository
