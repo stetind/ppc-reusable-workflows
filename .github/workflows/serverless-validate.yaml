@@ -2,9 +2,6 @@ name: AWS_Serverless_Validate
 
 on:
   workflow_call:
-    secrets:
-      SERVERLESS_ACCESS_KEY:
-        required: true
     inputs:
       deploy_environment:
         description: 'Choose an environment to validate in'
@@ -26,6 +23,9 @@ on:
         default: 'node:20.13'
         type: string
 
+env:
+  AWS_REGION: ${{ inputs.region }}
+
 jobs:
   validate_serverless:
     runs-on: ${{ inputs.runner }}
@@ -36,8 +36,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install dependencies
-        run: npm install
+      - name: 🔧 Setup Node and NPM
+        uses: stetind/ppc-npm-global-dependencies-action@v4.0
+        with:
+          npm_token: ${{ secrets.NPM_TOKEN }}
 
       - name: Validate Serverless configuration
         run: |
