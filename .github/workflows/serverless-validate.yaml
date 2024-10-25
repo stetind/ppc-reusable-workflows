@@ -2,6 +2,15 @@ name: AWS_Serverless_Validate
 
 on:
   workflow_call:
+    secrets:
+      NPM_TOKEN:
+        required: true
+      AWS_ACCESS_KEY_ID:
+        required: true
+      AWS_SECRET_ACCESS_KEY:
+        required: true
+      SERVERLESS_ACCESS_KEY:
+        required: true
     inputs:
       deploy_environment:
         description: 'Choose an environment to validate in'
@@ -27,8 +36,9 @@ on:
         required: false
         default: false
         type: boolean
+
 env:
-  AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1,
+  AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
   AWS_SDK_LOAD_CONFIG: 1
   AWS_REGION: ${{ inputs.region }}
   debugMode: ${{ inputs.debug }}
@@ -39,6 +49,11 @@ jobs:
     container:
       image: ${{ inputs.job_container }}
     environment: ${{ inputs.deploy_environment }}
+    env:
+      AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
+      AWS_SDK_LOAD_CONFIG: 1
+      AWS_REGION: ${{ inputs.region }}
+      debugMode: ${{ inputs.debug }}
 
     steps:
       - name: Checkout repository
@@ -53,6 +68,11 @@ jobs:
         uses: oNaiPs/secrets-to-env-action@v1.5
         with:
           secrets: ${{ toJSON(secrets) }}
+
+      - name: 📓 Fill [dot] Env (Generic)
+        uses: CallePuzzle/envvar-to-dotenv-action@v1.2.1
+        with:
+          variableNamesByFilter: ^[A-Za-z].*
 
       - name: Install jq
         run: |
@@ -75,13 +95,20 @@ jobs:
             echo "$key=${obj[$key]}" >> .env
           done
 
+      - name: 🏗️ Prepare Serverless
+        run: |
+          AWS_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY_ID }} \
+          AWS_SECRET=${{ secrets.AWS_SECRET_ACCESS_KEY }} \
+          npm run sls-configure
+
       - name: Validate Serverless configuration
         run: |
-          npx serverless validate
+          npx serverless package
           if [ $? -ne 0 ]; then
             echo "Serverless validation failed!"
             exit 1
           else
             echo "Serverless validation succeeded!"
           fi
-
+        env:
+          SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
