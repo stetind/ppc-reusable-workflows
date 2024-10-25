@@ -22,9 +22,16 @@ on:
         required: false
         default: 'node:20.13'
         type: string
-
+      debug:
+        description: 'Enable debug?'
+        required: false
+        default: false
+        type: boolean
 env:
+  AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1,
+  AWS_SDK_LOAD_CONFIG: 1
   AWS_REGION: ${{ inputs.region }}
+  debugMode: ${{ inputs.debug }}
 
 jobs:
   validate_serverless:
