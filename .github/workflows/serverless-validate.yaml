@@ -41,6 +41,36 @@ jobs:
         with:
           npm_token: ${{ secrets.NPM_TOKEN }}
 
+      - name: 🔧 Secret to Environment
+        uses: oNaiPs/secrets-to-env-action@v1.5
+        with:
+          secrets: ${{ toJSON(secrets) }}
+
+      - name: 📓 Fill [dot] Env (Generic)
+        uses: CallePuzzle/envvar-to-dotenv-action@v1.2.1
+        with:
+          variableNamesByFilter: ^[A-Za-z].*
+
+      - name: 🔧 Vars to Environment
+        shell: bash
+        run: |
+          declare -A obj
+          echo '${{ toJSON(vars) }}' > /workspace/.vars_json
+          
+          while read -r key value; do
+            obj[$key]=$value
+          done <<< $(jq -r 'to_entries[] | "\(.key) \(.value)"' /workspace/.vars_json)
+
+          echo '' >> /workspace/.env
+
+          for key in "${!obj[@]}"; do
+            value=${obj[$key]}
+            echo "$key=${obj[$key]}" >> /workspace/.env
+          done
+
+      - name: Install jq
+        run: apt-get update && apt-get install -y jq
+
       - name: Validate Serverless configuration
         run: |
           npx serverless validate
