@@ -11,6 +11,8 @@ on:
         required: true
       SERVERLESS_ACCESS_KEY:
         required: true
+      AWS_COGNITO_APP_SECRET:
+        required: true
     inputs:
       deploy_environment:
         description: 'Choose an environment to validate in'
