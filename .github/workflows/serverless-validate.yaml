@@ -13,20 +13,16 @@ on:
         required: true
     inputs:
       deploy_environment:
-        description: 'Choose an environment'
+        description: 'Choose an environment:'
         required: true
         default: "staging"
         type: string
       region:
-        description: 'Choose the region you want to deploy'
+        description: 'Choose a region:'
         required: false
         default: 'us-east-1'
         type: string
-      force:
-        description: 'Execute force deployment, even if no changes exist'
-        required: false
-        default: 'false'
-        type: string
+
       debug:
         description: 'Enable debug?'
         required: false
@@ -50,9 +46,9 @@ env:
   debugMode: ${{ inputs.debug }}
 
 jobs:
-  deploy:
+  validate_serverless:
     runs-on: ${{ inputs.runner }}
-    name: Deploy
+    name: Validate Serverless
     environment: ${{ inputs.deploy_environment }}
     container:
       image: ${{ inputs.job_container }}
