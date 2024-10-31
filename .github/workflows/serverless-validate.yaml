@@ -90,13 +90,12 @@ jobs:
 
       - name: 🏗️ Prepare Validation
         run: npm run sls-configure
-
-      - name: 🚅 Serverless Validate
-        run: npm run sls-print
-
         env:
-          SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
           AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      - name: 🚅 Serverless Validate
+        run: npm run sls-print
+        env:
+          SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
           PPC_STAGE: ${{ vars.PPC_STAGE }}
           REGION: ${{ inputs.region }}
