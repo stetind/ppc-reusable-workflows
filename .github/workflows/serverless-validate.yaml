@@ -103,6 +103,12 @@ jobs:
 
       - name: 🚅 Serverless Validate
         run: |
-          PPC_STAGE=${{ vars.PPC_STAGE }} REGION=${{ inputs.region }} npm sls print
+          PPC_STAGE=${{ vars.PPC_STAGE }} REGION=${{ inputs.region }} npm serverless print
+        env:
+          SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
+
+      - name: 🚅 Serverless Validate sls
+        run: |
+          PPC_STAGE=${{ vars.PPC_STAGE }} REGION=${{ inputs.region }} npm sls-print
         env:
           SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
