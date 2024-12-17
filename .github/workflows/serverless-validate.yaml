@@ -1,0 +1,101 @@
+name: AWS_Serverless_Validate
+
+on:
+  workflow_call:
+    secrets:
+      NPM_TOKEN:
+        required: true
+      SERVERLESS_ACCESS_KEY:
+        required: true
+      AWS_SECRET_ACCESS_KEY:
+        required: true
+      AWS_ACCESS_KEY_ID:
+        required: true
+    inputs:
+      deploy_environment:
+        description: 'Choose an environment:'
+        required: true
+        default: "staging"
+        type: string
+      region:
+        description: 'Choose a region:'
+        required: false
+        default: 'us-east-1'
+        type: string
+      runner:
+        description: 'Choose the runner'
+        required: false
+        default: 'self-hosted'
+        type: string
+      job_container:
+        description: 'Select the docker container for the action'
+        required: false
+        default: 'node:20.13'
+        type: string
+
+env:
+  AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1,
+  AWS_SDK_LOAD_CONFIG: 1
+  AWS_REGION: ${{ inputs.region }}
+  debugMode: 'false'
+
+jobs:
+  validate_serverless:
+    runs-on: ${{ inputs.runner }}
+    name: Validate Serverless
+    environment: ${{ inputs.deploy_environment }}
+    container:
+      image: ${{ inputs.job_container }}
+      volumes:
+        - ${{ github.workspace }}:/workspace
+    steps:
+      - name: 🛫 Checkout
+        uses: actions/checkout@v4
+
+      - name: 🧙 Install Node
+        uses: stetind/ppc-npm-global-dependencies-action@v4.0
+        with:
+          npm_token: ${{ secrets.NPM_TOKEN }}
+
+      - name: 🔧 Secret to Environment
+        uses: oNaiPs/secrets-to-env-action@v1.5
+        with:
+          secrets: ${{ toJSON(secrets) }}
+
+      - name: 📓 Fill [dot] Env (Generic)
+        uses: CallePuzzle/envvar-to-dotenv-action@v1.2.1
+        with:
+          variableNamesByFilter: ^[A-Za-z].*
+
+      - name: 🔧 Install jq
+        shell: bash
+        run: apt-get update && apt-get install -y -f jq
+
+      - name: 🔧 Vars to Environment
+        shell: bash
+        run: |
+          declare -A obj
+          echo '${{ toJSON(vars) }}' > /workspace/.vars_json
+          
+          while read -r key value; do
+            obj[$key]=$value
+          done <<< $(jq -r 'to_entries[] | "\(.key) \(.value)"' /workspace/.vars_json)
+
+          echo '' >> /workspace/.env
+
+          for key in "${!obj[@]}"; do
+            value=${obj[$key]}
+            echo "$key=${obj[$key]}" >> /workspace/.env
+          done
+
+      - name: 🏗️ Prepare Validation
+        run: npm run sls-configure
+        env:
+          AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      - name: 🚅 Serverless Validate
+        run: npm run sls-print
+        env:
+          SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
+          PPC_STAGE: ${{ vars.PPC_STAGE }}
+          REGION: ${{ inputs.region }}
