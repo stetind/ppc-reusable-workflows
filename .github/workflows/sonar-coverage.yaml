@@ -42,6 +42,6 @@ jobs:
         run: npm run test:ci
 
       - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@v4.0.0
+        uses: SonarSource/sonarqube-scan-action@v4.2.1
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
