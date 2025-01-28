@@ -5,6 +5,8 @@ on:
     secrets:
       NPM_TOKEN:
         required: true
+      SONAR_TOKEN:
+        required: true
     inputs:
       runner:
         description: 'Choose the runner'
