@@ -36,8 +36,13 @@ on:
 env:
   AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1,
   AWS_SDK_LOAD_CONFIG: 1
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_SESSION_TOKEN: ''
   AWS_REGION: ${{ inputs.region }}
   debugMode: 'false'
+  PPC_STAGE: ${{ vars.PPC_STAGE }}
+  REGION: ${{ inputs.region }}
 
 jobs:
   validate_serverless:
@@ -90,9 +95,7 @@ jobs:
 
       - name: 🏗️ Prepare Validation
         run: npm run sls-configure
-        env:
-          AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
       - name: 🚅 Serverless Validate
         run: npm run sls-print
         env:
