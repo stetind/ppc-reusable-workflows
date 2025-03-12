@@ -63,4 +63,3 @@ jobs:
       debug: ${{ inputs.debug }}
       job_container: ${{ inputs.job_container }}
       runner: ${{ inputs.runner }}
-      stage: ${{ inputs.deploy_environment }}
