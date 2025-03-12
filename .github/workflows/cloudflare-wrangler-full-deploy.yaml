@@ -27,9 +27,13 @@ on:
         required: false
         default: 'node:20.13'
         type: string
+
+env:
+  VERSION: 'main'
+
 jobs:
   analysis:
-    uses: stetind/ppc-reusable-workflows/.github/workflows/typescript.yaml@v6.4.0
+    uses: stetind/ppc-reusable-workflows/.github/workflows/typescript.yaml@$VERSION
     secrets: inherit
     with:
       job_container: ${{ inputs.job_container }}
@@ -37,7 +41,7 @@ jobs:
 
   deploy:
     needs: analysis
-    uses: stetind/ppc-reusable-workflows/.github/workflows/cloudflare-wrangler-deploy.yaml@v6.4.0
+    uses: stetind/ppc-reusable-workflows/.github/workflows/cloudflare-wrangler-deploy.yaml@$VERSION
     secrets: inherit
     with:
       deploy_environment: ${{ inputs.deploy_environment }}
