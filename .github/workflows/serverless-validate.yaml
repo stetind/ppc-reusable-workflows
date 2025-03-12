@@ -43,6 +43,7 @@ env:
   debugMode: 'false'
   PPC_STAGE: ${{ vars.PPC_STAGE }}
   REGION: ${{ inputs.region }}
+  SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
 
 jobs:
   validate_serverless:
