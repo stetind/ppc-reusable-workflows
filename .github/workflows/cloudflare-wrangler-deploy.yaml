@@ -25,7 +25,7 @@ on:
       job_container:
         description: 'Select the docker container for the action'
         required: false
-        default: 'node:20.13'
+        default: 'node:22.14'
         type: string
 env:
   WRANGLER_SECRETS: ''

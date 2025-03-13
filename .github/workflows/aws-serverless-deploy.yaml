@@ -40,7 +40,7 @@ on:
       job_container:
         description: 'Select the docker container for the action'
         required: false
-        default: 'node:20.13'
+        default: 'node:22.14'
         type: string
 
 env:
@@ -48,6 +48,12 @@ env:
   AWS_SDK_LOAD_CONFIG: 1
   AWS_REGION: ${{ inputs.region }}
   debugMode: ${{ inputs.debug }}
+  SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
+  AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  PPC_STAGE: ${{ inputs.deploy_environment }}
+  REGION: ${{ inputs.region }}
+
 
 jobs:
   deploy:
@@ -99,14 +105,12 @@ jobs:
           done
 
       - name: 🏗️ Prepare Deploy
-        run: AWS_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY_ID }} AWS_SECRET=${{ secrets.AWS_SECRET_ACCESS_KEY }} npm run sls-configure
+        run: npm run sls-configure
+
+      - name: 🚅 Force Deploy to AWS
+        if: ${{ inputs.force == 'true' }}
+        run: npm run sls-deploy --force
 
       - name: 🚅 Deploy to AWS
-        run: |
-          if [[ "${{ inputs.force }}" == "true" ]]; then
-            PPC_STAGE=${{ vars.PPC_STAGE }} REGION=${{ inputs.region }} npm run sls-deploy --force
-          else
-            PPC_STAGE=${{ vars.PPC_STAGE }} REGION=${{ inputs.region }} npm run sls-deploy
-          fi
-        env:
-          SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
+        if: ${{ inputs.force != 'true' }}
+        run: npm run sls-deploy

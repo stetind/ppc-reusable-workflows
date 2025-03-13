@@ -36,8 +36,9 @@ on:
       job_container:
         description: 'Select the docker container for the action'
         required: false
-        default: 'node:20.13'
+        default: 'node:22.14'
         type: string
+
 env:
   AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1,
   AWS_SDK_LOAD_CONFIG: 1
@@ -46,14 +47,14 @@ env:
 
 jobs:
   analysis:
-    uses: stetind/ppc-reusable-workflows/.github/workflows/typescript.yaml@v6.4.1
+    uses: stetind/ppc-reusable-workflows/.github/workflows/typescript.yaml@v7.0.0
     secrets: inherit
     with:
       job_container: ${{ inputs.job_container }}
       runner: ${{ inputs.runner }}
   deploy:
     needs: analysis
-    uses: stetind/ppc-reusable-workflows/.github/workflows/aws-serverless-deploy.yaml@v6.4.1
+    uses: stetind/ppc-reusable-workflows/.github/workflows/aws-serverless-deploy.yaml@v7.0.0
     secrets: inherit
     with:
       deploy_environment: ${{ inputs.deploy_environment }}
