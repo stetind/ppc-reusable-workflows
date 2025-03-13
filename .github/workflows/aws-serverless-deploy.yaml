@@ -58,8 +58,6 @@ jobs:
     runs-on: ${{ inputs.runner }}
     name: Deploy
     environment: ${{ inputs.deploy_environment }}
-    env:
-      PPC_STAGE: ${{ env.PPCENV_PPC_STAGE || env.PPC_STAGE }}
     container:
       image: ${{ inputs.job_container }}
       volumes:
