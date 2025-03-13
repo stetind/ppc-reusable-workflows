@@ -38,11 +38,6 @@ on:
         required: false
         default: 'node:22.14'
         type: string
-      stage:
-        description: 'Select the desired stage for deployment'
-        required: true
-        default: 'staging'
-        type: string
 
 env:
   AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1,
@@ -59,7 +54,7 @@ jobs:
       runner: ${{ inputs.runner }}
   deploy:
     needs: analysis
-    uses: stetind/ppc-reusable-workflows/.github/workflows/aws-serverless-deploy.yaml@v7.0.0
+    uses: stetind/ppc-reusable-workflows/.github/workflows/aws-serverless-deploy.yaml@v7.1.0
     secrets: inherit
     with:
       deploy_environment: ${{ inputs.deploy_environment }}
@@ -68,4 +63,3 @@ jobs:
       debug: ${{ inputs.debug }}
       job_container: ${{ inputs.job_container }}
       runner: ${{ inputs.runner }}
-      stage: ${{ inputs.stage }}
