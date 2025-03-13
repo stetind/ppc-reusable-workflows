@@ -104,9 +104,6 @@ jobs:
             echo "$key=${obj[$key]}" >> /workspace/.env
           done
 
-      - name: 🏗️ Prepare Deploy
-        run: npm run sls-configure
-
       - name: 🚅 Force Deploy to AWS
         if: ${{ inputs.force == 'true' }}
         run: npm run sls-deploy --force

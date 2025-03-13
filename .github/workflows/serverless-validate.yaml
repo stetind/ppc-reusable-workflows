@@ -94,8 +94,5 @@ jobs:
             echo "$key=${obj[$key]}" >> /workspace/.env
           done
 
-      - name: 🏗️ Prepare Validation
-        run: npm run sls-configure
-
       - name: 🚅 Serverless Validate
         run: npm run sls-print
