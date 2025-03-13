@@ -42,6 +42,11 @@ on:
         required: false
         default: 'node:22.14'
         type: string
+      stage:
+        description: 'Select the desired stage for deployment'
+        required: true
+        default: 'staging'
+        type: string
 
 env:
   AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1,
@@ -51,9 +56,8 @@ env:
   SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
   AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY_ID }}
   AWS_SECRET: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  PPC_STAGE: ${{ inputs.deploy_environment }}
+  PPC_STAGE: ${{ inputs.stage }}
   REGION: ${{ inputs.region }}
-
 
 jobs:
   deploy:
