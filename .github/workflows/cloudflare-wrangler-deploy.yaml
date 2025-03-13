@@ -114,7 +114,7 @@ jobs:
           fi
 
       - name: 📦 Publish app
-        uses: cloudflare/wrangler-action@v3.13.1
+        uses: cloudflare/wrangler-action@v3.14.0
         with:
           apiToken: ${{ secrets.CF_API_TOKEN }}
           environment: ${{ vars.env_environment }}
