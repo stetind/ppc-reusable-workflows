@@ -62,6 +62,8 @@ jobs:
       image: ${{ inputs.job_container }}
       volumes:
         - ${{ github.workspace }}:/workspace
+    env:
+      STAGE: ${{ vars.PPC_STAGE || vars.PPCENV_PPC_STAGE }}
     steps:
       - name: 🛫 Checkout
         uses: actions/checkout@v4
@@ -104,8 +106,8 @@ jobs:
 
       - name: 🚅 Force Deploy to AWS
         if: ${{ inputs.force == 'true' }}
-        run: npm run sls-deploy --force
+        run: PPC_STAGE=${{ env.STAGE }} REGION=${{ env.region }} npm run sls-deploy --force
 
       - name: 🚅 Deploy to AWS
         if: ${{ inputs.force != 'true' }}
-        run: npm run sls-deploy
+        run: PPC_STAGE=${{ env.STAGE }} REGION=${{ env.region }} npm run sls-deploy
