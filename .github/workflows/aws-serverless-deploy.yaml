@@ -46,14 +46,11 @@ on:
 env:
   AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1,
   AWS_SDK_LOAD_CONFIG: 1
-  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
   AWS_SESSION_TOKEN: ''
   AWS_REGION: ${{ inputs.region }}
-  debugMode: 'false'
-  PPC_STAGE: ${{ vars.PPC_STAGE || vars.PPCENV_PPC_STAGE }}
-  REGION: ${{ inputs.region }}
-  SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
+  debugMode: ${{ inputs.debug }}
 
 jobs:
   deploy:
@@ -91,38 +88,25 @@ jobs:
         shell: bash
         run: |
           declare -A obj
-          echo '${{ toJSON(vars) }}' > ./.vars_json
+          echo '${{ toJSON(vars) }}' > /workspace/.vars_json
           
           while read -r key value; do
             obj[$key]=$value
-          done <<< $(jq -r 'to_entries[] | "\(.key) \(.value)"' ./.vars_json)
+          done <<< $(jq -r 'to_entries[] | "\(.key) \(.value)"' /workspace/.vars_json)
 
-          echo '' >> ./.env
+          echo '' >> /workspace/.env
 
           for key in "${!obj[@]}"; do
             value=${obj[$key]}
-            echo "$key=${obj[$key]}" >> ./.env
+            echo "$key=${obj[$key]}" >> /workspace/.env
           done
-      - name: Archive production artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-env
-          path: |
-            ./*
-            ./.*
-
-      - name: 🚅 Force Deploy to AWS
-        if: ${{ inputs.force == 'true' }}
-        run: PPC_STAGE=${{ env.STAGE }} REGION=${{ env.region }} npm run sls-deploy --force
-        env:
-          SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
       - name: 🚅 Deploy to AWS
-        if: ${{ inputs.force != 'true' }}
-        run: pwd && ls -l && PPC_STAGE=${{ env.STAGE }} REGION=${{ env.region }} npm run sls-deploy
+        run: |
+          if [[ "${{ inputs.force }}" == "true" ]]; then
+            PPC_STAGE=${{ vars.PPC_STAGE || vars.PPCENV_PPC_STAGE }} REGION=${{ inputs.region }} npm run sls-deploy --force
+          else
+            PPC_STAGE=${{ vars.PPC_STAGE || vars.PPCENV_PPC_STAGE  }} REGION=${{ inputs.region }} npm run sls-deploy
+          fi
         env:
           SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
