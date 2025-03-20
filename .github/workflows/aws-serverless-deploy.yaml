@@ -107,7 +107,15 @@ jobs:
       - name: 🚅 Force Deploy to AWS
         if: ${{ inputs.force == 'true' }}
         run: PPC_STAGE=${{ env.STAGE }} REGION=${{ env.region }} npm run sls-deploy --force
+        env:
+          SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
       - name: 🚅 Deploy to AWS
         if: ${{ inputs.force != 'true' }}
         run: PPC_STAGE=${{ env.STAGE }} REGION=${{ env.region }} npm run sls-deploy
+        env:
+          SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
