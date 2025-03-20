@@ -7,8 +7,6 @@ on:
         required: true
       SERVERLESS_ACCESS_KEY:
         required: true
-      SERVERLESS_LICENSE_KEY:
-        required: true
       AWS_SECRET_ACCESS_KEY:
         required: true
       AWS_ACCESS_KEY_ID:
@@ -53,10 +51,9 @@ env:
   AWS_SESSION_TOKEN: ''
   AWS_REGION: ${{ inputs.region }}
   debugMode: 'false'
-  PPC_STAGE: ${{ vars.PPC_STAGE }}
+  PPC_STAGE: ${{ vars.PPC_STAGE || vars.PPCENV_PPC_STAGE }}
   REGION: ${{ inputs.region }}
   SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
-  SERVERLESS_LICENSE_KEY: ${{ secrets.SERVERLESS_LICENSE_KEY }}
 
 jobs:
   deploy:
@@ -67,8 +64,6 @@ jobs:
       image: ${{ inputs.job_container }}
       volumes:
         - ${{ github.workspace }}:/workspace
-    env:
-      STAGE: ${{ vars.PPC_STAGE || vars.PPCENV_PPC_STAGE }}
     steps:
       - name: 🛫 Checkout
         uses: actions/checkout@v4
@@ -111,8 +106,8 @@ jobs:
 
       - name: 🚅 Force Deploy to AWS
         if: ${{ inputs.force == 'true' }}
-        run: SERVERLESS_LICENSE_KEY=${{env.SERVERLESS_LICENSE_KEY}} PPC_STAGE=${{ env.STAGE }} REGION=${{ env.region }} AWS_ACCESS_KEY_ID=${{ env.AWS_ACCESS_KEY_ID }} AWS_SECRET_ACCESS_KEY=${{ env.AWS_SECRET_ACCESS_KEY }} npm run sls-deploy --force
+        run: PPC_STAGE=${{ env.STAGE }} REGION=${{ env.region }} npm run sls-deploy --force
 
       - name: 🚅 Deploy to AWS
         if: ${{ inputs.force != 'true' }}
-        run: SERVERLESS_LICENSE_KEY=${{env.SERVERLESS_LICENSE_KEY}} PPC_STAGE=${{ env.STAGE }} REGION=${{ env.region }} AWS_ACCESS_KEY_ID=${{ env.AWS_ACCESS_KEY_ID }} AWS_SECRET_ACCESS_KEY=${{ env.AWS_SECRET_ACCESS_KEY }} npm run sls-deploy
+        run: PPC_STAGE=${{ env.STAGE }} REGION=${{ env.region }} npm run sls-deploy

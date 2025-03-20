@@ -7,8 +7,6 @@ on:
         required: true
       SERVERLESS_ACCESS_KEY:
         required: true
-      SERVERLESS_LICENSE_KEY:
-        required: true
       AWS_SECRET_ACCESS_KEY:
         required: true
       AWS_ACCESS_KEY_ID:
@@ -46,7 +44,6 @@ env:
   PPC_STAGE: ${{ vars.PPC_STAGE }}
   REGION: ${{ inputs.region }}
   SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
-  SERVERLESS_LICENSE_KEY: ${{ secrets.SERVERLESS_LICENSE_KEY }}
 
 jobs:
   validate_serverless:
