@@ -49,8 +49,9 @@ env:
   AWS_REGION: ${{ inputs.region }}
   debugMode: ${{ inputs.debug }}
   SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
-  AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  AWS_SECRET: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  SERVERLESS_LICENSE_KEY: ${{ secrets.SERVERLESS_LICENSE_KEY }}
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
   REGION: ${{ inputs.region }}
 
 jobs:
