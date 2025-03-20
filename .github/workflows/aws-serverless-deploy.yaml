@@ -91,17 +91,17 @@ jobs:
         shell: bash
         run: |
           declare -A obj
-          echo '${{ toJSON(vars) }}' > /workspace/.vars_json
+          echo '${{ toJSON(vars) }}' > ./.vars_json
           
           while read -r key value; do
             obj[$key]=$value
-          done <<< $(jq -r 'to_entries[] | "\(.key) \(.value)"' /workspace/.vars_json)
+          done <<< $(jq -r 'to_entries[] | "\(.key) \(.value)"' ./.vars_json)
 
-          echo '' >> /workspace/.env
+          echo '' >> ./.env
 
           for key in "${!obj[@]}"; do
             value=${obj[$key]}
-            echo "$key=${obj[$key]}" >> /workspace/.env
+            echo "$key=${obj[$key]}" >> ./.env
           done
       - name: Archive production artifacts
         uses: actions/upload-artifact@v4
