@@ -103,7 +103,7 @@ jobs:
             echo "$key=${obj[$key]}" >> /workspace/.env
           done
 
-      - name: 🚅 Force Deploy to AWS
+      - name: 🚅 Force Deploy to AWS (Force)
         if: ${{ inputs.force == 'true' }}
         run: PPC_STAGE=${{ env.PPC_STAGE }} REGION=${{ env.region }} npm run sls-deploy --force
 
