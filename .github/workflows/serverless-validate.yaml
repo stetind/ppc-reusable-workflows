@@ -37,10 +37,6 @@ env:
   AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1,
   AWS_SDK_LOAD_CONFIG: 1
   AWS_REGION: ${{ inputs.region }}
-  AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  AWS_SECRET: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
-  PPC_STAGE: ${{ vars.PPC_STAGE }}
   REGION: ${{ inputs.region }}
   debugMode: 'false'
 
@@ -49,6 +45,11 @@ jobs:
     runs-on: ${{ inputs.runner }}
     name: Validate Serverless
     environment: ${{ inputs.deploy_environment }}
+    env:
+      AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
+      PPC_STAGE: ${{ vars.PPC_STAGE || vars.PPCENV_PPC_STAGE }}
     container:
       image: ${{ inputs.job_container }}
       volumes:
