@@ -59,6 +59,7 @@ jobs:
       SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
       PPC_STAGE: ${{ vars.PPC_STAGE || vars.PPCENV_PPC_STAGE }}
       REGION: ${{ inputs.region || vars.PPCENV_REGION }}
+      NPM_TOKEN: ${{ inputs.region || vars.PPCENV_REGION }}
 
     container:
       image: ${{ inputs.job_container }}
@@ -71,7 +72,7 @@ jobs:
       - name: 🧙 Install Node
         uses: stetind/ppc-npm-global-dependencies-action@v4.0
         with:
-          npm_token: ${{ secrets.NPM_TOKEN }}
+          npm_token: $NPM_TOKEN
 
       - name: 🔧 Secret to Environment
         uses: oNaiPs/secrets-to-env-action@v1.5
