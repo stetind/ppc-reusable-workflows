@@ -48,17 +48,18 @@ env:
   AWS_SDK_LOAD_CONFIG: 1
   AWS_REGION: ${{ inputs.region }}
   debugMode: ${{ inputs.debug }}
-
 jobs:
   deploy:
     runs-on: ${{ inputs.runner }}
     name: Deploy
     environment: ${{ inputs.deploy_environment }}
     env:
-      PPC_STAGE: ${{ vars.PPC_STAGE || vars.PPCENV_PPC_STAGE }}
       AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
+      PPC_STAGE: ${{ vars.PPC_STAGE || vars.PPCENV_PPC_STAGE }}
+      REGION: ${{ input.region || vars.PPCENV_REGION }}
+
     container:
       image: ${{ inputs.job_container }}
       volumes:
@@ -102,11 +103,10 @@ jobs:
             value=${obj[$key]}
             echo "$key=${obj[$key]}" >> /workspace/.env
           done
-
       - name: 🚅 Force Deploy to AWS (Force)
         if: ${{ inputs.force == 'true' }}
-        run: PPC_STAGE=${{ env.PPC_STAGE }} REGION=${{ env.region }} npm run sls-deploy --force
+        run: PPC_STAGE=$PPC_STAGE REGION=$REGION  npm run sls-deploy --force
 
-      - name: 🚅 Deploy to AWS
+      - name: 🚅 Force Deploy to AWS
         if: ${{ inputs.force != 'true' }}
-        run: PPC_STAGE=${{ env.PPC_STAGE }} REGION=${{ env.region }} npm run sls-deploy
+        run: PPC_STAGE=$PPC_STAGE REGION=$REGION  npm run sls-deploy
