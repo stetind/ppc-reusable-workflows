@@ -104,6 +104,12 @@ jobs:
             value=${obj[$key]}
             echo "$key=${obj[$key]}" >> /workspace/.env
           done
+
+      - name: 📦 Install Dependencies for Layers
+        run: |
+          cd serverless/layers/nodejs
+          npm install
+
       - name: 🚅 Force Deploy to AWS (Force)
         if: ${{ inputs.force == 'true' }}
         run: PPC_STAGE=$PPC_STAGE REGION=$REGION  npm run sls-deploy --force
