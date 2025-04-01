@@ -105,10 +105,17 @@ jobs:
             echo "$key=${obj[$key]}" >> /workspace/.env
           done
 
+      - name: 🛠 Debug - Print Working Directory
+        run: pwd
+
+      - name: 🛠 Debug - List Files
+        run: ls -R
+
       - name: 📦 Install Dependencies for Layers
         run: |
-          cd serverless/layers/nodejs
-          npm install
+          echo "Current directory: $(pwd)"
+          ls serverless/layers || echo "serverless/layers does not exist"
+          cd serverless/layers/nodejs && npm install
 
       - name: 🚅 Force Deploy to AWS (Force)
         if: ${{ inputs.force == 'true' }}
