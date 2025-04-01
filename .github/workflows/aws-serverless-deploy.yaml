@@ -105,11 +105,13 @@ jobs:
             echo "$key=${obj[$key]}" >> /workspace/.env
           done
 
-      - name: 🛠 Debug - Print Working Directory
-        run: pwd
-
-      - name: 🛠 Debug - List Files
-        run: ls -R
+      - name: 🛠 Debug - Verify Directory Structure
+        run: |
+          echo "Current working directory: $(pwd)"
+          echo "Listing top-level structure:"
+          ls -l
+          echo "Listing serverless/layers if it exists:"
+          ls -l serverless/layers || echo "serverless/layers does not exist"
 
       - name: 📦 Install Dependencies for Layers
         run: |
