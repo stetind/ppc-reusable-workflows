@@ -110,14 +110,14 @@ jobs:
           echo "Current working directory: $(pwd)"
           echo "Listing top-level structure:"
           ls -l
-          echo "Listing serverless/layers if it exists:"
-          ls -l serverless/layers || echo "serverless/layers does not exist"
+          echo "Listing serverless/layer if it exists:"
+          ls -l serverless/layer || echo "serverless/layer does not exist"
 
       - name: 📦 Install Dependencies for Layers
         run: |
           echo "Current directory: $(pwd)"
-          ls serverless/layers || echo "serverless/layers does not exist"
-          cd serverless/layers/nodejs && npm install
+          ls serverless/layer || echo "serverless/layer does not exist"
+          cd serverless/layer/nodejs && npm install
 
       - name: 🚅 Force Deploy to AWS (Force)
         if: ${{ inputs.force == 'true' }}
