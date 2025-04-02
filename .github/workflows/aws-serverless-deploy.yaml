@@ -118,6 +118,8 @@ jobs:
           echo "Current directory: $(pwd)"
           ls serverless/layer || echo "serverless/layer does not exist"
           cd serverless/layer/nodejs && npm install
+        with:
+          npm_token: $NPM_TOKEN
 
       - name: 🚅 Force Deploy to AWS (Force)
         if: ${{ inputs.force == 'true' }}
