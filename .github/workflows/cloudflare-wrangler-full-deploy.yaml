@@ -30,7 +30,7 @@ on:
 
 jobs:
   analysis:
-    uses: stetind/ppc-reusable-workflows/.github/workflows/typescript.yaml@v7.1.0
+    uses: stetind/ppc-reusable-workflows/.github/workflows/typescript.yaml@8.0.0-dev-1
     secrets: inherit
     with:
       job_container: ${{ inputs.job_container }}
@@ -38,7 +38,7 @@ jobs:
 
   deploy:
     needs: analysis
-    uses: stetind/ppc-reusable-workflows/.github/workflows/cloudflare-wrangler-deploy.yaml@v7.1.0
+    uses: stetind/ppc-reusable-workflows/.github/workflows/cloudflare-wrangler-deploy.yaml@8.0.0-dev-1
     secrets: inherit
     with:
       deploy_environment: ${{ inputs.deploy_environment }}
