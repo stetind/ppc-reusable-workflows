@@ -70,9 +70,10 @@ jobs:
         uses: actions/checkout@v4
 
       - name: 🧙 Install Node
-        uses: stetind/ppc-npm-global-dependencies-action@v4.0
+        uses: stetind/ppc-npm-global-dependencies-action@v5.0
         with:
           npm_token: $NPM_TOKEN
+          production: true
 
       - name: 🔧 Secret to Environment
         uses: oNaiPs/secrets-to-env-action@v1.5
@@ -104,10 +105,18 @@ jobs:
             value=${obj[$key]}
             echo "$key=${obj[$key]}" >> /workspace/.env
           done
+
+      - name: 🔧 Install Serverless Framework 4
+        shell: bash
+        run: |
+          npm i g serveless@4.10.0 \
+                  serverless-api-gateway-throttling@2.0.3 \
+                  serverless-prune-plugin@2.1.0
+
       - name: 🚅 Force Deploy to AWS (Force)
         if: ${{ inputs.force == 'true' }}
-        run: PPC_STAGE=$PPC_STAGE REGION=$REGION  npm run sls-deploy --force
+        run: PPC_STAGE=$PPC_STAGE REGION=$REGION  sls deploy -s $PPC_STAGE -r $REGION --verbose --force
 
       - name: 🚅 Force Deploy to AWS
         if: ${{ inputs.force != 'true' }}
-        run: PPC_STAGE=$PPC_STAGE REGION=$REGION  npm run sls-deploy
+        run: PPC_STAGE=$PPC_STAGE REGION=$REGION  sls deploy -s $PPC_STAGE -r $REGION --verbose
