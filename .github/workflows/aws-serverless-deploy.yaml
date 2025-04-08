@@ -117,6 +117,12 @@ jobs:
         shell: bash
         run: serverless update
 
+      - name: 🔧 Install Serverless Plugins
+        shell: bash
+        run: |
+          serverless plugin install serverless-api-gateway-throttling && \
+          serverless plugin install serverless-prune-plugin
+
       - name: 🔧 Install Serverless Framework 4 (DEBUG)
         shell: bash
         run: npm list -g --depth=0
