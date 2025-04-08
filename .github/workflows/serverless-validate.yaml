@@ -101,9 +101,13 @@ jobs:
       - name: 🔧 Install Serverless Framework 4
         shell: bash
         run: |
-          npm i g serveless@4.10.0 \
-                  serverless-api-gateway-throttling@2.0.3 \
+          npm i -g serveless@4.10.0 && \
+                  serverless-api-gateway-throttling@2.0.3 && \
                   serverless-prune-plugin@2.1.0
 
+      - name: 🔧 Install Serverless Framework 4 (DEBUG)
+        shell: bash
+        run: npm list -g --depth=0
+
       - name: 🚅 Serverless Validate
-        run: npm run sls-print
+        run: serverless print

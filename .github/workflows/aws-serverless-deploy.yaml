@@ -119,8 +119,8 @@ jobs:
 
       - name: 🚅 Force Deploy to AWS (Force)
         if: ${{ inputs.force == 'true' }}
-        run: PPC_STAGE=$PPC_STAGE REGION=$REGION  sls deploy -s $PPC_STAGE -r $REGION --verbose --force
+        run: PPC_STAGE=$PPC_STAGE REGION=$REGION  serverless deploy -s $PPC_STAGE -r $REGION --verbose --force
 
       - name: 🚅 Force Deploy to AWS
         if: ${{ inputs.force != 'true' }}
-        run: PPC_STAGE=$PPC_STAGE REGION=$REGION  sls deploy -s $PPC_STAGE -r $REGION --verbose
+        run: PPC_STAGE=$PPC_STAGE REGION=$REGION  serverless deploy -s $PPC_STAGE -r $REGION --verbose
