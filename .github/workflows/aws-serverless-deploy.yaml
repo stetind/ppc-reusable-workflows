@@ -73,7 +73,7 @@ jobs:
         uses: stetind/ppc-npm-global-dependencies-action@v5.0
         with:
           npm_token: $NPM_TOKEN
-          production: true
+          production: 'true'
 
       - name: 🔧 Secret to Environment
         uses: oNaiPs/secrets-to-env-action@v1.5
@@ -109,9 +109,13 @@ jobs:
       - name: 🔧 Install Serverless Framework 4
         shell: bash
         run: |
-          npm i g serveless@4.10.0 \
-                  serverless-api-gateway-throttling@2.0.3 \
+          npm i -g serveless@4.10.0 && \
+                  serverless-api-gateway-throttling@2.0.3 && \
                   serverless-prune-plugin@2.1.0
+
+      - name: 🔧 Install Serverless Framework 4 (DEBUG)
+        shell: bash
+        run: npm list -g --depth=0
 
       - name: 🚅 Force Deploy to AWS (Force)
         if: ${{ inputs.force == 'true' }}
