@@ -113,6 +113,10 @@ jobs:
                     serverless-api-gateway-throttling@2.0.3 \
                     serverless-prune-plugin@2.1.0
 
+      - name: 🔧 Update Serverless Framework 4
+        shell: bash
+        run: serverless update
+
       - name: 🔧 Install Serverless Framework 4 (DEBUG)
         shell: bash
         run: npm list -g --depth=0
