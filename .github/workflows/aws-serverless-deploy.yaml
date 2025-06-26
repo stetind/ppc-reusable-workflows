@@ -80,7 +80,7 @@ jobs:
           secrets: ${{ toJSON(secrets) }}
 
       - name: 📓 Fill [dot] Env (Generic)
-        uses: CallePuzzle/envvar-to-dotenv-action@v1.2.3
+        uses: CallePuzzle/envvar-to-dotenv-action@v1.2.4
         with:
           variableNamesByFilter: ^[A-Za-z].*
 
