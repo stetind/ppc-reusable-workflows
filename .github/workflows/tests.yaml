@@ -22,15 +22,17 @@ jobs:
     name: Run Jest Tests
     runs-on: ${{ inputs.runner }}
     container: ${{ inputs.job_container }}
-
+    env:
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
     steps:
       - name: 🛫 Checkout
         uses: actions/checkout@v4
 
       - name: 🔧 Setup Node and NPM
-        uses: stetind/ppc-npm-global-dependencies-action@v4.0
+        uses: stetind/ppc-npm-global-dependencies-action@v5.0
         with:
-          npm_token: ${{ secrets.NPM_TOKEN }}
+          npm_token: $NPM_TOKEN
 
       - name: 🔧 Building Environment
         run: npm run build --if-present && npx browserslist@latest --update-db

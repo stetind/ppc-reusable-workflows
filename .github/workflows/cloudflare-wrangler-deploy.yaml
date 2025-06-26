@@ -35,6 +35,8 @@ jobs:
     runs-on: ${{ inputs.runner }}
     name: Deploy
     environment: ${{ inputs.deploy_environment }}
+    env:
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
     container:
       image: ${{ inputs.job_container }}
       volumes:
@@ -44,9 +46,9 @@ jobs:
         uses: actions/checkout@v4
 
       - name: 🧙 Install Node
-        uses: stetind/ppc-npm-global-dependencies-action@v4.0
+        uses: stetind/ppc-npm-global-dependencies-action@v5.0
         with:
-          npm_token: ${{ secrets.NPM_TOKEN }}
+          npm_token: $NPM_TOKEN
 
       - name: 🔧 Building Environment
         run: npm run build --if-present
