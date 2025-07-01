@@ -34,12 +34,9 @@ jobs:
     container: ${{ inputs.job_container }}
     env:
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN  }}
     steps:
       - name: 🛫 Checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: 🔧 Setup Node and NPM
         uses: stetind/ppc-npm-global-dependencies-action@v5.0
@@ -56,4 +53,4 @@ jobs:
       - name: SonarCloud Scan
         uses: SonarSource/sonarqube-scan-action@v5.2.0
         env:
-          SONAR_TOKEN: $SONAR_TOKEN
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN  }}
