@@ -1,6 +1,14 @@
 name: SonarCloud Coverage
 
 on:
+  push:
+    branches:
+      - main
+      - master
+      - develop
+      - 'releases/**'
+  pull_request:
+    types: [ opened, synchronize, reopened ]
   workflow_call:
     secrets:
       NPM_TOKEN:
@@ -26,7 +34,6 @@ jobs:
     container: ${{ inputs.job_container }}
     env:
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
     steps:
       - name: 🛫 Checkout
         uses: actions/checkout@v4
@@ -46,4 +53,4 @@ jobs:
       - name: SonarCloud Scan
         uses: SonarSource/sonarqube-scan-action@v5.2.0
         env:
-          SONAR_TOKEN: $SONAR_TOKEN
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN  }}
