@@ -124,7 +124,7 @@ jobs:
   create_release:
     needs: update_repository
     name: Create Release
-    uses: stetind/ppc-reusable-workflows/.github/workflows/auto-release-based-conventional-commits.yaml@releases
+    uses: stetind/ppc-reusable-workflows/.github/workflows/auto-release-based-conventional-commits.yaml@${{ env.TEMP_BRANCH }}
     with:
       tag: ${{ github.event.inputs.tag || ''}}
       prerelease: ${{ github.event.inputs.prerelease || ''}}
