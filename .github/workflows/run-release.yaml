@@ -40,6 +40,5 @@ jobs:
     uses: stetind/ppc-reusable-workflows/.github/workflows/auto-release-based-conventional-commits.yaml@releases
     secrets: inherit
     with:
-      previous_tag: ${{ needs.read_metadata_and_delegate.outputs.previous_tag }}
-      new_tag: ${{ needs.read_metadata_and_delegate.outputs.new_tag }}
+      tag: ${{ needs.read_metadata_and_delegate.outputs.previous_tag }}
       prerelease: ${{ needs.read_metadata_and_delegate.outputs.prerelease }}
