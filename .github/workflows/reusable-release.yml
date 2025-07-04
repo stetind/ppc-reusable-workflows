@@ -99,11 +99,8 @@ jobs:
       - name: 📤 Commit and push version updates to 'releases' branch
         if: steps.check_commits.outputs.proceed == 'true'
         run: |
-#          git config user.name "github-actions[bot]"
-#          git config user.email "github-actions[bot]@users.noreply.github.com"
-          
-          # Create the 'releases' branch if it doesn't exist
           git checkout -b releases || git checkout releases
+          # Create the 'releases' branch if it doesn't exist
           
           git add .github/workflows/*.yaml
           git commit -m "Update version placeholders for ${{ steps.version.outputs.new_version }}"
