@@ -112,7 +112,7 @@ jobs:
           body: ${{ steps.changelog.outputs.changelog }}
           prerelease: ${{ github.event.inputs.prerelease != '' }}
           files: |
-            .github/workflows/*
+            *
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
