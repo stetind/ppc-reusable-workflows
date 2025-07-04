@@ -59,7 +59,7 @@ jobs:
 
           git checkout -B ${{ env.TEMP_BRANCH }}
           git add .github/workflows/*.yaml
-          git add .github/workflows/*.yml
+          git add .github/*.yaml
           git add .release-meta.json
           git add README.md
           git commit -m "Prepare release for version ${{ steps.version.outputs.new_version }}"
