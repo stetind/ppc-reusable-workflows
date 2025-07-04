@@ -23,14 +23,14 @@ jobs:
 
     steps:
       - name: ⬇️ Checkout repository
-        uses: stetind/ppc-github-composite-actions/.github/actions/checkout-repo@v1
+        uses: stetind/ppc-github-composite-actions/.github/actions/checkout-repo@main
         with:
           token: ${{ secrets.WORKFLOW_TOKEN }}
           fetch-depth: 0
 
       - name: 🏷️ Get latest tag (if exists)
         id: get_tag
-        uses: stetind/ppc-github-composite-actions/.github/actions/get-latest-tag@v1
+        uses: stetind/ppc-github-composite-actions/.github/actions/get-latest-tag@main
         with:
           previous_tag: ${{ inputs.tag }}
 
@@ -47,20 +47,20 @@ jobs:
 
       - name: 📦 Get commits since selected tag
         id: get_commits
-        uses: stetind/ppc-github-composite-actions/.github/actions/get-commits-since-tag@v1
+        uses: stetind/ppc-github-composite-actions/.github/actions/get-commits-since-tag@main
         with:
           selected_tag: ${{ steps.select_tag.outputs.selected_tag }}
 
       - name: 🚨 Check if commits found or force proceed
         id: check_commits
-        uses: stetind/ppc-github-composite-actions/.github/actions/check-if-should-proceed@v1
+        uses: stetind/ppc-github-composite-actions/.github/actions/check-if-should-proceed@main
         with:
           commits: ${{ steps.get_commits.outputs.commits }}
           force: ${{ inputs.force }}
 
       - name: 🔍 Detect version bump and compute new version
         id: version
-        uses: stetind/ppc-github-composite-actions/.github/actions/compute-new-version@v1
+        uses: stetind/ppc-github-composite-actions/.github/actions/compute-new-version@main
         with:
           commits: ${{ steps.get_commits.outputs.commits }}
           current_version: ${{ steps.select_tag.outputs.selected_tag }}
