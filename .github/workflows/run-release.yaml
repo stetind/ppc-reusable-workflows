@@ -1,5 +1,4 @@
-name: 🚀 Reusable Release
-run-name: 🚀 Reusable Release
+name: 🚀 Run Release from Branch
 
 on:
   push:
@@ -7,29 +6,41 @@ on:
       - releases
 
 jobs:
-  create_release:
-    name: Create Release
+  read_metadata_and_delegate:
+    name: Read Metadata & Trigger Reusable Release Workflow
     runs-on: ubuntu-latest
-
+    outputs:
+      tag: ${{ steps.read_meta.outputs.tag }}
+      prerelease: ${{ steps.read_meta.outputs.prerelease }}
+      force: ${{ steps.read_meta.outputs.force }}
     steps:
       - name: ⬇️ Checkout repository
         uses: actions/checkout@v4
         with:
-          ref: releases
           fetch-depth: 0
 
-      - name: 🔽 Load metadata
-        id: metadata
+      - name: 🔍 Read .release-meta.json
+        id: read_meta
         run: |
-          meta=$(cat .release-meta.json)
-          echo "tag=$(echo $meta | jq -r .tag)" >> $GITHUB_OUTPUT
-          echo "prerelease=$(echo $meta | jq -r .prerelease)" >> $GITHUB_OUTPUT
-          echo "force=$(echo $meta | jq -r .force)" >> $GITHUB_OUTPUT
+          if [ ! -f .release-meta.json ]; then
+            echo "::error ::.release-meta.json file not found!"
+            exit 1
+          fi
 
-      - name: 🚀 Final Release
-        uses: stetind/ppc-reusable-workflows/.github/workflows/auto-release-based-conventional-commits.yaml@releases
-        with:
-          tag: ${{ steps.metadata.outputs.tag }}
-          prerelease: ${{ steps.metadata.outputs.prerelease }}
-          force: ${{ steps.metadata.outputs.force }}
-          branch: releases
+          TAG=$(jq -r '.tag' .release-meta.json)
+          PRERELEASE=$(jq -r '.prerelease' .release-meta.json)
+          FORCE=$(jq -r '.force' .release-meta.json)
+
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "prerelease=$PRERELEASE" >> $GITHUB_OUTPUT
+          echo "force=$FORCE" >> $GITHUB_OUTPUT
+
+  call_reusable_release:
+    name: Final Release
+    needs: read_metadata_and_delegate
+    uses: stetind/ppc-reusable-workflows/.github/workflows/auto-release-based-conventional-commits.yaml@releases
+    secrets: inherit
+    with:
+      tag: ${{ needs.read_metadata_and_delegate.outputs.tag }}
+      prerelease: ${{ needs.read_metadata_and_delegate.outputs.prerelease }}
+      force: ${{ needs.read_metadata_and_delegate.outputs.force }}
