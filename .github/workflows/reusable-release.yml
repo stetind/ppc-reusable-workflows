@@ -222,7 +222,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: 📤 Delete 'releases' branch
-        if: steps.check_commits.outputs.proceed == 'true'
         run: |
           git push origin --delete releases
           echo "::notice ::Temporary branch `releases` Deleted successfully"
