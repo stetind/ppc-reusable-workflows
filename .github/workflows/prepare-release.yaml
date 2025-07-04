@@ -1,0 +1,53 @@
+name: 🚧 Prepare Auto Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Optional tag version (e.g., v1.0.0). Leave empty for the latest tag.'
+        required: false
+        type: string
+      prerelease:
+        description: 'Optional prerelease identifier (e.g., beta, rc). Leave empty for stable.'
+        required: false
+        type: string
+      force:
+        description: 'Force proceed even if no commits found (default is false).'
+        required: false
+        type: boolean
+        default: false
+env:
+  TEMP_BRANCH: releases
+
+jobs:
+  prepare:
+    name: Prepare & Push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.WORKFLOW_TOKEN }}
+          fetch-depth: 0
+
+      - name: Compute new version (placeholder)
+        id: version
+        run: |
+          new_version="1.0.0"  # Replace with bump logic
+          echo "new_version=$new_version" >> $GITHUB_OUTPUT
+
+      - name: Replace __VERSION__ placeholders
+        run: |
+          echo "Replacing version with ${{ steps.version.outputs.new_version }}"
+          find .github/workflows -type f -name "*.yaml" \
+            -exec sed -i "s|__VERSION__|${{ steps.version.outputs.new_version }}|g" {} +
+
+      - name: Commit & Push to ${{ env.TEMP_BRANCH }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git checkout -B ${{ env.TEMP_BRANCH }}
+          git add .github/workflows/*.yaml
+          git commit -m "Prepare release for version ${{ steps.version.outputs.new_version }}"
+          git push origin ${{ env.TEMP_BRANCH }} --force
