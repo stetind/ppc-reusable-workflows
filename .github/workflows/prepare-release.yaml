@@ -47,8 +47,7 @@ jobs:
           cat <<EOF > .release-meta.json
           {
             "tag": "${{ steps.version.outputs.new_version }}",
-            "prerelease": "${{ github.event.inputs.prerelease || '' }}",
-            "force": "${{ github.event.inputs.force || 'false' }}"
+            "prerelease": "${{ github.event.inputs.prerelease || '' }}"
           }
           EOF
 

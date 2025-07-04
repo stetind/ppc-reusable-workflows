@@ -29,11 +29,9 @@ jobs:
 
           TAG=$(jq -r '.tag' .release-meta.json)
           PRERELEASE=$(jq -r '.prerelease' .release-meta.json)
-          FORCE=$(jq -r '.force' .release-meta.json)
 
           echo "tag=$TAG" >> $GITHUB_OUTPUT
           echo "prerelease=$PRERELEASE" >> $GITHUB_OUTPUT
-          echo "force=$FORCE" >> $GITHUB_OUTPUT
 
   call_reusable_release:
     name: Final Release
@@ -43,4 +41,3 @@ jobs:
     with:
       tag: ${{ needs.read_metadata_and_delegate.outputs.tag }}
       prerelease: ${{ needs.read_metadata_and_delegate.outputs.prerelease }}
-      force: ${{ needs.read_metadata_and_delegate.outputs.force || 'false' }}
