@@ -114,6 +114,7 @@ jobs:
           name: Release ${{ steps.version.outputs.new_version }}
           body: ${{ steps.changelog.outputs.changelog }}
           prerelease: ${{ inputs.prerelease != '' }}
+          target_commitish: ${{ inputs.branch }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
