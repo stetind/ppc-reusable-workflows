@@ -87,12 +87,34 @@ jobs:
             echo "proceed=true" >> $GITHUB_OUTPUT
           fi
 
+      
+
       - name: Update Version References > Replace __VERSION__ placeholders
         if: steps.check_commits.outputs.proceed == 'true'
         shell: bash
         run: |
           echo "Replacing version with ${{ steps.version.outputs.new_version }}"
           find .github/workflows -type f -name "*.yaml" -exec sed -i "s|__VERSION__|${{ steps.version.outputs.new_version }}|g" {} +
+      - name: 📤 Commit and push version updates to 'releases' branch
+        if: steps.check_commits.outputs.proceed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Create the 'releases' branch if it doesn't exist
+          git checkout -b releases || git checkout releases
+          
+          git add .github/workflows/*.yaml
+          git commit -m "Update version placeholders for ${{ steps.version.outputs.new_version }}"
+          git push origin releases
+          echo "::notice ::Temporary branch `releases` Created successfully"
+
+      - name: ⬇️ Checkout repository
+        if: steps.check_commits.outputs.proceed == 'true'
+        uses: actions/checkout@v4
+        with:
+          ref: releases
+          fetch-depth: 0  # Ensure full history is available
 
       - name: 🔍 Detect version bump and compute new version
         id: version
@@ -111,10 +133,15 @@ jobs:
           name: Release ${{ steps.version.outputs.new_version }}
           body: ${{ steps.changelog.outputs.changelog }}
           prerelease: ${{ github.event.inputs.prerelease != '' }}
-          files: |
-            *
+
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 📤 Delete 'releases' branch
+        if: steps.check_commits.outputs.proceed == 'true'
+        run: |
+          git push origin --delete releases
+          echo "::notice ::Temporary branch `releases` Deleted successfully"
 
       - name: 🧾 Final Summary
         if: steps.check_commits.outputs.proceed == 'true'
