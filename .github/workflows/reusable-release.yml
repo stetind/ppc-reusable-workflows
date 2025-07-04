@@ -28,8 +28,8 @@ on:
         default: false
 
 jobs:
-  release:
-    name: Create Release
+  update_repository:
+    name: Update
     runs-on: ubuntu-latest
 
     steps:
@@ -88,14 +88,13 @@ jobs:
             echo "proceed=true" >> $GITHUB_OUTPUT
           fi
 
-      
-
       - name: Update Version References > Replace __VERSION__ placeholders
         if: steps.check_commits.outputs.proceed == 'true'
         shell: bash
         run: |
           echo "Replacing version with ${{ steps.version.outputs.new_version }}"
           find .github/workflows -type f -name "*.yaml" -exec sed -i "s|__VERSION__|${{ steps.version.outputs.new_version }}|g" {} +
+
       - name: 📤 Commit and push version updates to 'releases' branch
         if: steps.check_commits.outputs.proceed == 'true'
         run: |
@@ -110,12 +109,64 @@ jobs:
           git push origin releases
           echo "::notice ::Temporary branch `releases` Created successfully"
 
+
+  create_release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    steps:
       - name: ⬇️ Checkout repository
-        if: steps.check_commits.outputs.proceed == 'true'
         uses: actions/checkout@v4
         with:
           ref: releases
           fetch-depth: 0  # Ensure full history is available
+      - name: 🏷️ Get latest tag (if exists)
+        id: get_tag
+        run: |
+          latest_tag=$(git tag --list | grep -E '^v?[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -n 1)
+          echo "latest_tag=${latest_tag:-0.0.0}" >> $GITHUB_OUTPUT
+          echo "::notice ::Latest tag found: $latest_tag"
+
+      - name: 🏷️ Use provided tag or latest tag
+        id: select_tag
+        run: |
+          if [[ -n "${{ github.event.inputs.tag }}" ]]; then
+            echo "selected_tag=${{ github.event.inputs.tag }}" >> $GITHUB_OUTPUT
+            echo "::notice ::Using provided tag: ${{ github.event.inputs.tag }}"
+          else
+            echo "selected_tag=${{ steps.get_tag.outputs.latest_tag }}" >> $GITHUB_OUTPUT
+            echo "::notice ::Using latest tag: ${{ steps.get_tag.outputs.latest_tag }}"
+          fi
+
+      - name: 📦 Get commits since selected tag
+        id: get_commits
+        run: |
+          if [[ "${{ steps.select_tag.outputs.selected_tag }}" != "0.0.0" ]]; then
+            commits=$(git log "${{ steps.select_tag.outputs.selected_tag }}"..HEAD --pretty=format:"%s|%b")
+          else
+            commits=$(git log HEAD --pretty=format:"%s|%b")
+          fi
+
+          echo "commits<<EOF" >> $GITHUB_OUTPUT
+          echo "$commits" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          echo "::notice ::Commits fetched: $commits"
+
+      - name: 🚨 Check if commits found or force proceed
+        id: check_commits
+        run: |
+          if [[ -z "${{ steps.get_commits.outputs.commits }}" ]]; then
+            if [[ "${{ github.event.inputs.force }}" != "true" ]]; then
+              echo "::warning ::No commits found, skipping release creation."
+              echo "proceed=false" >> $GITHUB_OUTPUT
+              exit 0
+            else
+              echo "::notice ::Proceeding with release creation due to force flag."
+              echo "proceed=true" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "::notice ::Commits found, proceeding with release."
+            echo "proceed=true" >> $GITHUB_OUTPUT
+          fi
 
       - name: 🔍 Detect version bump and compute new version
         id: version
@@ -137,29 +188,30 @@ jobs:
 
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: 📤 Delete 'releases' branch
-        if: steps.check_commits.outputs.proceed == 'true'
-        run: |
-          git push origin --delete releases
-          echo "::notice ::Temporary branch `releases` Deleted successfully"
-
       - name: 🧾 Final Summary
         if: steps.check_commits.outputs.proceed == 'true'
         run: |
           new_version="${{ steps.version.outputs.new_version }}"
           repo="${{ github.repository }}"
           release_url="https://github.com/${repo}/releases/tag/${new_version}"
-          
+
           echo "::notice ::📦 Release Summary"
           echo "::notice ::🔖 Tag: $new_version"
-          
+
           if [[ "${{ github.event.inputs.prerelease }}" != "" && "${{ github.event.inputs.prerelease }}" != "none" ]]; then
             echo "::notice ::🚧 Pre-release: ${{ github.event.inputs.prerelease }}"
           else
             echo "::notice ::✅ Production Release"
           fi
-          
+
           echo "::notice ::🔗 URL: $release_url"
           echo "::notice ::🎉 Release successfully created!"
-
+  delete_repository:
+    name: Clear
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📤 Delete 'releases' branch
+        if: steps.check_commits.outputs.proceed == 'true'
+        run: |
+          git push origin --delete releases
+          echo "::notice ::Temporary branch `releases` Deleted successfully"
