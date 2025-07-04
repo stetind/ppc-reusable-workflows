@@ -43,4 +43,4 @@ jobs:
     with:
       tag: ${{ needs.read_metadata_and_delegate.outputs.tag }}
       prerelease: ${{ needs.read_metadata_and_delegate.outputs.prerelease }}
-      force: "${{ needs.read_metadata_and_delegate.outputs.force }}"
+      force: ${{ needs.read_metadata_and_delegate.outputs.force || 'false' }}
