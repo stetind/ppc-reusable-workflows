@@ -36,6 +36,7 @@ jobs:
       - name: ⬇️ Checkout repository
         uses: actions/checkout@v4
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0  # Ensure full history is available
 
       - name: 🏷️ Get latest tag (if exists)
@@ -114,6 +115,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: releases
+          token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0  # Ensure full history is available
 
       - name: 🔍 Detect version bump and compute new version
