@@ -12,4 +12,4 @@ jobs:
     uses: stetind/ppc-reusable-workflows/.github/workflows/auto-release-based-conventional-commits.yaml@releases
     secrets: inherit
     with:
-      branch: ${{ github.ref_name }}
+      branch: releases
