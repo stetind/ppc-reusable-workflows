@@ -26,10 +26,12 @@ jobs:
             exit 1
           fi
 
-          TAG=$(jq -r '.tag' .release-meta.json)
+          PREVIOUS_TAG=$(jq -r '.previous_tag' .release-meta.json)
+          NEW_TAG=$(jq -r '.new_tag' .release-meta.json)
           PRERELEASE=$(jq -r '.prerelease' .release-meta.json)
 
-          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "previous_tag=$PREVIOUS_TAG" >> $GITHUB_OUTPUT
+          echo "new_tag=$NEW_TAG" >> $GITHUB_OUTPUT
           echo "prerelease=$PRERELEASE" >> $GITHUB_OUTPUT
 
   call_reusable_release:
@@ -38,5 +40,6 @@ jobs:
     uses: stetind/ppc-reusable-workflows/.github/workflows/auto-release-based-conventional-commits.yaml@releases
     secrets: inherit
     with:
-      tag: ${{ needs.read_metadata_and_delegate.outputs.tag }}
+      previous_tag: ${{ needs.read_metadata_and_delegate.outputs.previous_tag }}
+      new_tag: ${{ needs.read_metadata_and_delegate.outputs.new_tag }}
       prerelease: ${{ needs.read_metadata_and_delegate.outputs.prerelease }}
