@@ -13,12 +13,8 @@ run-name: >-
 on:
   workflow_call:
     inputs:
-      previous_tag:
-        description: 'Optional tag version (e.g., v1.0.0).'
-        required: false
-        type: string
-      new_tag:
-        description: 'Optional tag version (e.g., v1.0.0).'
+      tag:
+        description: 'Optional tag version (e.g., v1.0.0). Leave empty for the latest tag.'
         required: false
         type: string
       prerelease:
@@ -47,28 +43,33 @@ jobs:
           ref: ${{ inputs.branch }}
           fetch-depth: 0
 
-      - name: 🏷️ Determine base tag
+      - name: 🏷️ Get latest tag (if exists)
         id: get_tag
         run: |
-          if [[ -n "${{ inputs.previous_tag }}" ]]; then
-            selected_tag="${{ inputs.previous_tag }}"
-            echo "::notice ::Using previous_tag input: $selected_tag"
+          latest_tag=$(git tag --list | grep -E '^v?[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -n 1)
+          echo "latest_tag=${latest_tag:-0.0.0}" >> $GITHUB_OUTPUT
+          echo "::notice ::Latest tag found: $latest_tag"
+
+      - name: 🏷️ Use provided tag or latest tag
+        id: select_tag
+        run: |
+          if [[ -n "${{ inputs.tag }}" ]]; then
+            echo "selected_tag=${{ inputs.tag }}" >> $GITHUB_OUTPUT
+            echo "::notice ::Using provided tag: ${{ inputs.tag }}"
           else
-            selected_tag=$(git tag --list | grep -E '^v?[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -n 1)
-            echo "::notice ::Detected latest tag: $selected_tag"
+            echo "selected_tag=${{ steps.get_tag.outputs.latest_tag }}" >> $GITHUB_OUTPUT
+            echo "::notice ::Using latest tag: ${{ steps.get_tag.outputs.latest_tag }}"
           fi
-          echo "selected_tag=${selected_tag:-0.0.0}" >> $GITHUB_OUTPUT
 
       - name: 📦 Get commits since selected tag
         id: get_commits
         run: |
-          tag="${{ steps.get_tag.outputs.latest_tag }}"
-          if [[ "$tag" != "0.0.0" ]]; then
-            commits=$(git log "$tag"..HEAD --pretty=format:"%s|%b")
+          if [[ "${{ steps.select_tag.outputs.selected_tag }}" != "0.0.0" ]]; then
+            commits=$(git log "${{ steps.select_tag.outputs.selected_tag }}"..HEAD --pretty=format:"%s|%b")
           else
             commits=$(git log HEAD --pretty=format:"%s|%b")
           fi
-
+          
           echo "commits<<EOF" >> $GITHUB_OUTPUT
           echo "$commits" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
@@ -91,9 +92,10 @@ jobs:
             echo "proceed=true" >> $GITHUB_OUTPUT
           fi
 
+
       - name: 🔍 Detect version bump and compute new version
         id: version
-        if: inputs.new_tag == '' && steps.check_commits.outputs.proceed == 'true'
+        if: steps.check_commits.outputs.proceed == 'true'
         run: |
           current_version="${{ steps.select_tag.outputs.selected_tag }}"
           current_version="${current_version#v}"
@@ -197,9 +199,9 @@ jobs:
         if: steps.check_commits.outputs.proceed == 'true'
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{ inputs.new_tag != '' && inputs.new_tag || steps.version.outputs.new_version }}
-          name: Release ${{ inputs.new_tag != '' && inputs.new_tag || steps.version.outputs.new_version }}
-          body: ${{ steps.changelog.outputs.changelog || 'Release created without changelog.' }}
+          tag_name: ${{ steps.version.outputs.new_version }}
+          name: Release ${{ steps.version.outputs.new_version }}
+          body: ${{ steps.changelog.outputs.changelog }}
           prerelease: ${{ inputs.prerelease != '' }}
           target_commitish: ${{ inputs.branch }}
         env:
@@ -208,7 +210,7 @@ jobs:
       - name: 🧾 Final Summary
         if: steps.check_commits.outputs.proceed == 'true'
         run: |
-          new_version="${{ inputs.new_tag != '' && inputs.new_tag || steps.version.outputs.new_version }}"
+          new_version="${{ steps.version.outputs.new_version }}"
           repo="${{ github.repository }}"
           release_url="https://github.com/${repo}/releases/tag/${new_version}"
       
