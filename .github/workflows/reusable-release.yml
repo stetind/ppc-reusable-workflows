@@ -111,7 +111,8 @@ jobs:
           name: Release ${{ steps.version.outputs.new_version }}
           body: ${{ steps.changelog.outputs.changelog }}
           prerelease: ${{ github.event.inputs.prerelease != '' }}
-          files: "*.y[a]ml"
+          files: |
+            .github/workflows/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
