@@ -47,14 +47,14 @@ env:
 
 jobs:
   analysis:
-    uses: stetind/ppc-reusable-workflows/.github/workflows/typescript.yaml@v7.2.0
+    uses: stetind/ppc-reusable-workflows/.github/workflows/typescript.yaml@__VERSION__
     secrets: inherit
     with:
       job_container: ${{ inputs.job_container }}
       runner: ${{ inputs.runner }}
   deploy:
     needs: analysis
-    uses: stetind/ppc-reusable-workflows/.github/workflows/aws-serverless-deploy.yaml@v7.2.0
+    uses: stetind/ppc-reusable-workflows/.github/workflows/aws-serverless-deploy.yaml@__VERSION__
     secrets: inherit
     with:
       deploy_environment: ${{ inputs.deploy_environment }}

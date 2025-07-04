@@ -12,7 +12,7 @@ Add it directly in a job of your workflow with this syntax:
 * 
 ```yaml
   job_name:
-    uses: stetind/ppc-reusable-workflows/.github/workflows/ci.yaml@main
+    uses: stetind/ppc-reusable-workflows/.github/workflows/ci.yaml@latest
     secrets:
       COMPOSER_ACCESS_TOKEN: ${{ secrets.COMPOSER_ACCESS_TOKEN }}
 ```
@@ -22,7 +22,7 @@ the repository that calls the reusable workflow.
 * Sonar syntax
 ```yaml
   job_name:
-    uses: stetind/ppc-reusable-workflows/.github/workflows/sonar.yaml@main
+    uses: stetind/ppc-reusable-workflows/.github/workflows/sonar.yaml@latest
     secrets: inherit
 ```
 * Sonar Secret Variable Requirements:
