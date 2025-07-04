@@ -1,13 +1,10 @@
 name: 🚀 Finalize Auto Release
 run-name: 🚀 Finalize Auto Release
 
-env:
-  TEMP_BRANCH: releases
-
 on:
   push:
     branches:
-      - ${{ env.TEMP_BRANCH }}
+      - releases
 
 jobs:
   create_release:
@@ -15,4 +12,4 @@ jobs:
     uses: stetind/ppc-reusable-workflows/.github/workflows/auto-release-based-conventional-commits.yaml@releases
     secrets: inherit
     with:
-      branch: ${{ env.TEMP_BRANCH }}
+      branch: releases
