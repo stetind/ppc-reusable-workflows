@@ -145,7 +145,7 @@ jobs:
     name: Create Release (from temp branch)
     if: needs.detect_release_workflow.outputs.branch_exists == 'true'
     needs: [ update_repository, detect_release_workflow ]
-    uses: stetind/ppc-reusable-workflows/.github/workflows/auto-release-based-conventional-commits.yaml@${{ env.TEMP_BRANCH }}
+    uses: stetind/ppc-reusable-workflows/.github/workflows/auto-release-based-conventional-commits.yaml@releases
     with:
       tag: ${{ github.event.inputs.tag || '' }}
       prerelease: ${{ github.event.inputs.prerelease || '' }}
