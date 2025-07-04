@@ -221,6 +221,11 @@ jobs:
     name: Clear
     runs-on: ubuntu-latest
     steps:
+      - name: ⬇️ Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.WORKFLOW_TOKEN }}
+          fetch-depth: 0  # Ensure full history is available
       - name: 📤 Delete 'releases' branch
         run: |
           git push origin --delete releases
