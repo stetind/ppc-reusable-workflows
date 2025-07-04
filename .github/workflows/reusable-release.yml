@@ -1,4 +1,4 @@
-name: 🚀 Auto Release Based on Conventional Commits
+name: 🚀 Reusable Auto Release
 
 run-name: >-
   ${{ 
@@ -26,16 +26,20 @@ on:
         required: false
         type: boolean
         default: false
+env:
+  TEMP_BRANCH: releases
 
 jobs:
-  release:
-    name: Create Release
+
+  update_repository:
+    name: Update
     runs-on: ubuntu-latest
 
     steps:
       - name: ⬇️ Checkout repository
         uses: actions/checkout@v4
         with:
+          token: ${{ secrets.WORKFLOW_TOKEN }}
           fetch-depth: 0  # Ensure full history is available
 
       - name: 🏷️ Get latest tag (if exists)
@@ -87,13 +91,6 @@ jobs:
             echo "proceed=true" >> $GITHUB_OUTPUT
           fi
 
-      - name: Update Version References > Replace __VERSION__ placeholders
-        if: steps.check_commits.outputs.proceed == 'true'
-        shell: bash
-        run: |
-          echo "Replacing version with ${{ steps.version.outputs.new_version }}"
-          find .github/workflows -type f -name "*.yaml" -exec sed -i "s|__VERSION__|${{ steps.version.outputs.new_version }}|g" {} +
-
       - name: 🔍 Detect version bump and compute new version
         id: version
         if: steps.check_commits.outputs.proceed == 'true'
@@ -103,33 +100,63 @@ jobs:
           echo "::notice ::New version computed: $new_version"
           echo "new_version=$new_version" >> $GITHUB_OUTPUT
 
-      - name: 📤 Create GitHub Release
+      - name: Update Version References > Replace __VERSION__ placeholders
         if: steps.check_commits.outputs.proceed == 'true'
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: ${{ steps.version.outputs.new_version }}
-          name: Release ${{ steps.version.outputs.new_version }}
-          body: ${{ steps.changelog.outputs.changelog }}
-          prerelease: ${{ github.event.inputs.prerelease != '' }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          echo "Replacing version with ${{ steps.version.outputs.new_version }}"
+          find .github/workflows -type f -name "*.yaml" -exec sed -i "s|__VERSION__|${{ steps.version.outputs.new_version }}|g" {} +
 
-      - name: 🧾 Final Summary
+      - name: 📤 Commit and push version updates to '${{ env.TEMP_BRANCH }}' branch
         if: steps.check_commits.outputs.proceed == 'true'
         run: |
-          new_version="${{ steps.version.outputs.new_version }}"
-          repo="${{ github.repository }}"
-          release_url="https://github.com/${repo}/releases/tag/${new_version}"
+          git config --global user.name "$(git log -n 1 --pretty=format:%an)"
+          git config --global user.email "$(git log -n 1 --pretty=format:%ae)"
+  
+          # Create the '${{ env.TEMP_BRANCH }}' branch if it doesn't exist
+          git checkout -b ${{ env.TEMP_BRANCH }} || git checkout ${{ env.TEMP_BRANCH }}
           
-          echo "::notice ::📦 Release Summary"
-          echo "::notice ::🔖 Tag: $new_version"
-          
-          if [[ "${{ github.event.inputs.prerelease }}" != "" && "${{ github.event.inputs.prerelease }}" != "none" ]]; then
-            echo "::notice ::🚧 Pre-release: ${{ github.event.inputs.prerelease }}"
-          else
-            echo "::notice ::✅ Production Release"
-          fi
-          
-          echo "::notice ::🔗 URL: $release_url"
-          echo "::notice ::🎉 Release successfully created!"
+          git add .github/workflows/*.yaml
+          git commit -m "Update version placeholders for ${{ steps.version.outputs.new_version }}"
+          git push origin HEAD:${{ env.TEMP_BRANCH }} --force
+          echo "::notice ::Temporary branch `${{ env.TEMP_BRANCH }}` Created successfully"
 
+  detect_release_workflow:
+    name: Check if workflow file exists in branch
+    runs-on: ubuntu-latest
+    needs: update_repository
+    outputs:
+      branch_exists: ${{ steps.check.outputs.exists }}
+    steps:
+      - name: 🔎 Check for workflow in temp branch
+        id: check
+        run: |
+          branch="${{ env.TEMP_BRANCH }}"
+          file=".github/workflows/auto-release-based-conventional-commits.yaml"
+          url="https://raw.githubusercontent.com/stetind/ppc-reusable-workflows/${branch}/${file}"
+          
+          if curl --silent --fail "$url" > /dev/null; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  create_release_from_temp:
+    name: Create Release (from temp branch)
+    if: needs.detect_release_workflow.outputs.branch_exists == 'true'
+    needs: [ update_repository, detect_release_workflow ]
+    uses: stetind/ppc-reusable-workflows/.github/workflows/auto-release-based-conventional-commits.yaml@releases
+    with:
+      tag: ${{ github.event.inputs.tag || '' }}
+      prerelease: ${{ github.event.inputs.prerelease || '' }}
+      force: ${{ github.event.inputs.force || false }}
+
+  create_release_from_main:
+    name: Create Release (from main)
+    if: needs.detect_release_workflow.outputs.branch_exists != 'true'
+    needs: [ update_repository, detect_release_workflow ]
+    uses: stetind/ppc-reusable-workflows/.github/workflows/auto-release-based-conventional-commits.yaml@main
+    with:
+      tag: ${{ github.event.inputs.tag || '' }}
+      prerelease: ${{ github.event.inputs.prerelease || '' }}
+      force: ${{ github.event.inputs.force || false }}
