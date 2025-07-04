@@ -1,5 +1,5 @@
-name: 🚀 Finalize Auto Release
-run-name: 🚀 Finalize Auto Release
+name: 🚀 Reusable Release
+run-name: 🚀 Reusable Release
 
 on:
   push:
@@ -8,8 +8,28 @@ on:
 
 jobs:
   create_release:
-    name: Final Release
-    uses: stetind/ppc-reusable-workflows/.github/workflows/auto-release-based-conventional-commits.yaml@releases
-    secrets: inherit
-    with:
-      branch: releases
+    name: Create Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: ⬇️ Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: releases
+          fetch-depth: 0
+
+      - name: 🔽 Load metadata
+        id: metadata
+        run: |
+          meta=$(cat .release-meta.json)
+          echo "tag=$(echo $meta | jq -r .tag)" >> $GITHUB_OUTPUT
+          echo "prerelease=$(echo $meta | jq -r .prerelease)" >> $GITHUB_OUTPUT
+          echo "force=$(echo $meta | jq -r .force)" >> $GITHUB_OUTPUT
+
+      - name: 🚀 Final Release
+        uses: stetind/ppc-reusable-workflows/.github/workflows/auto-release-based-conventional-commits.yaml@releases
+        with:
+          tag: ${{ steps.metadata.outputs.tag }}
+          prerelease: ${{ steps.metadata.outputs.prerelease }}
+          force: ${{ steps.metadata.outputs.force }}
+          branch: releases

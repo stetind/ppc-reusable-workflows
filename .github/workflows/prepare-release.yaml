@@ -1,5 +1,5 @@
-name: 🚧 Prepare Auto Release
-run-name: 🚧 Prepare Auto Release
+name: 🚧 Prepare Reusable Release
+run-name: 🚧 Prepare Reusable Release
 on:
   workflow_dispatch:
     inputs:
@@ -42,6 +42,16 @@ jobs:
           find .github/workflows -type f -name "*.yaml" \
             -exec sed -i "s|__VERSION__|${{ steps.version.outputs.new_version }}|g" {} +
 
+      - name: 💾 Write release metadata
+        run: |
+          cat <<EOF > .release-meta.json
+          {
+            "tag": "${{ steps.version.outputs.new_version }}",
+            "prerelease": "${{ github.event.inputs.prerelease || '' }}",
+            "force": "${{ github.event.inputs.force || 'false' }}"
+          }
+          EOF
+
       - name: Commit & Push to ${{ env.TEMP_BRANCH }}
         run: |
           git config user.name "github-actions[bot]"
@@ -49,5 +59,8 @@ jobs:
 
           git checkout -B ${{ env.TEMP_BRANCH }}
           git add .github/workflows/*.yaml
+          git add .github/workflows/*.yml
+          git add .release-meta.json
+          git add README.md
           git commit -m "Prepare release for version ${{ steps.version.outputs.new_version }}"
           git push origin ${{ env.TEMP_BRANCH }} --force
