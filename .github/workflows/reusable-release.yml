@@ -111,6 +111,7 @@ jobs:
 
 
   create_release:
+    needs: update_repository
     name: Create Release
     runs-on: ubuntu-latest
     steps:
@@ -207,6 +208,7 @@ jobs:
           echo "::notice ::🔗 URL: $release_url"
           echo "::notice ::🎉 Release successfully created!"
   delete_repository:
+    needs: create_release
     name: Clear
     runs-on: ubuntu-latest
     steps:
