@@ -26,6 +26,12 @@ on:
         required: false
         type: boolean
         default: false
+      branch:
+        required: false
+        type: string
+
+env:
+  branch_name: ${{ github.event.inputs.branch || github.head_ref }}
 
 jobs:
   release:
@@ -36,6 +42,7 @@ jobs:
       - name: ⬇️ Checkout repository
         uses: actions/checkout@v4
         with:
+          ref: ${{ env.branch_name }}
           fetch-depth: 0  # Ensure full history is available
 
       - name: 🏷️ Get latest tag (if exists)
