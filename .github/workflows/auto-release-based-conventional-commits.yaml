@@ -37,6 +37,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: echo branch
+        run: |
+          echo "::notice ::selected branch: ${{ github.event.inputs.branch_name }}"
+
       - name: ⬇️ Checkout repository
         uses: actions/checkout@v4
         with:
