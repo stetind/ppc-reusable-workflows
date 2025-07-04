@@ -39,12 +39,12 @@ jobs:
     steps:
       - name: echo branch
         run: |
-          echo "::notice ::selected branch: ${{ github.event.inputs.branch_name }}"
+          echo "::notice ::selected branch: ${{ inputs.branch_name }}"
 
       - name: ⬇️ Checkout repository
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.inputs.branch_name }}
+          ref: ${{ inputs.branch_name }}
           fetch-depth: 0  # Ensure full history is available
 
       - name: 🏷️ Get latest tag (if exists)
@@ -57,9 +57,9 @@ jobs:
       - name: 🏷️ Use provided tag or latest tag
         id: select_tag
         run: |
-          if [[ -n "${{ github.event.inputs.tag }}" ]]; then
-            echo "selected_tag=${{ github.event.inputs.tag }}" >> $GITHUB_OUTPUT
-            echo "::notice ::Using provided tag: ${{ github.event.inputs.tag }}"
+          if [[ -n "${{ inputs.tag }}" ]]; then
+            echo "selected_tag=${{ inputs.tag }}" >> $GITHUB_OUTPUT
+            echo "::notice ::Using provided tag: ${{ inputs.tag }}"
           else
             echo "selected_tag=${{ steps.get_tag.outputs.latest_tag }}" >> $GITHUB_OUTPUT
             echo "::notice ::Using latest tag: ${{ steps.get_tag.outputs.latest_tag }}"
@@ -83,7 +83,7 @@ jobs:
         id: check_commits
         run: |
           if [[ -z "${{ steps.get_commits.outputs.commits }}" ]]; then
-            if [[ "${{ github.event.inputs.force }}" != "true" ]]; then
+            if [[ "${{ inputs.force }}" != "true" ]]; then
               echo "::warning ::No commits found, skipping release creation."
               echo "proceed=false" >> $GITHUB_OUTPUT
               exit 0
@@ -113,7 +113,7 @@ jobs:
           tag_name: ${{ steps.version.outputs.new_version }}
           name: Release ${{ steps.version.outputs.new_version }}
           body: ${{ steps.changelog.outputs.changelog }}
-          prerelease: ${{ github.event.inputs.prerelease != '' }}
+          prerelease: ${{ inputs.prerelease != '' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -127,8 +127,8 @@ jobs:
           echo "::notice ::📦 Release Summary"
           echo "::notice ::🔖 Tag: $new_version"
           
-          if [[ "${{ github.event.inputs.prerelease }}" != "" && "${{ github.event.inputs.prerelease }}" != "none" ]]; then
-            echo "::notice ::🚧 Pre-release: ${{ github.event.inputs.prerelease }}"
+          if [[ "${{ inputs.prerelease }}" != "" && "${{ inputs.prerelease }}" != "none" ]]; then
+            echo "::notice ::🚧 Pre-release: ${{ inputs.prerelease }}"
           else
             echo "::notice ::✅ Production Release"
           fi
