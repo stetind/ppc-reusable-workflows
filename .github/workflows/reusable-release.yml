@@ -1,4 +1,4 @@
-name: 🚀 Auto Release Based on Conventional Commits
+name: 🚀 Reusable Auto Release
 
 run-name: >-
   ${{ 
@@ -26,8 +26,11 @@ on:
         required: false
         type: boolean
         default: false
+env:
+  TEMP_RELEASE_BRANCH: releases
 
 jobs:
+
   update_repository:
     name: Update
     runs-on: ubuntu-latest
@@ -104,19 +107,19 @@ jobs:
           echo "Replacing version with ${{ steps.version.outputs.new_version }}"
           find .github/workflows -type f -name "*.yaml" -exec sed -i "s|__VERSION__|${{ steps.version.outputs.new_version }}|g" {} +
 
-      - name: 📤 Commit and push version updates to 'releases' branch
+      - name: 📤 Commit and push version updates to '${{ env.TEMP_RELEASE_BRANCH }}' branch
         if: steps.check_commits.outputs.proceed == 'true'
         run: |
           git config --global user.name "$(git log -n 1 --pretty=format:%an)"
           git config --global user.email "$(git log -n 1 --pretty=format:%ae)"
   
-          # Create the 'releases' branch if it doesn't exist
-          git checkout -b releases || git checkout releases
+          # Create the '${{ env.TEMP_RELEASE_BRANCH }}' branch if it doesn't exist
+          git checkout -b ${{ env.TEMP_RELEASE_BRANCH }} || git checkout ${{ env.TEMP_RELEASE_BRANCH }}
           
           git add .github/workflows/*.yaml
           git commit -m "Update version placeholders for ${{ steps.version.outputs.new_version }}"
-          git push origin releases
-          echo "::notice ::Temporary branch `releases` Created successfully"
+          git push origin HEAD:${{ env.TEMP_RELEASE_BRANCH }} --force
+          echo "::notice ::Temporary branch `${{ env.TEMP_RELEASE_BRANCH }}` Created successfully"
 
 
   create_release:
@@ -127,7 +130,7 @@ jobs:
       - name: ⬇️ Checkout repository
         uses: actions/checkout@v4
         with:
-          ref: releases
+          ref: ${{ env.TEMP_RELEASE_BRANCH }}
           fetch-depth: 0  # Ensure full history is available
       - name: 🏷️ Get latest tag (if exists)
         id: get_tag
@@ -203,7 +206,7 @@ jobs:
         run: |
           new_version="${{ steps.version.outputs.new_version }}"
           repo="${{ github.repository }}"
-          release_url="https://github.com/${repo}/releases/tag/${new_version}"
+          release_url="https://github.com/${repo}/${{ env.TEMP_RELEASE_BRANCH }}/tag/${new_version}"
 
           echo "::notice ::📦 Release Summary"
           echo "::notice ::🔖 Tag: $new_version"
@@ -216,17 +219,3 @@ jobs:
 
           echo "::notice ::🔗 URL: $release_url"
           echo "::notice ::🎉 Release successfully created!"
-  delete_repository:
-    needs: create_release
-    name: Clear
-    runs-on: ubuntu-latest
-    steps:
-      - name: ⬇️ Checkout repository
-        uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.WORKFLOW_TOKEN }}
-          fetch-depth: 0  # Ensure full history is available
-      - name: 📤 Delete 'releases' branch
-        run: |
-          git push origin --delete releases
-          echo "::notice ::Temporary branch `releases` Deleted successfully"
