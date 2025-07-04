@@ -27,7 +27,7 @@ on:
         type: boolean
         default: false
 env:
-  TEMP_RELEASE_BRANCH: releases
+  TEMP_BRANCH: releases
 
 jobs:
 
@@ -107,115 +107,25 @@ jobs:
           echo "Replacing version with ${{ steps.version.outputs.new_version }}"
           find .github/workflows -type f -name "*.yaml" -exec sed -i "s|__VERSION__|${{ steps.version.outputs.new_version }}|g" {} +
 
-      - name: 📤 Commit and push version updates to '${{ env.TEMP_RELEASE_BRANCH }}' branch
+      - name: 📤 Commit and push version updates to '${{ env.TEMP_BRANCH }}' branch
         if: steps.check_commits.outputs.proceed == 'true'
         run: |
           git config --global user.name "$(git log -n 1 --pretty=format:%an)"
           git config --global user.email "$(git log -n 1 --pretty=format:%ae)"
   
-          # Create the '${{ env.TEMP_RELEASE_BRANCH }}' branch if it doesn't exist
-          git checkout -b ${{ env.TEMP_RELEASE_BRANCH }} || git checkout ${{ env.TEMP_RELEASE_BRANCH }}
+          # Create the '${{ env.TEMP_BRANCH }}' branch if it doesn't exist
+          git checkout -b ${{ env.TEMP_BRANCH }} || git checkout ${{ env.TEMP_BRANCH }}
           
           git add .github/workflows/*.yaml
           git commit -m "Update version placeholders for ${{ steps.version.outputs.new_version }}"
-          git push origin HEAD:${{ env.TEMP_RELEASE_BRANCH }} --force
-          echo "::notice ::Temporary branch `${{ env.TEMP_RELEASE_BRANCH }}` Created successfully"
-
+          git push origin HEAD:${{ env.TEMP_BRANCH }} --force
+          echo "::notice ::Temporary branch `${{ env.TEMP_BRANCH }}` Created successfully"
 
   create_release:
     needs: update_repository
     name: Create Release
-    runs-on: ubuntu-latest
-    steps:
-      - name: ⬇️ Checkout repository
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ env.TEMP_RELEASE_BRANCH }}
-          fetch-depth: 0  # Ensure full history is available
-      - name: 🏷️ Get latest tag (if exists)
-        id: get_tag
-        run: |
-          latest_tag=$(git tag --list | grep -E '^v?[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -n 1)
-          echo "latest_tag=${latest_tag:-0.0.0}" >> $GITHUB_OUTPUT
-          echo "::notice ::Latest tag found: $latest_tag"
-
-      - name: 🏷️ Use provided tag or latest tag
-        id: select_tag
-        run: |
-          if [[ -n "${{ github.event.inputs.tag }}" ]]; then
-            echo "selected_tag=${{ github.event.inputs.tag }}" >> $GITHUB_OUTPUT
-            echo "::notice ::Using provided tag: ${{ github.event.inputs.tag }}"
-          else
-            echo "selected_tag=${{ steps.get_tag.outputs.latest_tag }}" >> $GITHUB_OUTPUT
-            echo "::notice ::Using latest tag: ${{ steps.get_tag.outputs.latest_tag }}"
-          fi
-
-      - name: 📦 Get commits since selected tag
-        id: get_commits
-        run: |
-          if [[ "${{ steps.select_tag.outputs.selected_tag }}" != "0.0.0" ]]; then
-            commits=$(git log "${{ steps.select_tag.outputs.selected_tag }}"..HEAD --pretty=format:"%s|%b")
-          else
-            commits=$(git log HEAD --pretty=format:"%s|%b")
-          fi
-
-          echo "commits<<EOF" >> $GITHUB_OUTPUT
-          echo "$commits" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-          echo "::notice ::Commits fetched: $commits"
-
-      - name: 🚨 Check if commits found or force proceed
-        id: check_commits
-        run: |
-          if [[ -z "${{ steps.get_commits.outputs.commits }}" ]]; then
-            if [[ "${{ github.event.inputs.force }}" != "true" ]]; then
-              echo "::warning ::No commits found, skipping release creation."
-              echo "proceed=false" >> $GITHUB_OUTPUT
-              exit 0
-            else
-              echo "::notice ::Proceeding with release creation due to force flag."
-              echo "proceed=true" >> $GITHUB_OUTPUT
-            fi
-          else
-            echo "::notice ::Commits found, proceeding with release."
-            echo "proceed=true" >> $GITHUB_OUTPUT
-          fi
-
-      - name: 🔍 Detect version bump and compute new version
-        id: version
-        if: steps.check_commits.outputs.proceed == 'true'
-        run: |
-          # Assuming you have logic for version bumping here...
-          new_version="1.0.0"  # Example, replace with actual version bump logic
-          echo "::notice ::New version computed: $new_version"
-          echo "new_version=$new_version" >> $GITHUB_OUTPUT
-
-      - name: 📤 Create GitHub Release
-        if: steps.check_commits.outputs.proceed == 'true'
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ steps.version.outputs.new_version }}
-          name: Release ${{ steps.version.outputs.new_version }}
-          body: ${{ steps.changelog.outputs.changelog }}
-          prerelease: ${{ github.event.inputs.prerelease != '' }}
-
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: 🧾 Final Summary
-        if: steps.check_commits.outputs.proceed == 'true'
-        run: |
-          new_version="${{ steps.version.outputs.new_version }}"
-          repo="${{ github.repository }}"
-          release_url="https://github.com/${repo}/${{ env.TEMP_RELEASE_BRANCH }}/tag/${new_version}"
-
-          echo "::notice ::📦 Release Summary"
-          echo "::notice ::🔖 Tag: $new_version"
-
-          if [[ "${{ github.event.inputs.prerelease }}" != "" && "${{ github.event.inputs.prerelease }}" != "none" ]]; then
-            echo "::notice ::🚧 Pre-release: ${{ github.event.inputs.prerelease }}"
-          else
-            echo "::notice ::✅ Production Release"
-          fi
-
-          echo "::notice ::🔗 URL: $release_url"
-          echo "::notice ::🎉 Release successfully created!"
+    uses: stetind/ppc-reusable-workflows/.github/workflows/auto-release-based-conventional-commits.yaml@releases
+    with:
+      tag: ${{ github.event.inputs.tag || ''}}
+      prerelease: ${{ github.event.inputs.prerelease || ''}}
+      force: ${{ github.event.inputs.force || false }}
