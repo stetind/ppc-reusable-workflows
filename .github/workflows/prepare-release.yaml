@@ -1,5 +1,5 @@
 name: 🚧 Prepare Auto Release
-
+run-name: 🚧 Prepare Auto Release
 on:
   workflow_dispatch:
     inputs:

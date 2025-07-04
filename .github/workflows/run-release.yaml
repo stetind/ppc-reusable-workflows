@@ -1,4 +1,5 @@
 name: 🚀 Finalize Auto Release
+run-name: 🚀 Finalize Auto Release
 
 on:
   push:
@@ -10,3 +11,5 @@ jobs:
     name: Final Release
     uses: stetind/ppc-reusable-workflows/.github/workflows/auto-release-based-conventional-commits.yaml@releases
     secrets: inherit
+    with:
+      branch: releases

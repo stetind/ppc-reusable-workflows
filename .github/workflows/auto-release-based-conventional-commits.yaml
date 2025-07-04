@@ -12,9 +12,6 @@ run-name: >-
 
 on:
   workflow_call:
-    secrets:
-      GITHUB_TOKEN:
-        required: true
     inputs:
       tag:
         description: 'Optional tag version (e.g., v1.0.0). Leave empty for the latest tag.'
@@ -29,6 +26,12 @@ on:
         required: false
         type: boolean
         default: false
+      branch:
+        required: false
+        type: string
+
+env:
+  branch_name: ${{ github.event.inputs.branch || github.head_ref }}
 
 jobs:
   release:
@@ -39,6 +42,7 @@ jobs:
       - name: ⬇️ Checkout repository
         uses: actions/checkout@v4
         with:
+          ref: ${{ env.branch_name }}
           fetch-depth: 0  # Ensure full history is available
 
       - name: 🏷️ Get latest tag (if exists)
