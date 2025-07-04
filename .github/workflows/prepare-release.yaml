@@ -23,7 +23,7 @@ jobs:
 
     steps:
       - name: ⬇️ Checkout repository
-        uses: stetind/ppc-github-composite-actions/.github/actions/checkout-repo@main
+        uses: actions/checkout@v4
         with:
           token: ${{ secrets.WORKFLOW_TOKEN }}
           fetch-depth: 0
@@ -31,8 +31,6 @@ jobs:
       - name: 🏷️ Get latest tag (if exists)
         id: get_tag
         uses: stetind/ppc-github-composite-actions/.github/actions/get-latest-tag@main
-        with:
-          previous_tag: ${{ inputs.tag }}
 
       - name: 🏷️ Use provided tag or latest tag
         id: select_tag
@@ -49,21 +47,21 @@ jobs:
         id: get_commits
         uses: stetind/ppc-github-composite-actions/.github/actions/get-commits-since-tag@main
         with:
-          selected_tag: ${{ steps.select_tag.outputs.selected_tag }}
+          tag: ${{ steps.select_tag.outputs.selected_tag }}
 
       - name: 🚨 Check if commits found or force proceed
         id: check_commits
-        uses: stetind/ppc-github-composite-actions/.github/actions/check-if-should-proceed@main
+        uses: stetind/ppc-github-composite-actions/.github/actions/check-should-proceed@main
         with:
           commits: ${{ steps.get_commits.outputs.commits }}
           force: ${{ inputs.force }}
 
       - name: 🔍 Detect version bump and compute new version
         id: version
-        uses: stetind/ppc-github-composite-actions/.github/actions/compute-new-version@main
+        uses: stetind/ppc-github-composite-actions/.github/actions/detect-version-bump@main
         with:
           commits: ${{ steps.get_commits.outputs.commits }}
-          current_version: ${{ steps.select_tag.outputs.selected_tag }}
+          tag: ${{ steps.select_tag.outputs.selected_tag }}
 
       - name: Replace __VERSION__ placeholders
         run: |
