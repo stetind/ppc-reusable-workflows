@@ -40,7 +40,7 @@ jobs:
       - name: ⬇️ Checkout repository
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.ref_name }}
+          ref: ${{ github.event.inputs.branch_name }}
           fetch-depth: 0  # Ensure full history is available
 
       - name: 🏷️ Get latest tag (if exists)
