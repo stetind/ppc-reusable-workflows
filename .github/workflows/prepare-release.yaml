@@ -49,6 +49,8 @@ jobs:
         uses: stetind/ppc-github-composite-actions/.github/actions/get-latest-tag@main
         with:
           tag: ${{ github.event.inputs.tag }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 🧪 Generate changelog
         id: changelog

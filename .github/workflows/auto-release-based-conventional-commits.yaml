@@ -44,11 +44,6 @@ on:
         description: 'Optional prerelease identifier (e.g., beta, rc). Leave empty for stable.'
         required: false
         type: string
-      force:
-        description: 'Force proceed even if no commits found (default is false).'
-        required: false
-        type: boolean
-        default: false
       branch:
         required: false
         type: string
@@ -71,6 +66,8 @@ jobs:
         uses: stetind/ppc-github-composite-actions/.github/actions/get-latest-tag@main
         with:
           tag: ${{ github.event.inputs.tag }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 🧪 Generate changelog
         id: changelog
@@ -80,19 +77,31 @@ jobs:
           new_tag: ${{ inputs.new_tag }}
           repository: ${{ github.repository }}
 
+      - name: 📦 Check if release exists
+        id: check_release_exists
+        run: |
+          release_exists=$(gh release view ${{ steps.changelog.outputs.new_tag }} --json name --jq ".name" || echo "not_found")
+          if [[ "$release_exists" != "not_found" ]]; then
+            echo "::error ::Release with tag ${{ steps.changelog.outputs.new_tag }} already exists. Exiting."
+            exit 1
+          else
+            echo "::notice ::No existing release found, proceeding with release creation."
+          fi
+
       - name: 📤 Create GitHub Release
-        if: steps.changelog.outputs.has_changes == 'true'
+        if: steps.changelog.outputs.has_changes == 'true' && steps.check_release_exists.outcome == 'success'
         uses: stetind/ppc-github-composite-actions/.github/actions/create-github-release@main
         with:
           version: ${{ steps.changelog.outputs.new_tag }}
           changelog: ${{ steps.changelog.outputs.changelog }}
           prerelease: ${{ inputs.prerelease != '' && inputs.prerelease != 'none' }}
           target_branch: ${{ inputs.branch }}
+          draft: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 📟 Final Summary
-        if: steps.changelog.outputs.proceed == 'true'
+        if: steps.changelog.outputs.proceed == 'true' && steps.check_release_exists.outcome == 'success'
         run: |
           new_version="${{ steps.version.outputs.new_version }}"
           repo="${{ github.repository }}"
