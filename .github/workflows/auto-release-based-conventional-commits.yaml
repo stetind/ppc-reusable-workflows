@@ -43,54 +43,38 @@ jobs:
           ref: ${{ inputs.branch }}
           fetch-depth: 0
 
-      - name: 🏷️ Get latest tag (compute)
-        id: get_tag_compute
-        if: ${{ inputs.tag == '' }}
+      - name: 🏷️ Get latest tag (if exists)
+        id: get_tag
         uses: stetind/ppc-github-composite-actions/.github/actions/get-latest-tag@main
 
-      - name: 🏷️ Get latest tag (provided)
-        id: get_tag_provided
-        if: ${{ inputs.tag }}
-        run: |
-            echo "latest_tag=${{ inputs.tag }}" >> $GITHUB_OUTPUT
-
-      - name: 🌎 Select tag
+      - name: 🏷️ Use provided tag or latest tag
         id: select_tag
         run: |
-          if [[ -n "${{ steps.get_tag_compute.outputs.latest_tag }}" ]]; then
-            selected_tag="${{ steps.get_tag_compute.outputs.latest_tag }}"
+          LATEST="${{ steps.get_tag.outputs.latest_tag }}"
+          TAG_INPUT="${{ github.event.inputs.tag }}"
+
+          if [[ -n "$TAG_INPUT" ]]; then
+            echo "selected_tag=$TAG_INPUT" >> $GITHUB_OUTPUT
+            echo "::notice ::Using provided tag: $TAG_INPUT"
           else
-            selected_tag="${{ steps.get_tag_provided.outputs.latest_tag }}"
+            echo "selected_tag=$LATEST" >> $GITHUB_OUTPUT
+            echo "::notice ::Using latest tag: $LATEST"
           fi
-          
-          echo "selected_tag=$selected_tag" >> $GITHUB_OUTPUT
-          echo "::notice ::Using tag: $selected_tag"
 
-#      - name: 🌎 Select tag
-#        id: select_tag
-#        run: |
-#          if [[ -n "${{ inputs.tag }}" ]]; then
-#            echo "selected_tag=${{ inputs.tag }}" >> $GITHUB_OUTPUT
-#            echo "::notice ::Using provided tag: ${{ inputs.tag }}"
-#          else
-#            echo "selected_tag=${{ steps.get_tag.outputs.latest_tag }}" >> $GITHUB_OUTPUT
-#            echo "::notice ::Using latest tag: ${{ steps.get_tag.outputs.latest_tag }}"
-#          fi
-
-      - name: 📦 Get commits
+      - name: 📦 Get commits since selected tag
         id: get_commits
         uses: stetind/ppc-github-composite-actions/.github/actions/get-commits-since-tag@main
         with:
           tag: ${{ steps.select_tag.outputs.selected_tag }}
 
-      - name: ⚠️ Check if commits found
+      - name: 🚨 Check if commits found or force proceed
         id: check_commits
         uses: stetind/ppc-github-composite-actions/.github/actions/check-should-proceed@main
         with:
           commits: ${{ steps.get_commits.outputs.commits }}
           force: ${{ inputs.force }}
 
-      - name: 🔍 Compute new version
+      - name: 🔍 Detect version bump and compute new version
         id: version_computed
         if: steps.check_commits.outputs.proceed == 'true' && inputs.tag == ''
         uses: stetind/ppc-github-composite-actions/.github/actions/detect-version-bump@main
