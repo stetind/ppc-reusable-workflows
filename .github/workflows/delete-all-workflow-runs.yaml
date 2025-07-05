@@ -12,7 +12,7 @@
 #   - github_repository: Full repository name (e.g., owner/repo) [required]
 #   - status: Optional status filter (completed, in_progress, queued)
 #
-# Authentication:
+# Environment:
 #   - Requires ACTIONS_DELETE_TOKEN and GITHUB_TOKEN with repo scope
 #
 # Example usage:
@@ -21,10 +21,6 @@
 # =====================================================================
 
 name: 🧹 Delete All Workflow Runs
-
-env:
-  GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
-  ACTIONS_DELETE_TOKEN: ${{ env.ACTIONS_DELETE_TOKEN }}
 
 on:
   workflow_call:
@@ -47,6 +43,10 @@ on:
         description: 'Optional status filter (e.g., completed, in_progress, queued, etc.)'
         type: string
         required: false
+
+env:
+  GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
+  ACTIONS_DELETE_TOKEN: ${{ env.ACTIONS_DELETE_TOKEN }}
 
 jobs:
   cleanup:
