@@ -50,7 +50,7 @@ jobs:
         with:
           tag: ${{ github.event.inputs.tag }}
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 🧪 Generate changelog
         id: changelog
