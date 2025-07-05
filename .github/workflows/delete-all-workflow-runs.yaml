@@ -13,7 +13,7 @@
 #   - status: Optional status filter (completed, in_progress, queued)
 #
 # Environment:
-#   - Requires ACTIONS_DELETE_TOKEN and GITHUB_TOKEN with repo scope
+#   - Requires WORKFLOW_TOKEN and GITHUB_TOKEN with repo scope
 #
 # Example usage:
 #   - Delete all runs: Set only github_repository
@@ -44,10 +44,6 @@ on:
         type: string
         required: false
 
-env:
-  GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
-  ACTIONS_DELETE_TOKEN: ${{ env.ACTIONS_DELETE_TOKEN }}
-
 jobs:
   cleanup:
     runs-on: ubuntu-latest
@@ -68,11 +64,11 @@ jobs:
           echo "Working with repository: ${{ steps.setup.outputs.repo }}"
 
       - name: 🔐 Authenticate with GitHub CLI
-        run: echo "${{ env.ACTIONS_DELETE_TOKEN }}" | gh auth login --with-token
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | gh auth login --with-token
 
       - name: 🧼 Delete all workflow runs
         env:
-          GH_TOKEN: ${{ env.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.WORKFLOW_TOKEN }}
         run: |
           echo "Fetching and deleting all workflow runs..."
           
