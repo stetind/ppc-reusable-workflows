@@ -1,3 +1,21 @@
+# =============================================================================
+# 🚀 Auto Release Based on Conventional Commits
+#
+# Reusable workflow to automatically create a GitHub release:
+# - Detects semantic version bump from conventional commits
+# - Computes new version (unless overridden with input)
+# - Generates changelog from commits
+# - Publishes a GitHub Release (stable or prerelease)
+#
+# Inputs:
+#   - tag (optional): Use a fixed version (skips bump logic)
+#   - prerelease (optional): "beta", "rc", or empty
+#   - force (optional): Force release even with no new commits
+#   - branch (optional): Target branch (default: current ref)
+#
+# Trigger: `workflow_call`
+# =============================================================================
+
 name: 🚀 Auto Release Based on Conventional Commits
 
 run-name: >-

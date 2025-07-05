@@ -1,3 +1,11 @@
+# =============================================================================
+# 🧹 ESLint Linter Check
+# Runs ESLint across your TypeScript/JavaScript project and fails on lint errors.
+# Inputs:
+#   - folder: Folder to lint (default is root)
+#   - eslint_config: Optional path to a custom ESLint config file
+# =============================================================================
+
 name: Typescript eslint
 
 on:

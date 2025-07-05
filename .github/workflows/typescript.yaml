@@ -1,3 +1,11 @@
+# =============================================================================
+# 🧰 TypeScript Project Setup
+# Installs dependencies, builds TypeScript, and optionally runs lint and tests.
+# Inputs:
+#   - run_lint: Run ESLint if true
+#   - run_tests: Run test script if true
+# =============================================================================
+
 name: Typescript CI
 
 on:

@@ -1,3 +1,11 @@
+# =============================================================================
+# 📦 NPM Publish
+# Publishes a Node.js package to npm. Designed for use with semantic versioning and GitHub Actions.
+# Inputs:
+#   - npm_token: Required npm access token
+#   - production: Boolean to determine if production publishing (true) or dry-run
+# =============================================================================
+
 name: Npm - Publish
 
 on:

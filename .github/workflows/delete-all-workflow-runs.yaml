@@ -1,0 +1,94 @@
+# =====================================================================
+# 🧹 Delete All GitHub Actions Workflow Runs
+#
+# This workflow allows you to delete all GitHub Actions workflow runs
+# for a given repository, optionally filtering by `status`.
+#
+# It supports deletion of:
+# - All workflow runs (no filter)
+# - Only completed / failed / cancelled / in_progress / queued runs
+#
+# Inputs:
+#   - github_repository: Full repository name (e.g., owner/repo) [required]
+#   - status: Optional status filter (completed, in_progress, queued)
+#
+# Authentication:
+#   - Requires ACTIONS_DELETE_TOKEN and GITHUB_TOKEN with repo scope
+#
+# Example usage:
+#   - Delete all runs: Set only github_repository
+#   - Delete only completed runs: Set status to "completed"
+# =====================================================================
+
+name: 🧹 Delete All Workflow Runs
+
+env:
+  GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
+  ACTIONS_DELETE_TOKEN: ${{ env.ACTIONS_DELETE_TOKEN }}
+
+on:
+  workflow_call:
+    inputs:
+      github_repository:
+        description: ''
+        type: string
+        required: true
+      status:
+        description: 'Optional status filter (e.g., completed, in_progress, queued, etc.)'
+        type: string
+        required: false
+  workflow_dispatch:
+    inputs:
+      github_repository:
+        description: ''
+        type: string
+        required: true
+      status:
+        description: 'Optional status filter (e.g., completed, in_progress, queued, etc.)'
+        type: string
+        required: false
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🔐 Authenticate with GitHub CLI
+        run: echo "${{ env.ACTIONS_DELETE_TOKEN }}" | gh auth login --with-token
+
+      - name: 🧼 Delete all workflow runs
+        env:
+          GH_TOKEN: ${{ env.GITHUB_TOKEN }}
+        run: |
+          echo "Fetching and deleting all workflow runs..."
+          
+          per_page=100
+          page=1
+          deleted_count=0
+          
+          while true; do
+            echo "🔄 Fetching page $page..."
+          
+            url="/repos/${{ inputs.github_repository }}/actions/runs?per_page=$per_page&page=$page"
+            if [[ -n "${{ inputs.status }}" ]]; then
+              url="${url}&status=${{ inputs.status }}"
+              echo "📎 Filtering runs by status: ${{ inputs.status }}"
+            fi
+          
+            runs=$(gh api -X GET "$url" --jq '.workflow_runs[]?.id')
+          
+            if [[ -z "$runs" ]]; then
+              echo "✅ No more runs to delete."
+              break
+            fi
+          
+            for run_id in $runs; do
+              echo "🗑️ Deleting run $run_id"
+              gh api --method DELETE "/repos/${{ inputs.github_repository }}/actions/runs/$run_id"
+              ((deleted_count+=1))
+              sleep 0.3 # avoid rate limits
+            done
+          
+            ((page+=1))
+          done
+          
+          echo "🔥 Deleted $deleted_count workflow runs."

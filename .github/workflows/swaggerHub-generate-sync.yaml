@@ -1,3 +1,13 @@
+# =============================================================================
+# 🔁 SwaggerHub Generate & Sync
+# Generates and syncs Swagger/OpenAPI specs to SwaggerHub.
+# Inputs:
+#   - api: API name in SwaggerHub
+#   - owner: SwaggerHub owner
+#   - version: API version
+#   - file: Path to OpenAPI spec file
+# =============================================================================
+
 name: SwaggerHub Generate and Sync
 run-name: >-
   ${{
