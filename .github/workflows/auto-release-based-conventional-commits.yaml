@@ -42,20 +42,39 @@ jobs:
         with:
           ref: ${{ inputs.branch }}
 
-      - name: 🏷️ Get latest tag
-        id: get_tag
+      - name: 🏷️ Get latest tag (compute)
+        id: get_tag_compute
+        if: ${{ inputs.tag == '' }}
         uses: stetind/ppc-github-composite-actions/.github/actions/get-latest-tag@main
+
+      - name: 🏷️ Get latest tag (provided)
+        id: get_tag_provided
+        if: ${{ steps.get_tag_compute.outputs.latest_tag != '' && inputs.tag }}
+        run: |
+            echo "selected_tag=${{ inputs.tag }}" >> $GITHUB_OUTPUT
+            echo "::notice ::Using provided tag: ${{ inputs.tag }}"
+            echo "latest_tag=$selected_tag" >> $GITHUB_OUTPUT
 
       - name: 🌎 Select tag
         id: select_tag
         run: |
-          if [[ -n "${{ inputs.tag }}" ]]; then
-            echo "selected_tag=${{ inputs.tag }}" >> $GITHUB_OUTPUT
-            echo "::notice ::Using provided tag: ${{ inputs.tag }}"
+          if [[ -n ${{ steps.get_tag_compute.outputs.latest_tag }} ]]; then
+            echo "selected_tag=${{ steps.get_tag_compute.outputs.latest_tag }}" >> $GITHUB_OUTPUT
           else
-            echo "selected_tag=${{ steps.get_tag.outputs.latest_tag }}" >> $GITHUB_OUTPUT
-            echo "::notice ::Using latest tag: ${{ steps.get_tag.outputs.latest_tag }}"
+            echo "selected_tag=${{ steps.get_tag_provided.outputs.latest_tag }}" >> $GITHUB_OUTPUT
           fi
+          echo "::notice ::Using tag: $latest_tag"
+
+#      - name: 🌎 Select tag
+#        id: select_tag
+#        run: |
+#          if [[ -n "${{ inputs.tag }}" ]]; then
+#            echo "selected_tag=${{ inputs.tag }}" >> $GITHUB_OUTPUT
+#            echo "::notice ::Using provided tag: ${{ inputs.tag }}"
+#          else
+#            echo "selected_tag=${{ steps.get_tag.outputs.latest_tag }}" >> $GITHUB_OUTPUT
+#            echo "::notice ::Using latest tag: ${{ steps.get_tag.outputs.latest_tag }}"
+#          fi
 
       - name: 📦 Get commits
         id: get_commits
