@@ -56,7 +56,7 @@ jobs:
       - name: 🌎 Select tag
         id: select_tag
         run: |
-          if [[ -n ${{ steps.get_tag_compute.outputs.latest_tag }} ]]; then
+          if [[ -n "${{ steps.get_tag_compute.outputs.latest_tag }}" ]]; then
             echo "selected_tag=${{ steps.get_tag_compute.outputs.latest_tag }}" >> $GITHUB_OUTPUT
           else
             echo "selected_tag=${{ steps.get_tag_provided.outputs.latest_tag }}" >> $GITHUB_OUTPUT
