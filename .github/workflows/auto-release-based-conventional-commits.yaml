@@ -107,6 +107,9 @@ jobs:
           changelog: ${{ steps.changelog.outputs.changelog }}
           prerelease: ${{ inputs.prerelease != '' && inputs.prerelease != 'none' }}
           target_branch: ${{ inputs.branch }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 
       - name: 📟 Final Summary
         if: steps.check_commits.outputs.proceed == 'true'
