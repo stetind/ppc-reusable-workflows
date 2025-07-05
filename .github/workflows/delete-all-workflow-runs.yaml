@@ -25,10 +25,6 @@ name: 🧹 Delete All Workflow Runs
 on:
   workflow_call:
     inputs:
-      github_repository:
-        description: ''
-        type: string
-        required: true
       status:
         description: 'Optional status filter (e.g., completed, in_progress, queued, etc.)'
         type: string
@@ -48,21 +44,6 @@ jobs:
   cleanup:
     runs-on: ubuntu-latest
     steps:
-      - name: Determine repository to use
-        id: setup
-        run: |
-          if [ -z "${{ inputs.github_repository }}" ]; then
-            echo "::notice ::No repository provided. Using current repository: ${{ github.repository }}"
-            echo "repo=${{ github.repository }}" >> $GITHUB_OUTPUT
-          else
-            echo "::notice ::Using provided repository: ${{ inputs.github_repository }}"
-            echo "repo=${{ inputs.github_repository }}" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Use repository
-        run: |
-          echo "Working with repository: ${{ steps.setup.outputs.repo }}"
-
       - name: 🔐 Authenticate with GitHub CLI
         run: echo "${{ secrets.WORKFLOW_TOKEN }}" | gh auth login --with-token
 
@@ -72,6 +53,9 @@ jobs:
         run: |
           echo "Fetching and deleting all workflow runs..."
           
+          current_run_id=${{ github.run_id }}
+          echo "🚫 Current run ID: $current_run_id (will be skipped)"
+          
           per_page=100
           page=1
           deleted_count=0
@@ -79,7 +63,7 @@ jobs:
           while true; do
             echo "🔄 Fetching page $page..."
           
-            url="/repos/${{ steps.setup.outputs.repo }}/actions/runs?per_page=$per_page&page=$page"
+            url="/repos/${{ github.repository }}/actions/runs?per_page=$per_page&page=$page"
             if [[ -n "${{ inputs.status }}" ]]; then
               url="${url}&status=${{ inputs.status }}"
               echo "📎 Filtering runs by status: ${{ inputs.status }}"
@@ -93,8 +77,12 @@ jobs:
             fi
           
             for run_id in $runs; do
+              if [[ "$run_id" == "$current_run_id" ]]; then
+                echo "⏭️ Skipping current run $run_id"
+                continue
+              fi
               echo "🗑️ Deleting run $run_id"
-              gh api --method DELETE "/repos/${{ steps.setup.outputs.repo }}/actions/runs/$run_id"
+              gh api --method DELETE "/repos/${{ github.repository }}/actions/runs/$run_id"
               ((deleted_count+=1))
               sleep 0.3 # avoid rate limits
             done
