@@ -61,6 +61,7 @@ jobs:
           echo "prerelease=$PRERELEASE" >> $GITHUB_OUTPUT
 
       - name: 📟 Final Summary
+        if: always()
         run: |
           previous_tag="${{ steps.read_meta.outputs.previous_tag }}"
           new_tag="${{ steps.read_meta.outputs.new_tag }}"

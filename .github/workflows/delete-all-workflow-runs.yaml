@@ -37,9 +37,8 @@ on:
     inputs:
       github_repository:
         description: ''
-#        default: ${{ github.ref_name }}
         type: string
-        required: true
+        required: false
       status:
         description: 'Optional status filter (e.g., completed, in_progress, queued, etc.)'
         type: string
@@ -53,6 +52,21 @@ jobs:
   cleanup:
     runs-on: ubuntu-latest
     steps:
+      - name: Determine repository to use
+        id: setup
+        run: |
+          if [ -z "${{ inputs.github_repository }}" ]; then
+            echo "::notice ::No repository provided. Using current repository: ${{ github.repository }}"
+            echo "repo=${{ github.repository }}" >> $GITHUB_OUTPUT
+          else
+            echo "::notice ::Using provided repository: ${{ inputs.github_repository }}"
+            echo "repo=${{ inputs.github_repository }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Use repository
+        run: |
+          echo "Working with repository: ${{ steps.setup.outputs.repo }}"
+
       - name: 🔐 Authenticate with GitHub CLI
         run: echo "${{ env.ACTIONS_DELETE_TOKEN }}" | gh auth login --with-token
 
@@ -69,7 +83,7 @@ jobs:
           while true; do
             echo "🔄 Fetching page $page..."
           
-            url="/repos/${{ inputs.github_repository }}/actions/runs?per_page=$per_page&page=$page"
+            url="/repos/${{ steps.setup.outputs.repo }}/actions/runs?per_page=$per_page&page=$page"
             if [[ -n "${{ inputs.status }}" ]]; then
               url="${url}&status=${{ inputs.status }}"
               echo "📎 Filtering runs by status: ${{ inputs.status }}"
@@ -84,7 +98,7 @@ jobs:
           
             for run_id in $runs; do
               echo "🗑️ Deleting run $run_id"
-              gh api --method DELETE "/repos/${{ inputs.github_repository }}/actions/runs/$run_id"
+              gh api --method DELETE "/repos/${{ steps.setup.outputs.repo }}/actions/runs/$run_id"
               ((deleted_count+=1))
               sleep 0.3 # avoid rate limits
             done
