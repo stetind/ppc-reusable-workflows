@@ -74,7 +74,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 📟 Final Summary
-        if: steps.check_commits.outputs.proceed == 'true'
+        if: steps.changelog.outputs.proceed == 'true'
         run: |
           new_version="${{ steps.version.outputs.new_version }}"
           repo="${{ github.repository }}"
