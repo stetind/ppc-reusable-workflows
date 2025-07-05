@@ -71,7 +71,7 @@ jobs:
           force: ${{ inputs.force }}
 
       - name: 🔍 Compute new version
-        id: version
+        id: version_computed
         if: steps.check_commits.outputs.proceed == 'true' && inputs.tag == ''
         uses: stetind/ppc-github-composite-actions/.github/actions/detect-version-bump@main
         with:
@@ -79,9 +79,19 @@ jobs:
           tag: ${{ steps.select_tag.outputs.selected_tag }}
 
       - name: 🔢 Use provided version (skip computation)
-        id: version
+        id: version_provided
         if: steps.check_commits.outputs.proceed == 'true' && inputs.tag != ''
         run: echo "new_version=${{ inputs.tag }}" >> $GITHUB_OUTPUT
+
+      - name: 🔄 Select final version
+        id: version
+        if: steps.check_commits.outputs.proceed == 'true'
+        run: |
+          if [[ "${{ inputs.tag }}" != "" ]]; then
+            echo "new_version=${{ steps.version_provided.outputs.new_version }}" >> $GITHUB_OUTPUT
+          else
+            echo "new_version=${{ steps.version_computed.outputs.new_version }}" >> $GITHUB_OUTPUT
+          fi
 
       - name: 🧪 Generate changelog
         id: changelog
