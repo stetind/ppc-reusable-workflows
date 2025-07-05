@@ -49,10 +49,8 @@ jobs:
 
       - name: 🏷️ Get latest tag (provided)
         id: get_tag_provided
-        if: ${{ steps.get_tag_compute.outputs.latest_tag != '' && inputs.tag }}
+        if: ${{ inputs.tag }}
         run: |
-            echo "selected_tag=${{ inputs.tag }}" >> $GITHUB_OUTPUT
-            echo "::notice ::Using provided tag: ${{ inputs.tag }}"
             echo "latest_tag=$selected_tag" >> $GITHUB_OUTPUT
 
       - name: 🌎 Select tag
