@@ -88,6 +88,8 @@ jobs:
         uses: stetind/ppc-github-composite-actions/.github/actions/generate-changelog@main
         with:
           commits: ${{ steps.get_commits.outputs.commits }}
+          previous_tag: ${{ inputs.branch }}
+          new_tag: ${{ steps.version.outputs.new_version }}
 
       - name: 📤 Create GitHub Release
         if: steps.check_commits.outputs.proceed == 'true'
