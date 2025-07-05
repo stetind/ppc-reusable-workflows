@@ -87,10 +87,10 @@ jobs:
 #        if: steps.check_commits.outputs.proceed == 'true' && inputs.tag != ''
 #        run: echo "new_version=${{ inputs.tag }}" >> $GITHUB_OUTPUT
 
-      - name: 🔄 Select final version
-        id: version
-        if: steps.check_commits.outputs.proceed == 'true'
-        run: echo "new_version=${{ steps.version.outputs.new_version }}" >> $GITHUB_OUTPUT
+#      - name: 🔄 Select final version
+#        id: version
+#        if: steps.check_commits.outputs.proceed == 'true'
+#        run: echo "new_version=${{ steps.version.outputs.new_version }}" >> $GITHUB_OUTPUT
 
       - name: 🧪 Generate changelog
         id: changelog
