@@ -110,7 +110,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-
       - name: 📟 Final Summary
         if: steps.check_commits.outputs.proceed == 'true'
         run: |

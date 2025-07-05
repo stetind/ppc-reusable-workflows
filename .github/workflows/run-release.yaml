@@ -10,7 +10,8 @@ jobs:
     name: Read Metadata & Trigger Reusable Release Workflow
     runs-on: ubuntu-latest
     outputs:
-      tag: ${{ steps.read_meta.outputs.tag }}
+      previous_tag: ${{ steps.read_meta.outputs.previous_tag }}
+      new_tag: ${{ steps.read_meta.outputs.new_tag }}
       prerelease: ${{ steps.read_meta.outputs.prerelease }}
     steps:
       - name: ⬇️ Checkout repository
@@ -33,6 +34,17 @@ jobs:
           echo "previous_tag=$PREVIOUS_TAG" >> $GITHUB_OUTPUT
           echo "new_tag=$NEW_TAG" >> $GITHUB_OUTPUT
           echo "prerelease=$PRERELEASE" >> $GITHUB_OUTPUT
+      - name: 📟 Final Summary
+        run: |
+          previous_tag="${{ steps.read_meta.outputs.previous_tag }}"
+          new_tag="${{ steps.read_meta.outputs.new_tag }}"
+          prerelease="${{ steps.read_meta.outputs.prerelease }}"
+          
+          echo "::notice ::📆 Meta Data"
+          echo "::notice ::🚧 Previous Tag: $previous_tag"
+          echo "::notice ::🚧 New Tag: $new_tag"
+          echo "::notice ::🚧 Pre-release: $prerelease"
+  
 
   call_reusable_release:
     name: Final Release
