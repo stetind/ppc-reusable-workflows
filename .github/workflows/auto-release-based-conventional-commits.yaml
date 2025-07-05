@@ -78,7 +78,7 @@ jobs:
         if: steps.changelog.outputs.has_changes
         uses: stetind/ppc-github-composite-actions/.github/actions/create-github-release@main
         with:
-          version: ${{ steps.version.outputs.new_version }}
+          version: ${{ steps.changelog.outputs.new_tag }}
           changelog: ${{ steps.changelog.outputs.changelog }}
           prerelease: ${{ inputs.prerelease != '' && inputs.prerelease != 'none' }}
           target_branch: ${{ inputs.branch }}
