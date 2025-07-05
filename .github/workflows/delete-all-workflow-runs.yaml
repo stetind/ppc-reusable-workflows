@@ -26,13 +26,19 @@ on:
   workflow_call:
     inputs:
       status:
-        description: 'Optional status filter (e.g., completed, in_progress, queued, etc.)'
+        description: 'Optional status filter (e.g., completed, action_required, cancelled, failure, neutral, skipped, stale, success, timed_out, queued, requested, waiting, pending, etc.)'
         type: string
         required: false
+        default: 'cancelled'
+      workflow_name:
+        description: 'The name of the workflow to delete runs for (e.g., "CI Workflow")'
+        required: false
+        type: string
+        default: 'cancelled'
   workflow_dispatch:
     inputs:
       status:
-        description: 'Optional status filter (e.g., completed, in_progress, queued, etc.)'
+        description: 'Optional status filter (e.g., completed, action_required, cancelled, failure, neutral, skipped, stale, success, timed_out, queued, requested, waiting, pending, etc.)'
         type: string
         required: false
 
@@ -48,30 +54,37 @@ jobs:
           GH_TOKEN: ${{ secrets.WORKFLOW_TOKEN }}
         run: |
           echo "Fetching and deleting all workflow runs..."
-          
+
           current_run_id=${{ github.run_id }}
+          workflow_name="${{ inputs.workflow_name }}"
           echo "🚫 Current run ID: $current_run_id (will be skipped)"
-          
+          echo "🔍 Targeting workflow: $workflow_name (only deleting runs for this workflow)"
+
           per_page=100
           page=1
           deleted_count=0
-          
+
           while true; do
             echo "🔄 Fetching page $page..."
-          
+
+            # URL with workflow name filtering
             url="/repos/${{ github.repository }}/actions/runs?per_page=$per_page&page=$page"
             if [[ -n "${{ inputs.status }}" ]]; then
               url="${url}&status=${{ inputs.status }}"
               echo "📎 Filtering runs by status: ${{ inputs.status }}"
             fi
-          
-            runs=$(gh api -X GET "$url" --jq '.workflow_runs[]?.id')
-          
+            if [[ -n "$workflow_name" ]]; then
+              url="${url}&workflow=$workflow_name"
+              echo "📎 Filtering runs by workflow: $workflow_name"
+            fi
+
+            runs=$(gh api -X GET "$url" --jq '.workflow_runs[]? | select(.status != "in_progress" and .status != "waiting" and .status != "pending") | .id')
+
             if [[ -z "$runs" ]]; then
               echo "✅ No more runs to delete."
               break
             fi
-          
+
             for run_id in $runs; do
               if [[ "$run_id" == "$current_run_id" ]]; then
                 echo "⏭️ Skipping current run $run_id"
@@ -82,8 +95,8 @@ jobs:
               ((deleted_count+=1))
               sleep 0.3 # avoid rate limits
             done
-          
+
             ((page+=1))
           done
-          
+
           echo "🔥 Deleted $deleted_count workflow runs."
