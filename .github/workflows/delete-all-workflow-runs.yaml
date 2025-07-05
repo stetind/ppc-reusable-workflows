@@ -31,10 +31,6 @@ on:
         required: false
   workflow_dispatch:
     inputs:
-      github_repository:
-        description: ''
-        type: string
-        required: false
       status:
         description: 'Optional status filter (e.g., completed, in_progress, queued, etc.)'
         type: string
