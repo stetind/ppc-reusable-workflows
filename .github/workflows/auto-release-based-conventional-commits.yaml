@@ -44,7 +44,7 @@ jobs:
 
       - name: 🏷️ Get latest tag
         id: get_tag
-        uses: stetind/ppc-github-composite-actions/get-latest-tag@main
+        uses: stetind/ppc-github-composite-actions/.github/actions/get-latest-tag@main
 
       - name: 🌎 Select tag
         id: select_tag
@@ -59,13 +59,13 @@ jobs:
 
       - name: 📦 Get commits
         id: get_commits
-        uses: stetind/ppc-github-composite-actions/get-commits-since-tag@main
+        uses: stetind/ppc-github-composite-actions/.github/actions/get-commits-since-tag@main
         with:
           tag: ${{ steps.select_tag.outputs.selected_tag }}
 
       - name: ⚠️ Check if commits found
         id: check_commits
-        uses: stetind/ppc-github-composite-actions/check-should-proceed@main
+        uses: stetind/ppc-github-composite-actions/.github/actions/check-should-proceed@main
         with:
           commits: ${{ steps.get_commits.outputs.commits }}
           force: ${{ inputs.force }}
@@ -73,8 +73,9 @@ jobs:
       - name: 🔍 Compute new version
         id: version
         if: steps.check_commits.outputs.proceed == 'true' && inputs.tag == ''
-        uses: stetind/ppc-github-composite-actions/detect-version-bump@main
+        uses: stetind/ppc-github-composite-actions/.github/actions/detect-version-bump@main
         with:
+          commits: ${{ steps.get_commits.outputs.commits }}
           tag: ${{ steps.select_tag.outputs.selected_tag }}
 
       - name: 🔢 Use provided version (skip computation)
@@ -84,18 +85,18 @@ jobs:
 
       - name: 🧪 Generate changelog
         id: changelog
-        uses: stetind/ppc-github-composite-actions/generate-changelog@main
+        uses: stetind/ppc-github-composite-actions/.github/actions/generate-changelog@main
         with:
           commits: ${{ steps.get_commits.outputs.commits }}
 
       - name: 📤 Create GitHub Release
         if: steps.check_commits.outputs.proceed == 'true'
-        uses: stetind/ppc-github-composite-actions/create-release@main
+        uses: stetind/ppc-github-composite-actions/.github/actions/create-github-release@main
         with:
-          tag_name: ${{ steps.version.outputs.new_version }}
-          body: ${{ steps.changelog.outputs.changelog }}
+          version: ${{ steps.version.outputs.new_version }}
+          changelog: ${{ steps.changelog.outputs.changelog }}
           prerelease: ${{ inputs.prerelease != '' && inputs.prerelease != 'none' }}
-          branch: ${{ inputs.branch }}
+          target_branch: ${{ inputs.branch }}
 
       - name: 📟 Final Summary
         if: steps.check_commits.outputs.proceed == 'true'
