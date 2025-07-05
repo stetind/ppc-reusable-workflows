@@ -63,7 +63,6 @@ jobs:
 
       - name: 🧪 Generate changelog
         id: changelog
-        if: steps.check_commits.outputs.proceed == 'true'
         uses: stetind/ppc-github-composite-actions/.github/actions/generate-changelog-by-tag@main
         with:
           previous_tag: ${{ steps.select_tag.outputs.selected_tag }}
@@ -71,7 +70,7 @@ jobs:
           repository: ${{ github.repository }}
 
       - name: 📤 Create GitHub Release
-        if: steps.check_commits.outputs.proceed == 'true'
+        if: steps.changelog.outputs.has_changes
         uses: stetind/ppc-github-composite-actions/.github/actions/create-github-release@main
         with:
           version: ${{ steps.version.outputs.new_version }}
