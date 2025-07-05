@@ -17,6 +17,11 @@ on:
         description: 'Optional tag version (e.g., v1.0.0). Leave empty for the latest tag.'
         required: false
         type: string
+      new_tag:
+        description: 'Optional tag version (e.g., v1.0.0).'
+        required: false
+        type: string
+        default: ''
       prerelease:
         description: 'Optional prerelease identifier (e.g., beta, rc). Leave empty for stable.'
         required: false
@@ -66,7 +71,7 @@ jobs:
         uses: stetind/ppc-github-composite-actions/.github/actions/generate-changelog-by-tag@main
         with:
           previous_tag: ${{ steps.select_tag.outputs.selected_tag }}
-          new_tag: ${{ steps.version.outputs.new_version }}
+          new_tag: ${{ inputs.new_tag }}
           repository: ${{ github.repository }}
 
       - name: 📤 Create GitHub Release
