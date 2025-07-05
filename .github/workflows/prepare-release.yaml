@@ -45,9 +45,9 @@ jobs:
       - name: Replace __VERSION__ placeholders
         if: steps.changelog.outputs.has_changes != ''
         run: |
-          echo "Replacing version with ${{ steps.version.outputs.new_version }}"
+          echo "Replacing version with ${{ steps.changelog.outputs.new_tag }}"
           find .github/workflows -type f -name "*.yaml" \
-            -exec sed -i "s|__VERSION__|${{ steps.version.outputs.new_version }}|g" {} +
+            -exec sed -i "s|__VERSION__|${{ steps.changelog.outputs.new_tag }}|g" {} +
 
       - name: 💾 Write release metadata
         if: steps.changelog.outputs.has_changes != ''
@@ -71,5 +71,5 @@ jobs:
           git add .github/*.yaml
           git add .release-meta.json
           git add README.md
-          git commit -m "Prepare release for version ${{ steps.version.outputs.new_version }}"
+          git commit -m "Prepare release for version ${{ steps.changelog.outputs.new_tag }}"
           git push origin ${{ env.TEMP_BRANCH }} --force
