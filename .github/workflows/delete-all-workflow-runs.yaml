@@ -37,7 +37,7 @@ on:
     inputs:
       github_repository:
         description: ''
-        default: ${{ github.ref_name }}
+#        default: ${{ github.ref_name }}
         type: string
         required: true
       status:
