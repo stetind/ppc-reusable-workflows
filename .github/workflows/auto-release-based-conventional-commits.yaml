@@ -75,30 +75,26 @@ jobs:
           force: ${{ inputs.force }}
 
       - name: 🔍 Detect version bump and compute new version
-        id: version_computed
-        if: steps.check_commits.outputs.proceed == 'true' && inputs.tag == ''
+        id: version
+        if: steps.check_commits.outputs.proceed == 'true'
         uses: stetind/ppc-github-composite-actions/.github/actions/detect-version-bump@main
         with:
           commits: ${{ steps.get_commits.outputs.commits }}
           tag: ${{ steps.select_tag.outputs.selected_tag }}
 
-      - name: 🔢 Use provided version (skip computation)
-        id: version_provided
-        if: steps.check_commits.outputs.proceed == 'true' && inputs.tag != ''
-        run: echo "new_version=${{ inputs.tag }}" >> $GITHUB_OUTPUT
+#      - name: 🔢 Use provided version (skip computation)
+#        id: version_provided
+#        if: steps.check_commits.outputs.proceed == 'true' && inputs.tag != ''
+#        run: echo "new_version=${{ inputs.tag }}" >> $GITHUB_OUTPUT
 
       - name: 🔄 Select final version
         id: version
         if: steps.check_commits.outputs.proceed == 'true'
-        run: |
-          if [[ "${{ inputs.tag }}" != "" ]]; then
-            echo "new_version=${{ steps.version_provided.outputs.new_version }}" >> $GITHUB_OUTPUT
-          else
-            echo "new_version=${{ steps.version_computed.outputs.new_version }}" >> $GITHUB_OUTPUT
-          fi
+        run: echo "new_version=${{ steps.version.outputs.new_version }}" >> $GITHUB_OUTPUT
 
       - name: 🧪 Generate changelog
         id: changelog
+        if: steps.check_commits.outputs.proceed == 'true'
         uses: stetind/ppc-github-composite-actions/.github/actions/generate-changelog@main
         with:
           commits: ${{ steps.get_commits.outputs.commits }}
