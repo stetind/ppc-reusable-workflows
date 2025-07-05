@@ -28,61 +28,40 @@ jobs:
           token: ${{ secrets.WORKFLOW_TOKEN }}
           fetch-depth: 0
 
-      - name: 🏷️ Get latest tag (if exists)
-        id: get_tag
-        uses: stetind/ppc-github-composite-actions/.github/actions/get-latest-tag@main
-
-      - name: 🏷️ Use provided tag or latest tag
+      - name: 🏷️ Select tag
         id: select_tag
-        run: |
-          LATEST="${{ steps.get_tag.outputs.latest_tag }}"
-          TAG_INPUT="${{ github.event.inputs.tag }}"
-          
-          if [[ -n "$TAG_INPUT" ]]; then
-            echo "selected_tag=$TAG_INPUT" >> $GITHUB_OUTPUT
-            echo "::notice ::Using provided tag: $TAG_INPUT"
-          else
-            echo "selected_tag=$LATEST" >> $GITHUB_OUTPUT
-            echo "::notice ::Using latest tag: $LATEST"
-          fi
-
-      - name: 📦 Get commits since selected tag
-        id: get_commits
-        uses: stetind/ppc-github-composite-actions/.github/actions/get-commits-since-tag@main
+        uses: stetind/ppc-github-composite-actions/.github/actions/get-latest-tag@main
         with:
-          tag: ${{ steps.select_tag.outputs.selected_tag }}
+          tag: ${{ github.event.inputs.tag }}
 
-      - name: 🚨 Check if commits found or force proceed
-        id: check_commits
-        uses: stetind/ppc-github-composite-actions/.github/actions/check-should-proceed@main
+      - name: 🧪 Generate changelog
+        id: changelog
+        uses: stetind/ppc-github-composite-actions/.github/actions/generate-changelog-by-tag@main
         with:
-          commits: ${{ steps.get_commits.outputs.commits }}
-          force: ${{ inputs.force }}
-
-      - name: 🔍 Detect version bump and compute new version
-        id: version
-        uses: stetind/ppc-github-composite-actions/.github/actions/detect-version-bump@main
-        with:
-          commits: ${{ steps.get_commits.outputs.commits }}
-          tag: ${{ steps.select_tag.outputs.selected_tag }}
+          previous_tag: ${{ steps.select_tag.outputs.selected_tag }}
+          repository: ${{ github.repository }}
+          new_tag: ''
 
       - name: Replace __VERSION__ placeholders
+        if: steps.changelog.outputs.has_changes != ''
         run: |
           echo "Replacing version with ${{ steps.version.outputs.new_version }}"
           find .github/workflows -type f -name "*.yaml" \
             -exec sed -i "s|__VERSION__|${{ steps.version.outputs.new_version }}|g" {} +
 
       - name: 💾 Write release metadata
+        if: steps.changelog.outputs.has_changes != ''
         run: |
           cat <<EOF > .release-meta.json
           {
             "previous_tag": "${{ steps.select_tag.outputs.selected_tag }}",
-            "new_tag": "${{ steps.version.outputs.new_version }}",
+            "new_tag": "${{ steps.changelog.outputs.new_tag }}",
             "prerelease": "${{ github.event.inputs.prerelease || '' }}"
           }
           EOF
 
       - name: Commit & Push to ${{ env.TEMP_BRANCH }}
+        if: steps.changelog.outputs.has_changes != ''
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
