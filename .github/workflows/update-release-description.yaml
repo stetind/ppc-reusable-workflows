@@ -1,0 +1,61 @@
+name: 📝 Enhance GitHub Release Description
+
+on:
+  release:
+    types: [created]  # Trigger only when a release is manually created
+
+jobs:
+  update-release:
+    name: Validate and Enhance Release Notes
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: ⬇️ Checkout repo
+        uses: actions/checkout@v4
+
+      - name: 🧾 Extract Release Info
+        id: release
+        run: |
+          echo "tag=${{ github.event.release.tag_name }}" >> $GITHUB_OUTPUT
+          echo "body=$(echo '${{ github.event.release.body }}' | base64 -w0)" >> $GITHUB_OUTPUT
+
+      - name: 🧪 Check if body follows Conventional Commits format
+        id: check
+        run: |
+          decoded_body=$(echo "${{ steps.release.outputs.body }}" | base64 -d)
+          if echo "$decoded_body" | grep -qE '^(feat|fix|chore|refactor|perf|style|test|docs)(\([^)]+\))?: .+'; then
+            echo "conventional=true" >> $GITHUB_OUTPUT
+          else
+            echo "conventional=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: 🚧 Exit if not conventional
+        if: steps.check.outputs.conventional == 'false'
+        run: |
+          echo "::notice::Release notes do not follow Conventional Commits. Skipping changelog enhancement."
+          exit 0
+
+      - name: 🧠 Get previous tag
+        id: previous_tag
+        run: |
+          git fetch --tags
+          TAGS=$(git tag --sort=-creatordate)
+          PREV_TAG=$(echo "$TAGS" | grep -A1 "${{ steps.release.outputs.tag }}" | tail -n1)
+          echo "previous_tag=$PREV_TAG" >> $GITHUB_OUTPUT
+
+      - name: 🪄 Generate grouped changelog
+        id: changelog
+        uses: stetind/ppc-github-composite-actions/.github/actions/generate-changelog@main
+        with:
+          repository: ${{ github.repository }}
+          commits: "false"  # optional, since you're using release notes instead of raw commits
+          previous_tag: ${{ steps.previous_tag.outputs.previous_tag }}
+          new_tag: ${{ steps.release.outputs.tag }}
+
+      - name: 📝 Update release description
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release edit "${{ steps.release.outputs.tag }}" \
+            --repo "${{ github.repository }}" \
+            --notes "${{ steps.changelog.outputs.changelog }}"
