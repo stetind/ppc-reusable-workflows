@@ -1,3 +1,12 @@
+# =============================================================================
+# 🚀 AWS Serverless Full Deploy
+# Performs `serverless deploy` followed by optional post-deploy scripts.
+# Inputs:
+#   - stage, region, folder: Same as aws-serverless-deploy
+#   - environment: Optional env file
+#   - post_script: Optional shell script path to run after deploy
+# =============================================================================
+
 name: AWS_Serverless_Deploy
 
 on:

@@ -1,3 +1,11 @@
+# =============================================================================
+# 🧪 Run Tests
+# Executes tests in the project using a defined command and environment.
+# Inputs:
+#   - test_command: The shell command to run tests (e.g. npm test)
+#   - env_file: Optional .env file to source before running tests
+# =============================================================================
+
 name: Jest tests
 
 on:

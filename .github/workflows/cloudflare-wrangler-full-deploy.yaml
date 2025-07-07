@@ -1,3 +1,12 @@
+# =============================================================================
+# ☁️ Cloudflare Full Wrangler Deploy
+# Wrapper around Wrangler deploy that also sets up secrets and environment config.
+# Inputs:
+#   - wrangler_environment
+#   - secrets
+#   - post_script: Optional post-deploy script
+# =============================================================================
+
 name: Cloudflare_Deploy
 
 on:
