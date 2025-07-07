@@ -1,0 +1,118 @@
+# =============================================================================
+# 🚀 Auto Release Based on Conventional Commits
+#
+# Reusable workflow to automatically create a GitHub release:
+# - Detects semantic version bump from conventional commits
+# - Computes new version (unless overridden with input)
+# - Generates changelog from commits
+# - Publishes a GitHub Release (stable or prerelease)
+#
+# Inputs:
+#   - tag (optional): Use a fixed version (skips bump logic)
+#   - prerelease (optional): "beta", "rc", or empty
+#   - force (optional): Force release even with no new commits
+#   - branch (optional): Target branch (default: current ref)
+#
+# Trigger: `workflow_call`
+# =============================================================================
+
+name: 🚀 Auto Release Based on Conventional Commits
+
+run-name: >-
+  ${{ 
+    format(
+      '`{0}` Release ({1}{2})', 
+      github.event.inputs.prerelease && github.event.inputs.prerelease != '' && github.event.inputs.prerelease != 'none' && 'Staging' || 'PRODUCTION', 
+      github.event.inputs.tag || 'latest',
+      github.event.inputs.prerelease && github.event.inputs.prerelease != '' && github.event.inputs.prerelease != 'none' && format(', Pre-release: {0}', github.event.inputs.prerelease) || ''
+    ) 
+  }}
+
+on:
+  workflow_call:
+    inputs:
+      tag:
+        description: 'Optional tag version (e.g., v1.0.0). Leave empty for the latest tag.'
+        required: false
+        type: string
+      new_tag:
+        description: 'Optional tag version (e.g., v1.0.0).'
+        required: false
+        type: string
+        default: ''
+      prerelease:
+        description: 'Optional prerelease identifier (e.g., beta, rc). Leave empty for stable.'
+        required: false
+        type: string
+      branch:
+        required: false
+        type: string
+        default: ${{ github.ref_name }}
+
+jobs:
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: ⬇️ Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
+          fetch-depth: 0
+
+      - name: 🏷️ Select tag
+        id: select_tag
+        uses: stetind/ppc-github-composite-actions/.github/actions/get-latest-tag@main
+        with:
+          tag: ${{ github.event.inputs.tag }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🧪 Generate changelog
+        id: changelog
+        uses: stetind/ppc-github-composite-actions/.github/actions/generate-changelog-by-tag@main
+        with:
+          previous_tag: ${{ steps.select_tag.outputs.selected_tag }}
+          new_tag: ${{ inputs.new_tag }}
+          repository: ${{ github.repository }}
+
+      - name: 📦 Check if release exists
+        id: check_release_exists
+        run: |
+          release_exists=$(gh release view ${{ steps.changelog.outputs.new_tag }} --json name --jq ".name" || echo "not_found")
+          if [[ "$release_exists" != "not_found" ]]; then
+            echo "::error ::Release with tag ${{ steps.changelog.outputs.new_tag }} already exists. Exiting."
+            exit 1
+          else
+            echo "::notice ::No existing release found, proceeding with release creation."
+          fi
+
+      - name: 📤 Create GitHub Release
+        if: steps.changelog.outputs.has_changes == 'true' && steps.check_release_exists.outcome == 'success'
+        uses: stetind/ppc-github-composite-actions/.github/actions/create-github-release@main
+        with:
+          version: ${{ steps.changelog.outputs.new_tag }}
+          changelog: ${{ steps.changelog.outputs.changelog }}
+          prerelease: ${{ inputs.prerelease != '' && inputs.prerelease != 'none' }}
+          target_branch: ${{ inputs.branch }}
+          draft: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 📟 Final Summary
+        if: steps.changelog.outputs.proceed == 'true' && steps.check_release_exists.outcome == 'success'
+        run: |
+          new_version="${{ steps.version.outputs.new_version }}"
+          repo="${{ github.repository }}"
+          release_url="https://github.com/${repo}/releases/tag/${new_version}"
+          
+          echo "::notice ::📆 Release Summary"
+          echo "::notice ::🔖 Tag: $new_version"
+          if [[ "${{ inputs.prerelease }}" != "" && "${{ inputs.prerelease }}" != "none" ]]; then
+            echo "::notice ::🚧 Pre-release: ${{ inputs.prerelease }}"
+          else
+            echo "::notice ::✅ Production Release"
+          fi
+          echo "::notice ::🔗 URL: $release_url"
+          echo "::notice ::🎉 Release successfully created!"
