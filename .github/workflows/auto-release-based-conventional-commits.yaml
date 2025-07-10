@@ -48,6 +48,10 @@ on:
         required: false
         type: string
         default: ${{ github.ref_name }}
+      draft:
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   release:
@@ -96,7 +100,7 @@ jobs:
           changelog: ${{ steps.changelog.outputs.changelog }}
           prerelease: ${{ inputs.prerelease != '' && inputs.prerelease != 'none' }}
           target_branch: ${{ inputs.branch }}
-          draft: true
+          draft: ${{ inputs.draft }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
