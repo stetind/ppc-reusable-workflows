@@ -1,0 +1,82 @@
+# ============================================================================
+# 🚀 Run Release from Branch
+#
+# This workflow is triggered when the `releases` branch is updated.
+# It reads metadata from `.release-meta.json`, then delegates to the
+# reusable release workflow to publish the release.
+#
+# This file supports the two-stage release flow:
+#   1. Prepare: Generates `.release-meta.json` with the new version.
+#   2. Release: This workflow consumes that metadata to trigger release.
+#
+# Inputs:
+#   - .release-meta.json must exist in the repo and include:
+#       - previous_tag: Tag to compare from
+#       - new_tag: Tag to be released
+#       - prerelease: Optional prerelease identifier
+#
+# Requires:
+#   - Proper setup of the reusable workflow at:
+#     `stetind/ppc-reusable-workflows/.github/workflows/auto-release-based-conventional-commits.yaml`
+#
+# Usage:
+#   Push to the `releases` branch with a valid `.release-meta.json` file.
+# ============================================================================
+
+name: 🚀 Run Release from Branch
+
+on:
+  push:
+    branches:
+      - releases
+
+jobs:
+  read_metadata_and_delegate:
+    name: Read Metadata & Trigger Reusable Release Workflow
+    runs-on: ubuntu-latest
+    outputs:
+      previous_tag: ${{ steps.read_meta.outputs.previous_tag }}
+      new_tag: ${{ steps.read_meta.outputs.new_tag }}
+      prerelease: ${{ steps.read_meta.outputs.prerelease }}
+    steps:
+      - name: ⬇️ Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🔍 Read .release-meta.json
+        id: read_meta
+        run: |
+          if [ ! -f .release-meta.json ]; then
+            echo "::error ::.release-meta.json file not found!"
+            exit 1
+          fi
+
+          PREVIOUS_TAG=$(jq -r '.previous_tag' .release-meta.json)
+          NEW_TAG=$(jq -r '.new_tag' .release-meta.json)
+          PRERELEASE=$(jq -r '.prerelease' .release-meta.json)
+
+          echo "previous_tag=$PREVIOUS_TAG" >> $GITHUB_OUTPUT
+          echo "new_tag=$NEW_TAG" >> $GITHUB_OUTPUT
+          echo "prerelease=$PRERELEASE" >> $GITHUB_OUTPUT
+
+      - name: 📟 Final Summary
+        if: always()
+        run: |
+          previous_tag="${{ steps.read_meta.outputs.previous_tag }}"
+          new_tag="${{ steps.read_meta.outputs.new_tag }}"
+          prerelease="${{ steps.read_meta.outputs.prerelease }}"
+          
+          echo "::notice ::📆 Meta Data"
+          echo "::notice ::🚧 Previous Tag: $previous_tag"
+          echo "::notice ::🚧 New Tag: $new_tag"
+          echo "::notice ::🚧 Pre-release: $prerelease"
+
+  call_reusable_release:
+    name: Final Release
+    needs: read_metadata_and_delegate
+    uses: stetind/ppc-reusable-workflows/.github/workflows/auto-release-based-conventional-commits.yaml@releases
+    secrets: inherit
+    with:
+      tag: ${{ needs.read_metadata_and_delegate.outputs.previous_tag }}
+      prerelease: ${{ needs.read_metadata_and_delegate.outputs.prerelease }}

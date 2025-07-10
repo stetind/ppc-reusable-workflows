@@ -1,3 +1,10 @@
+# =============================================================================
+# 🔁 SwaggerHub Sync
+# Uploads a Swagger/OpenAPI definition to SwaggerHub.
+# Inputs:
+#   - api, owner, version, file: Same as swaggerHub-generate-sync
+# =============================================================================
+
 name: SwaggerHub
 run-name: >-
   ${{

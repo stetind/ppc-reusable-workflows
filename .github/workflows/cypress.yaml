@@ -1,3 +1,12 @@
+# =============================================================================
+# 🧪 Cypress E2E Tests
+# Runs Cypress tests using a defined browser and base URL.
+# Inputs:
+#   - base_url: Base URL to test against
+#   - browser: Which browser to use (e.g. chrome, electron)
+#   - record: Enable Cypress dashboard recording
+# =============================================================================
+
 name: Cypress Test
 on:
   workflow_call:

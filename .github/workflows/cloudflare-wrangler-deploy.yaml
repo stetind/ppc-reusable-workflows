@@ -1,3 +1,11 @@
+# =============================================================================
+# ☁️ Cloudflare Wrangler Deploy
+# Deploys a Cloudflare Worker using Wrangler.
+# Inputs:
+#   - wrangler_environment: Target environment (e.g. production, staging)
+#   - secrets: Optional JSON object with key-value secrets to be injected
+# =============================================================================
+
 name: Cloudflare_Deploy
 
 on:

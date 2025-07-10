@@ -1,3 +1,13 @@
+# =============================================================================
+# 🚀 AWS Serverless Deploy
+# Deploys a Serverless Framework project using AWS credentials and environment configuration.
+# Inputs:
+#   - stage: Target stage (e.g. dev, prod)
+#   - region: AWS region
+#   - folder: Directory of the service (default is current directory)
+#   - environment: Optional .env file to load environment variables
+# =============================================================================
+
 name: AWS_Serverless_Deploy
 
 on:

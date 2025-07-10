@@ -1,0 +1,93 @@
+# =============================================================================
+# 🚧 Prepare Reusable Release
+#
+# This workflow prepares a new release:
+# - Computes the next semantic version based on commits
+# - Replaces `__VERSION__` placeholders in workflows/files
+# - Writes a `.release-meta.json` file with previous/new tags and prerelease info
+# - Commits and force-pushes to the `releases` branch
+#
+# Inputs:
+#   - tag (optional): Use a specific version tag instead of computing
+#   - prerelease (optional): e.g., "beta", "rc", or empty for stable
+#
+# Trigger: workflow_dispatch
+# =============================================================================
+
+name: 🚧 Prepare Reusable Release
+run-name: 🚧 Prepare Reusable Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Optional tag version (e.g., v1.0.0). Leave empty for the latest tag.'
+        required: false
+        type: string
+      prerelease:
+        description: 'Optional prerelease identifier (e.g., beta, rc). Leave empty for stable.'
+        required: false
+        type: string
+
+env:
+  TEMP_BRANCH: releases
+
+jobs:
+  prepare:
+    name: Prepare & Push
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: ⬇️ Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.WORKFLOW_TOKEN }}
+          fetch-depth: 0
+
+      - name: 🏷️ Select tag
+        id: select_tag
+        uses: stetind/ppc-github-composite-actions/.github/actions/get-latest-tag@main
+        with:
+          tag: ${{ github.event.inputs.tag }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🧪 Generate changelog
+        id: changelog
+        uses: stetind/ppc-github-composite-actions/.github/actions/generate-changelog-by-tag@main
+        with:
+          previous_tag: ${{ steps.select_tag.outputs.selected_tag }}
+          repository: ${{ github.repository }}
+          new_tag: ''
+
+      - name: Replace __VERSION__ placeholders
+        if: steps.changelog.outputs.has_changes != ''
+        run: |
+          echo "Replacing version with ${{ steps.changelog.outputs.new_tag }}"
+          find .github/workflows -type f -name "*.yaml" \
+            -exec sed -i "s|__VERSION__|${{ steps.changelog.outputs.new_tag }}|g" {} +
+
+      - name: 💾 Write release metadata
+        if: steps.changelog.outputs.has_changes != ''
+        run: |
+          cat <<EOF > .release-meta.json
+          {
+            "previous_tag": "${{ steps.select_tag.outputs.selected_tag }}",
+            "new_tag": "${{ steps.changelog.outputs.new_tag }}",
+            "prerelease": "${{ github.event.inputs.prerelease || '' }}"
+          }
+          EOF
+
+      - name: Commit & Push to ${{ env.TEMP_BRANCH }}
+        if: steps.changelog.outputs.has_changes != ''
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git checkout -B ${{ env.TEMP_BRANCH }}
+          git add .github/workflows/*.yaml
+          git add .github/*.yaml
+          git add .release-meta.json
+          git add README.md
+          git commit -m "Prepare release for version ${{ steps.changelog.outputs.new_tag }}"
+          git push origin ${{ env.TEMP_BRANCH }} --force

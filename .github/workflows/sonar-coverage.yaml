@@ -1,14 +1,15 @@
+# =============================================================================
+# 📊 SonarCloud Coverage
+# Runs code analysis and coverage reporting using SonarCloud.
+# Inputs:
+#   - sonar_token: Required SonarCloud token
+#   - project_key: SonarCloud project key
+#   - organization: SonarCloud organization
+# =============================================================================
+
 name: SonarCloud Coverage
 
 on:
-  push:
-    branches:
-      - main
-      - master
-      - develop
-      - 'releases/**'
-  pull_request:
-    types: [ opened, synchronize, reopened ]
   workflow_call:
     secrets:
       NPM_TOKEN:
