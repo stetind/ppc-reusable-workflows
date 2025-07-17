@@ -30,6 +30,17 @@ run-name: >-
 
 on:
   workflow_call:
+    outputs:
+      tag:
+        description: "The version name"
+        value: ${{ steps.version.outputs.new_version }}
+      prerelease:
+        description: "Describe if the version is prerelease or not"
+        value: ${{ inputs.prerelease != '' && inputs.prerelease != 'none' }}
+      has_changes:
+        description: "Describe if the release has changes or not"
+        value: ${{ steps.changelog.outputs.has_changes }}
+
     inputs:
       tag:
         description: 'Optional tag version (e.g., v1.0.0). Leave empty for the latest tag.'
