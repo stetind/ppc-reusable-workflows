@@ -89,3 +89,23 @@ jobs:
       prerelease: ${{ needs.read_metadata_and_delegate.outputs.prerelease }}
       runner: ${{ vars.DEFAULT_RUNNER || 'ubuntu-latest' }}
       job_container: ${{ vars.DEFAULT_NODE_CONTAINER || 'node:22.14' }}
+
+  clear:
+    name: Clear Repository
+    needs: call_reusable_release
+    runs-on: ${{ inputs.runner }}
+    container: ${{ inputs.job_container }}
+
+    steps:
+      - name: ⬇️ Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          fetch-depth: 0
+
+      - name: 💀 Delete release Branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          git branch -D release
