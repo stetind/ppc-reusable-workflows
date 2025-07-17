@@ -114,4 +114,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           
-          git branch -D releases
+          git branch -D origin/releases
+          echo "::notice ::Delete branch : `origin/releases`"
