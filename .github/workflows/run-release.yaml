@@ -92,7 +92,7 @@ jobs:
 
   clear:
     name: Clear Repository
-    needs: call_reusable_release
+    if: "success() || failure() "
     runs-on: ${{ vars.DEFAULT_RUNNER || 'ubuntu-latest' }}
     container: ${{ vars.DEFAULT_NODE_CONTAINER || 'node:22.14' }}
 
