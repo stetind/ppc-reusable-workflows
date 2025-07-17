@@ -100,19 +100,19 @@ jobs:
       - name: ⬇️ Checkout repository
         uses: actions/checkout@v4
         with:
+          set-safe-directory: true
           ref: ${{ github.event.repository.default_branch }}
           token: ${{ secrets.WORKFLOW_TOKEN }}
           fetch-depth: 0
-      - name: Install Git in container
-        run: |
-          apt-get update && apt-get install git
-          # one time fix to avoid permission problems later on
-          git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
       - name: 💀 Delete `releases` Branch
+        id: delete_releases
+        uses: dawidd6/action-delete-branch@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branches: releases
+
+      - name: 📟 Summary
+        if: ${{ success() }}
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          
-          git branch -D origin/releases
-          echo "::notice ::Delete branch : `origin/releases`"
+          echo "::notice ::Branch : `origin/releases` has been deleted"
