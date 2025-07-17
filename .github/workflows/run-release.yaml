@@ -94,7 +94,7 @@ jobs:
     name: Clear Repository
     needs: call_reusable_release
     runs-on: ${{ vars.DEFAULT_RUNNER || 'ubuntu-latest' }}
-    container: ${{ 'ubuntu:latest' }}
+    container: ${{ vars.DEFAULT_NODE_CONTAINER || 'node:22.14' }}
 
     steps:
       - name: ⬇️ Checkout repository
@@ -105,8 +105,7 @@ jobs:
           fetch-depth: 0
       - name: Install Git in container
         run: |
-          apk update
-          apk add git
+          apt-get update && apt-get install git
           # one time fix to avoid permission problems later on
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
