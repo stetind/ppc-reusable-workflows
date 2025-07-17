@@ -97,14 +97,6 @@ jobs:
     container: ${{ vars.DEFAULT_NODE_CONTAINER || 'node:22.14' }}
 
     steps:
-      - name: ⬇️ Checkout repository
-        uses: actions/checkout@v4
-        with:
-          set-safe-directory: true
-          ref: ${{ github.event.repository.default_branch }}
-          token: ${{ secrets.WORKFLOW_TOKEN }}
-          fetch-depth: 0
-
       - name: 💀 Delete `releases` Branch
         id: delete_releases
         uses: dawidd6/action-delete-branch@v3
