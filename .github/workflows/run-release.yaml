@@ -109,9 +109,9 @@ jobs:
           # one time fix to avoid permission problems later on
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
-      - name: 💀 Delete release Branch
+      - name: 💀 Delete `releases` Branch
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           
-          git branch -D release
+          git branch -D releases
