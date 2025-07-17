@@ -27,7 +27,7 @@ on:
 
 jobs:
   eslint:
-    uses: stetind/ppc-reusable-workflows/.github/workflows/eslint.yaml@__VERSION__
+    uses: stetind/ppc-reusable-workflows/.github/workflows/eslint.yaml@v8.1.0
     secrets: inherit
     with:
       job_container: ${{ inputs.job_container }}
@@ -35,7 +35,7 @@ jobs:
 
   testing:
     needs: eslint
-    uses: stetind/ppc-reusable-workflows/.github/workflows/tests.yaml@__VERSION__
+    uses: stetind/ppc-reusable-workflows/.github/workflows/tests.yaml@v8.1.0
     secrets: inherit
     with:
       job_container: ${{ inputs.job_container }}

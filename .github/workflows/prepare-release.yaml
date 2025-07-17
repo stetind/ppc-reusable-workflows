@@ -3,7 +3,7 @@
 #
 # This workflow prepares a new release:
 # - Computes the next semantic version based on commits
-# - Replaces `__VERSION__` placeholders in workflows/files
+# - Replaces `v8.1.0` placeholders in workflows/files
 # - Writes a `.release-meta.json` file with previous/new tags and prerelease info
 # - Commits and force-pushes to the `releases` branch
 #
@@ -61,12 +61,12 @@ jobs:
           repository: ${{ github.repository }}
           new_tag: ''
 
-      - name: Replace __VERSION__ placeholders
+      - name: Replace v8.1.0 placeholders
         if: steps.changelog.outputs.has_changes != ''
         run: |
           echo "Replacing version with ${{ steps.changelog.outputs.new_tag }}"
           find .github/workflows -type f -name "*.yaml" \
-            -exec sed -i "s|__VERSION__|${{ steps.changelog.outputs.new_tag }}|g" {} +
+            -exec sed -i "s|v8.1.0|${{ steps.changelog.outputs.new_tag }}|g" {} +
 
       - name: 💾 Write release metadata
         if: steps.changelog.outputs.has_changes != ''
