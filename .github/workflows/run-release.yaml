@@ -31,14 +31,14 @@ on:
       - releases
 
 env:
-  runner: ${{ vars.default_runner }}
-  job_container: ${{ vars.default_node_container }}
+  RUNNER: ${{ vars.default_runner }}
+  CONTAINER: ${{ vars.default_node_container }}
 
 jobs:
   read_metadata_and_delegate:
     name: Read Metadata & Trigger Reusable Release Workflow
-    runs-on: ${{ env.runner }}
-    container: ${{ env.job_container }}
+    runs-on: $RUNNER
+    container: $CONTAINER
 
     outputs:
       previous_tag: ${{ steps.read_meta.outputs.previous_tag }}
@@ -87,5 +87,5 @@ jobs:
     with:
       tag: ${{ needs.read_metadata_and_delegate.outputs.previous_tag }}
       prerelease: ${{ needs.read_metadata_and_delegate.outputs.prerelease }}
-      runner: ${{ env.runner }}
-      job_container: ${{ env.job_container }}
+      runner: $RUNNER
+      job_container: $CONTAINER
