@@ -131,7 +131,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 📟 Final Summary
-        if: steps.changelog.outputs.proceed == 'true' && steps.check_release_exists.outcome == 'success'
+        if: success()
         run: |
           new_version="${{ steps.changelog.outputs.new_tag }}"
           repo="${{ github.repository }}"
