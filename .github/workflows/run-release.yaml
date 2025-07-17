@@ -103,7 +103,16 @@ jobs:
           ref: ${{ github.event.repository.default_branch }}
           token: ${{ secrets.WORKFLOW_TOKEN }}
           fetch-depth: 0
+      - name: Install Git in container
+        run: |
+          apk update
+          apk add git
+          # one time fix to avoid permission problems later on
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
       - name: 💀 Delete release Branch
         run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
           git branch -D release
