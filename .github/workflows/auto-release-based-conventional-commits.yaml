@@ -33,13 +33,13 @@ on:
     outputs:
       tag:
         description: "The version name"
-        value: ${{ steps.version.outputs.new_version }}
+        value: ${{ jobs.release.outputs.new_version }}
       prerelease:
         description: "Describe if the version is prerelease or not"
-        value: ${{ inputs.prerelease != '' && inputs.prerelease != 'none' }}
+        value: ${{ jobs.release.outputs.prerelease }}
       has_changes:
         description: "Describe if the release has changes or not"
-        value: ${{ steps.changelog.outputs.has_changes }}
+        value: ${{ jobs.release.outputs.has_changes }}
 
     inputs:
       tag:
@@ -79,6 +79,10 @@ jobs:
     name: Create Release
     runs-on: ${{ inputs.runner }}
     container: ${{ inputs.job_container }}
+    outputs:
+      tag: ${{ jobs.version.outputs.new_version }}
+      prerelease: ${{ inputs.prerelease != '' && inputs.prerelease != 'none' }}
+      has_changes: ${{ steps.changelog.outputs.has_changes }}
 
     steps:
       - name: ⬇️ Checkout repository
