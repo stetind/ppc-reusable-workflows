@@ -44,10 +44,6 @@ jobs:
           token: ${{ secrets.WORKFLOW_TOKEN }}
           fetch-depth: 0
 
-      - name: 🔧 Install gh
-        shell: bash
-        run: apt-get update && apt-get install -y -f gh
-
       - name: 🏷️ Select tag
         id: select_tag
         uses: stetind/ppc-github-composite-actions/.github/actions/get-latest-tag@main
