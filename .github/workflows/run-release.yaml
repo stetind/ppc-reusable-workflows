@@ -33,16 +33,23 @@ on:
 jobs:
   read_metadata_and_delegate:
     name: Read Metadata & Trigger Reusable Release Workflow
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.DEFAULT_RUNNER || 'ubuntu-latest' }}
+    container: ${{ vars.DEFAULT_NODE_CONTAINER || 'node:22.14' }}
+
     outputs:
       previous_tag: ${{ steps.read_meta.outputs.previous_tag }}
       new_tag: ${{ steps.read_meta.outputs.new_tag }}
       prerelease: ${{ steps.read_meta.outputs.prerelease }}
+
     steps:
       - name: ⬇️ Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      - name: 🔧 Install jq
+        shell: bash
+        run: apt-get update && apt-get install -y -f jq
 
       - name: 🔍 Read .release-meta.json
         id: read_meta
@@ -80,3 +87,5 @@ jobs:
     with:
       tag: ${{ needs.read_metadata_and_delegate.outputs.previous_tag }}
       prerelease: ${{ needs.read_metadata_and_delegate.outputs.prerelease }}
+      runner: ${{ vars.DEFAULT_RUNNER || 'ubuntu-latest' }}
+      job_container: ${{ vars.DEFAULT_NODE_CONTAINER || 'node:22.14' }}
