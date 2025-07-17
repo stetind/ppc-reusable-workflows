@@ -80,7 +80,7 @@ jobs:
     runs-on: ${{ inputs.runner }}
     container: ${{ inputs.job_container }}
     outputs:
-      tag: ${{ steps.changelog.outputs.tag }}
+      tag: ${{ steps.changelog.outputs.new_tag }}
       prerelease: ${{ inputs.prerelease != '' && inputs.prerelease != 'none' }}
       has_changes: ${{ steps.changelog.outputs.has_changes }}
 
@@ -110,9 +110,9 @@ jobs:
       - name: 📦 Check if release exists
         id: check_release_exists
         run: |
-          release_exists=$(gh release view ${{ steps.changelog.outputs.tag }} --json name --jq ".name" || echo "not_found")
+          release_exists=$(gh release view ${{ steps.changelog.outputs.new_tag }} --json name --jq ".name" || echo "not_found")
           if [[ "$release_exists" != "not_found" ]]; then
-            echo "::error ::Release with tag ${{ steps.changelog.outputs.tag }} already exists. Exiting."
+            echo "::error ::Release with tag ${{ steps.changelog.outputs.new_tag }} already exists. Exiting."
             exit 1
           else
             echo "::notice ::No existing release found, proceeding with release creation."
@@ -122,7 +122,7 @@ jobs:
         if: steps.changelog.outputs.has_changes == 'true' && steps.check_release_exists.outcome == 'success'
         uses: stetind/ppc-github-composite-actions/.github/actions/create-github-release@main
         with:
-          version: ${{ steps.changelog.outputs.tag }}
+          version: ${{ steps.changelog.outputs.new_tag }}
           changelog: ${{ steps.changelog.outputs.changelog }}
           prerelease: ${{ inputs.prerelease != '' && inputs.prerelease != 'none' }}
           target_branch: ${{ inputs.branch }}
@@ -133,7 +133,7 @@ jobs:
       - name: 📟 Final Summary
         if: success()
         run: |
-          new_version="${{ steps.changelog.outputs.tag }}"
+          new_version="${{ steps.changelog.outputs.new_tag }}"
           repo="${{ github.repository }}"
           release_url="https://github.com/${repo}/releases/tag/${new_version}"
           
