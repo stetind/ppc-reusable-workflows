@@ -31,14 +31,14 @@ on:
       - releases
 
 env:
-  RUNNER: ${{ vars.default_runner }}
-  CONTAINER: ${{ vars.default_node_container }}
+  ENV_RUNNER: ${{ vars.DEFAULT_RUNNER || 'ubuntu-latest' }}
+  ENV_CONTAINER: ${{ vars.DEFAULT_NODE_CONTAINER || 'node:22.14' }}
 
 jobs:
   read_metadata_and_delegate:
     name: Read Metadata & Trigger Reusable Release Workflow
-    runs-on: $RUNNER
-    container: $CONTAINER
+    runs-on: $ENV_RUNNER
+    container: $ENV_CONTAINER
 
     outputs:
       previous_tag: ${{ steps.read_meta.outputs.previous_tag }}
@@ -87,5 +87,5 @@ jobs:
     with:
       tag: ${{ needs.read_metadata_and_delegate.outputs.previous_tag }}
       prerelease: ${{ needs.read_metadata_and_delegate.outputs.prerelease }}
-      runner: $RUNNER
-      job_container: $CONTAINER
+      runner: $ENV_RUNNER
+      job_container: $ENV_CONTAINER
