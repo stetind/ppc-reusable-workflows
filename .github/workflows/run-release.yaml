@@ -49,7 +49,7 @@ jobs:
 
       - name: 🔧 Install jq
         shell: bash
-        run: sudo apt-get update && sudo apt-get install -y -f jq
+        run: apt-get update && apt-get install -y -f jq
 
       - name: 🔍 Read .release-meta.json
         id: read_meta
