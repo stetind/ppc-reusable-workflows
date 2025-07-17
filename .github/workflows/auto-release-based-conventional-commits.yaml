@@ -30,6 +30,17 @@ run-name: >-
 
 on:
   workflow_call:
+    outputs:
+      tag:
+        description: "The version name"
+        value: ${{ jobs.release.outputs.new_version }}
+      prerelease:
+        description: "Describe if the version is prerelease or not"
+        value: ${{ jobs.release.outputs.prerelease }}
+      has_changes:
+        description: "Describe if the release has changes or not"
+        value: ${{ jobs.release.outputs.has_changes }}
+
     inputs:
       tag:
         description: 'Optional tag version (e.g., v1.0.0). Leave empty for the latest tag.'
@@ -68,6 +79,10 @@ jobs:
     name: Create Release
     runs-on: ${{ inputs.runner }}
     container: ${{ inputs.job_container }}
+    outputs:
+      tag: ${{ steps.changelog.outputs.new_tag }}
+      prerelease: ${{ inputs.prerelease != '' && inputs.prerelease != 'none' }}
+      has_changes: ${{ steps.changelog.outputs.has_changes }}
 
     steps:
       - name: ⬇️ Checkout repository
@@ -118,7 +133,7 @@ jobs:
       - name: 📟 Final Summary
         if: steps.changelog.outputs.proceed == 'true' && steps.check_release_exists.outcome == 'success'
         run: |
-          new_version="${{ steps.version.outputs.new_version }}"
+          new_version="${{ steps.changelog.outputs.new_tag }}"
           repo="${{ github.repository }}"
           release_url="https://github.com/${repo}/releases/tag/${new_version}"
           

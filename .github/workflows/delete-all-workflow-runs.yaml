@@ -34,13 +34,17 @@ on:
         description: 'The name of the workflow to delete runs for (e.g., "CI Workflow")'
         required: false
         type: string
-        default: 'cancelled'
+
   workflow_dispatch:
     inputs:
       status:
         description: 'Optional status filter (e.g., completed, action_required, cancelled, failure, neutral, skipped, stale, success, timed_out, queued, requested, waiting, pending, etc.)'
         type: string
         required: false
+      workflow_name:
+        description: 'The name of the workflow to delete runs for (e.g., "CI Workflow")'
+        required: false
+        type: string
 
 jobs:
   cleanup:

@@ -89,3 +89,22 @@ jobs:
       prerelease: ${{ needs.read_metadata_and_delegate.outputs.prerelease }}
       runner: ${{ vars.DEFAULT_RUNNER || 'ubuntu-latest' }}
       job_container: ${{ vars.DEFAULT_NODE_CONTAINER || 'node:22.14' }}
+
+  clear:
+    name: Clear Repository
+    needs: call_reusable_release
+    runs-on: ${{ vars.DEFAULT_RUNNER || 'ubuntu-latest' }}
+    container: ${{ vars.DEFAULT_NODE_CONTAINER || 'node:22.14' }}
+
+    steps:
+      - name: 💀 Delete `releases` Branch
+        id: delete_releases
+        uses: dawidd6/action-delete-branch@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branches: releases
+
+      - name: 📟 Summary
+        if: ${{ success() }}
+        run: |
+          echo "::notice ::Branch : `origin/releases` has been deleted"
