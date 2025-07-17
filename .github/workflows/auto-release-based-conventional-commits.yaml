@@ -104,7 +104,7 @@ jobs:
         uses: stetind/ppc-github-composite-actions/.github/actions/generate-changelog-by-tag@main
         with:
           previous_tag: ${{ steps.select_tag.outputs.selected_tag }}
-          new_tag: ${{ inputs.tag }}
+          new_tag: ${{ inputs.new_tag }}
           repository: ${{ github.repository }}
 
       - name: 📦 Check if release exists
