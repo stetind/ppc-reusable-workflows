@@ -30,14 +30,21 @@ on:
     branches:
       - releases
 
+env:
+  runner: ${{ vars.default_runner }}
+  job_container: ${{ vars.default_node_container }}
+
 jobs:
   read_metadata_and_delegate:
     name: Read Metadata & Trigger Reusable Release Workflow
-    runs-on: ubuntu-latest
+    runs-on: ${{ env.runner }}
+    container: ${{ env.job_container }}
+
     outputs:
       previous_tag: ${{ steps.read_meta.outputs.previous_tag }}
       new_tag: ${{ steps.read_meta.outputs.new_tag }}
       prerelease: ${{ steps.read_meta.outputs.prerelease }}
+
     steps:
       - name: ⬇️ Checkout repository
         uses: actions/checkout@v4
@@ -80,3 +87,5 @@ jobs:
     with:
       tag: ${{ needs.read_metadata_and_delegate.outputs.previous_tag }}
       prerelease: ${{ needs.read_metadata_and_delegate.outputs.prerelease }}
+      runner: ${{ env.runner }}
+      job_container: ${{ env.job_container }}
