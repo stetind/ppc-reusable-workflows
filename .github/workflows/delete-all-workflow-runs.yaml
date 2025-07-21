@@ -1,30 +1,3 @@
-# =============================================================================
-# 🧹 Delete GitHub Actions Workflow Runs
-#
-# Description:
-#   Bulk deletion tool for GitHub Actions workflow runs with flexible filtering.
-#
-# Key Features:
-#   • Selective deletion by workflow name
-#   • Status-based filtering
-#   • Skip protection for current run
-#   • Paginated processing for large repositories
-#
-# Inputs:
-#   • workflow_name: Target specific workflow
-#   • status: Filter by run status (completed, cancelled, etc.)
-#   • runner: Custom runner selection
-#   • job_container: Docker container for the action
-#
-# Requirements:
-#   • WORKFLOW_TOKEN with workflow delete permissions
-#   • GitHub CLI authentication
-#
-# Triggers:
-#   • Manual (workflow_dispatch)
-#   • Reusable workflow (workflow_call)
-# =============================================================================
-
 name: 🧹 Delete All Workflow Runs
 
 on:
@@ -126,8 +99,17 @@ jobs:
     container: ${{ inputs.job_container }}
 
     steps:
-      - name: Install GH
-        run: apt-get update && apt-get install -y -f gh
+      - name: 📦 Install dependencies
+        run: |
+          echo "📥 Updating package lists..."
+          apt-get update && \
+          echo "⚙️ Installing required packages..." && \
+          apt-get install -y \
+            jq \
+            bash \
+            curl \
+            gh && \
+          echo "✅ Dependencies installed successfully!"
 
       - name: 🔐 Authenticate with GitHub CLI
         run: echo "${{ secrets.WORKFLOW_TOKEN }}" | gh auth login --with-token
