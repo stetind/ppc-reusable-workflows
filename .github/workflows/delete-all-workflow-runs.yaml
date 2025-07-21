@@ -52,7 +52,21 @@ on:
   workflow_dispatch:
     inputs:
       status:
-        description: 'Status filter for workflow runs'
+        description: |
+          Optional status filter for workflow runs. Available options:
+          • completed - All completed runs
+          • action_required - Runs that require action
+          • cancelled - Manually cancelled runs
+          • failure - Failed runs
+          • neutral - Runs with neutral outcome
+          • skipped - Skipped runs
+          • stale - Stale runs
+          • success - Successful runs
+          • timed_out - Runs that exceeded time limit
+          • queued - Queued runs
+          • requested - Requested runs
+          • waiting - Waiting runs
+          • pending - Pending runs
         type: choice
         required: false
         default: 'cancelled'
