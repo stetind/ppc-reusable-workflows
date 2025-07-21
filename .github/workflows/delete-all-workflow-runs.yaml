@@ -126,12 +126,15 @@ jobs:
     container: ${{ inputs.job_container }}
 
     steps:
+      - name: Install GH
+        run: apt-get update && apt-get install -y -f gh
+
       - name: 🔐 Authenticate with GitHub CLI
         run: echo "${{ secrets.WORKFLOW_TOKEN }}" | gh auth login --with-token
 
       - name: 🧼 Delete all workflow runs
         env:
-          GH_TOKEN: ${{ secrets.WORKFLOW_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           echo "🚀 Fetching and deleting all workflow runs..."
 
