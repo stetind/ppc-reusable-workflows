@@ -18,6 +18,7 @@
 # Outputs:
 #   - tag: The version name
 #   - prerelease: Whether this is a prerelease
+#   - prerelease_suffix: The prerelease suffix
 #   - has_changes: Whether there are changes to release
 #
 # Trigger: workflow_call
@@ -44,6 +45,9 @@ on:
       prerelease:
         description: "Describe if the version is prerelease or not"
         value: ${{ jobs.release.outputs.prerelease }}
+      prerelease_suffix:
+        description: "The prerelease suffix"
+        value: ${{ jobs.release.outputs.prerelease_suffix }}
       has_changes:
         description: "Describe if the release has changes or not"
         value: ${{ jobs.release.outputs.has_changes }}
@@ -89,6 +93,7 @@ jobs:
     outputs:
       tag: ${{ steps.changelog.outputs.new_tag }}
       prerelease: ${{ inputs.prerelease != '' && inputs.prerelease != 'none' }}
+      prerelease_suffix: ${{ inputs.prerelease }}
       has_changes: ${{ steps.changelog.outputs.has_changes }}
 
     steps:
