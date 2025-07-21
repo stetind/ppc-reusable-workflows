@@ -11,15 +11,19 @@ name: Npm - Publish
 on:
   workflow_call:
     inputs:
+      release_version_name:
+        description: The name of the version that will be used to publish release on NPM.
+        type: string
+        required: true
+      is_dev_release:
+        description: Mark the publish as dev or not.
+        type: boolean
+        default: false
+        required: false
       dev_release_tag_name:
         description: The name of the tag that will be used to publish a dev release on NPM.
         type: string
         default: dev
-        required: false
-      release_version_name:
-        description: The name of the version that will be used to publish release on NPM.
-        type: string
-        default: ${{ github.event.release.tag_name }}
         required: false
       runner:
         description: 'Choose the runner'
@@ -57,13 +61,13 @@ jobs:
           NODE_AUTH_TOKEN: $NPM_TOKEN
 
       - name: 🐱‍🚀 Publish Dev
-        if: "github.event.release.prerelease"
+        if: "inputs.is_dev_release"
         run: npm publish --tag ${{ inputs.dev_release_tag_name }}
         env:
           NODE_AUTH_TOKEN: $NPM_TOKEN
 
       - name: 🐱‍🚀 Publish Release
-        if: "!github.event.release.prerelease"
+        if: "!inputs.is_dev_release"
         run: npm publish
         env:
           NODE_AUTH_TOKEN: $NPM_TOKEN
