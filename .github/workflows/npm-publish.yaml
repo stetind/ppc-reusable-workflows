@@ -1,10 +1,24 @@
 # =============================================================================
 # 📦 NPM Publish
-# Publishes a Node.js package to npm. Designed for use with semantic versioning and GitHub Actions.
+#
+# This workflow publishes Node.js packages to npm registry:
+# - Supports both production and development releases
+# - Handles version updates automatically
+# - Configurable for different environments and runners
+#
 # Inputs:
-#   - npm_token: Required npm access token
-#   - production: Boolean to determine if production publishing (true) or dry-run
+#   - release_version_name: Version for npm package
+#   - is_dev_release: Whether this is a development release
+#   - dev_release_tag_name: Tag for dev releases (default: dev)
+#   - runner: GitHub runner to use (default: ubuntu-latest)
+#   - job_container: Docker container image (default: node:22.14)
+#
+# Required Secrets:
+#   - NPM_TOKEN: npm registry authentication token
+#
+# Trigger: workflow_call
 # =============================================================================
+
 
 name: Npm - Publish
 

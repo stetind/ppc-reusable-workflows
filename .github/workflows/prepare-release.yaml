@@ -1,15 +1,18 @@
 # =============================================================================
 # 🚧 Prepare Reusable Release
 #
-# This workflow prepares a new release:
-# - Computes the next semantic version based on commits
-# - Replaces `__VERSION__` placeholders in workflows/files
-# - Writes a `.release-meta.json` file with previous/new tags and prerelease info
-# - Commits and force-pushes to the `releases` branch
+# This workflow prepares a new release by:
+# - Computing the next semantic version from commits
+# - Replacing __VERSION__ placeholders in workflow files
+# - Creating .release-meta.json with version metadata
+# - Pushing changes to the releases branch
 #
 # Inputs:
-#   - tag (optional): Use a specific version tag instead of computing
-#   - prerelease (optional): e.g., "beta", "rc", or empty for stable
+#   - tag: Optional specific version tag to use
+#   - prerelease: Optional prerelease identifier (beta/rc)
+#
+# Environment:
+#   - TEMP_BRANCH: Branch name for release preparation
 #
 # Trigger: workflow_dispatch
 # =============================================================================

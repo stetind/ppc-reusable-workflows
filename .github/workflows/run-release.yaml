@@ -1,27 +1,22 @@
-# ============================================================================
+# =============================================================================
 # 🚀 Run Release from Branch
 #
-# This workflow is triggered when the `releases` branch is updated.
-# It reads metadata from `.release-meta.json`, then delegates to the
-# reusable release workflow to publish the release.
+# This workflow automates the release process when the `releases` branch updates:
+# - Reads metadata from .release-meta.json
+# - Triggers the reusable release workflow
+# - Cleans up after successful release
 #
-# This file supports the two-stage release flow:
-#   1. Prepare: Generates `.release-meta.json` with the new version.
-#   2. Release: This workflow consumes that metadata to trigger release.
+# Required Files:
+#   - .release-meta.json containing:
+#     - previous_tag: Tag to compare from
+#     - new_tag: Tag to be released
+#     - prerelease: Optional prerelease identifier
 #
-# Inputs:
-#   - .release-meta.json must exist in the repo and include:
-#       - previous_tag: Tag to compare from
-#       - new_tag: Tag to be released
-#       - prerelease: Optional prerelease identifier
+# Dependencies:
+#   - stetind/ppc-reusable-workflows/.github/workflows/auto-release-based-conventional-commits.yaml
 #
-# Requires:
-#   - Proper setup of the reusable workflow at:
-#     `stetind/ppc-reusable-workflows/.github/workflows/auto-release-based-conventional-commits.yaml`
-#
-# Usage:
-#   Push to the `releases` branch with a valid `.release-meta.json` file.
-# ============================================================================
+# Trigger: push (branch: releases)
+# =============================================================================
 
 name: 🚀 Run Release from Branch
 

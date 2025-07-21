@@ -1,10 +1,24 @@
 # =============================================================================
 # ✅ Serverless Validate
-# Validates a Serverless Framework configuration.
+#
+# This workflow validates a Serverless Framework configuration:
+# - Ensures the serverless.yml file is valid
+# - Verifies configuration for specified stage and region
+# - Validates AWS credentials and permissions
+#
 # Inputs:
-#   - folder: Directory containing serverless.yml
-#   - stage: Stage to validate
-#   - region: AWS region
+#   - deploy_environment: Environment to validate (default: staging)
+#   - region: AWS region (default: us-east-1) 
+#   - runner: GitHub runner to use (default: self-hosted)
+#   - job_container: Docker container image (default: node:20.13)
+#
+# Required Secrets:
+#   - NPM_TOKEN
+#   - SERVERLESS_ACCESS_KEY
+#   - AWS_SECRET_ACCESS_KEY
+#   - AWS_ACCESS_KEY_ID
+#
+# Trigger: workflow_call
 # =============================================================================
 
 name: AWS_Serverless_Validate
