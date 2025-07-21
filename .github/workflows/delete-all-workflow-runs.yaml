@@ -134,7 +134,7 @@ jobs:
 
       - name: 🧼 Delete all workflow runs
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.WORKFLOW_TOKEN }}
         run: |
           echo "🚀 Fetching and deleting all workflow runs..."
 
