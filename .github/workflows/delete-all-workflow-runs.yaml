@@ -112,20 +112,22 @@ jobs:
           echo "✅ Dependencies installed successfully!"
 
       - name: 🔐 Authenticate with GitHub CLI
+        shell: bash
         run: echo "${{ secrets.WORKFLOW_TOKEN }}" | gh auth login --with-token
 
       - name: 🧼 Delete all workflow runs
+        shell: bash
         env:
           GH_TOKEN: ${{ secrets.WORKFLOW_TOKEN }}
         run: |
           echo "🚀 Fetching and deleting all workflow runs..."
 
-          current_run_id=${{ github.run_id }}
+          current_run_id="${{ github.run_id }}"
           workflow_name="${{ inputs.workflow_name }}"
           
           # First, let's list all workflows to see the exact name
           echo "📋 Available workflows:"
-          gh api "/repos/${{ github.repository }}/actions/workflows" --jq '.workflows[] | .name'
+          gh api "/repos/${{ github.repository }}/actions/workflows" | jq -r '.workflows[].name'
           
           echo "🚫 Current run ID: $current_run_id (will be skipped)"
           echo "🔍 Targeting workflow: $workflow_name"
@@ -138,14 +140,15 @@ jobs:
             echo "🔄 Fetching page $page..."
 
             url="/repos/${{ github.repository }}/actions/runs?per_page=$per_page&page=$page"
-            if [[ -n "${{ inputs.status }}" ]]; then
+            if [ -n "${{ inputs.status }}" ]; then
               url="${url}&status=${{ inputs.status }}"
               echo "📎 Filtering runs by status: ${{ inputs.status }}"
             fi
-            if [[ -n "$workflow_name" ]]; then
-              # Get the workflow ID instead of using the name
-              workflow_id=$(gh api "/repos/${{ github.repository }}/actions/workflows" --jq ".workflows[] | select(.name==\"$workflow_name\") | .id")
-              if [[ -n "$workflow_id" ]]; then
+            
+            if [ -n "$workflow_name" ]; then
+              workflow_id=$(gh api "/repos/${{ github.repository }}/actions/workflows" | \
+                          jq -r --arg name "$workflow_name" '.workflows[] | select(.name==$name) | .id')
+              if [ -n "$workflow_id" ]; then
                 url="${url}&workflow_id=$workflow_id"
                 echo "🎯 Found workflow ID: $workflow_id"
               else
@@ -155,19 +158,15 @@ jobs:
             fi
 
             response=$(gh api -X GET "$url")
-            if [[ $(echo "$response" | jq '.total_count') -eq 0 ]]; then
+            total_count=$(echo "$response" | jq -r '.total_count')
+            
+            if [ "$total_count" -eq 0 ]; then
               echo "✅ No more runs to delete."
               break
             fi
 
-            runs=$(echo "$response" | jq -r '.workflow_runs[]? | select(.id != null) | .id')
-            if [[ -z "$runs" ]]; then
-              echo "✅ No more runs to process on this page."
-              break
-            fi
-
-            for run_id in $runs; do
-              if [[ "$run_id" == "$current_run_id" ]]; then
+            echo "$response" | jq -r '.workflow_runs[]? | select(.id != null) | .id' | while read -r run_id; do
+              if [ "$run_id" = "$current_run_id" ]; then
                 echo "⏭️ Skipping current run $run_id"
                 continue
               fi
