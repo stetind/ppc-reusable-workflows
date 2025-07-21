@@ -41,12 +41,18 @@ on:
         description: 'Choose the runner'
         required: false
         default: 'self-hosted'
-        type: string
+        type: choice
+        options:
+          - 'self-hosted'
+          - 'ubuntu-latest'
       job_container:
         description: 'Select the docker container for the action'
         required: false
         default: 'node:22.14'
-        type: string
+        type: choice
+        options:
+          - 'node:22.14'
+          - 'ubuntu:latest'
 
 env:
   TEMP_BRANCH: releases
