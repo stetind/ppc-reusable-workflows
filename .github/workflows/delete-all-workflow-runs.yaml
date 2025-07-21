@@ -1,24 +1,29 @@
-# =====================================================================
-# 🧹 Delete All GitHub Actions Workflow Runs
+# =============================================================================
+# 🧹 Delete GitHub Actions Workflow Runs
 #
-# This workflow allows you to delete all GitHub Actions workflow runs
-# for a given repository, optionally filtering by `status`.
+# Description:
+#   Bulk deletion tool for GitHub Actions workflow runs with flexible filtering.
 #
-# It supports deletion of:
-# - All workflow runs (no filter)
-# - Only completed / failed / canceled / in_progress / queued runs
+# Key Features:
+#   • Selective deletion by workflow name
+#   • Status-based filtering
+#   • Skip protection for current run
+#   • Paginated processing for large repositories
 #
 # Inputs:
-#   - github_repository: Full repository name (e.g., owner/repo) [required]
-#   - status: Optional status filter (completed, in_progress, queued)
+#   • workflow_name: Target specific workflow
+#   • status: Filter by run status (completed, cancelled, etc.)
+#   • runner: Custom runner selection
+#   • job_container: Docker container for the action
 #
-# Environment:
-#   - Requires WORKFLOW_TOKEN and GITHUB_TOKEN with repo scope
+# Requirements:
+#   • WORKFLOW_TOKEN with workflow delete permissions
+#   • GitHub CLI authentication
 #
-# Example usage:
-#   - Delete all runs: Set only github_repository
-#   - Delete only completed runs: Set status to "completed"
-# =====================================================================
+# Triggers:
+#   • Manual (workflow_dispatch)
+#   • Reusable workflow (workflow_call)
+# =============================================================================
 
 name: 🧹 Delete All Workflow Runs
 
@@ -47,6 +52,16 @@ on:
       workflow_name:
         description: 'The name of the workflow to delete runs for (e.g., "CI Workflow")'
         required: false
+        type: string
+      runner:
+        description: 'Choose the runner'
+        required: false
+        default: 'self-hosted'
+        type: string
+      job_container:
+        description: 'Select the docker container for the action'
+        required: false
+        default: 'node:22.14'
         type: string
 
   workflow_dispatch:
@@ -88,10 +103,22 @@ on:
         description: 'The name of the workflow to delete runs for (e.g., "CI Workflow")'
         required: false
         type: string
+      runner:
+        description: 'Choose the runner'
+        required: false
+        default: 'self-hosted'
+        type: string
+      job_container:
+        description: 'Select the docker container for the action'
+        required: false
+        default: 'node:22.14'
+        type: string
 
 jobs:
   cleanup:
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runner }}
+    container: ${{ inputs.job_container }}
+
     steps:
       - name: 🔐 Authenticate with GitHub CLI
         run: echo "${{ secrets.WORKFLOW_TOKEN }}" | gh auth login --with-token

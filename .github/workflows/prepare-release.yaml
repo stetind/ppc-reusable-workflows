@@ -1,20 +1,26 @@
 # =============================================================================
 # 🚧 Prepare Reusable Release
 #
-# This workflow prepares a new release by:
-# - Computing the next semantic version from commits
-# - Replacing __VERSION__ placeholders in workflow files
-# - Creating .release-meta.json with version metadata
-# - Pushing changes to the releases branch
+# Description:
+#   Automates the release preparation process by handling versioning and file updates.
+#
+# Key Functions:
+#   • Computes next semantic version from commit history
+#   • Updates __VERSION__ placeholders in workflow files
+#   • Creates version metadata in .release-meta.json
+#   • Pushes changes to releases branch
 #
 # Inputs:
-#   - tag: Optional specific version tag to use
-#   - prerelease: Optional prerelease identifier (beta/rc)
+#   • tag: Optional specific version tag (e.g., v1.0.0)
+#   • prerelease: Optional prerelease identifier (beta/rc)
+#   • runner: Custom runner selection
+#   • job_container: Docker container for the action
 #
-# Environment:
-#   - TEMP_BRANCH: Branch name for release preparation
+# Requirements:
+#   • WORKFLOW_TOKEN with repository write access
+#   • Git history access (fetch-depth: 0)
 #
-# Trigger: workflow_dispatch
+# Trigger: Manual (workflow_dispatch)
 # =============================================================================
 
 name: 🚧 Prepare Reusable Release
@@ -31,6 +37,16 @@ on:
         description: 'Optional prerelease identifier (e.g., beta, rc). Leave empty for stable.'
         required: false
         type: string
+      runner:
+        description: 'Choose the runner'
+        required: false
+        default: 'self-hosted'
+        type: string
+      job_container:
+        description: 'Select the docker container for the action'
+        required: false
+        default: 'node:22.14'
+        type: string
 
 env:
   TEMP_BRANCH: releases
@@ -38,8 +54,8 @@ env:
 jobs:
   prepare:
     name: Prepare & Push
-    runs-on: ${{ vars.DEFAULT_RUNNER || 'ubuntu-latest' }}
-    container: ${{ vars.DEFAULT_NODE_CONTAINER || 'node:22.14' }}
+    runs-on: ${{ inputs.runner || vars.DEFAULT_RUNNER }}
+    container: ${{ inputs.job_container || vars.DEFAULT_NODE_CONTAINER}}
 
     steps:
       - name: ⬇️ Checkout repository
