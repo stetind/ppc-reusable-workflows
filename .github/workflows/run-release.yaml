@@ -77,7 +77,7 @@ jobs:
   call_reusable_release:
     name: Final Release
     needs: read_metadata_and_delegate
-    uses: stetind/ppc-reusable-workflows/.github/workflows/auto-release-based-conventional-commits.yaml@releases
+    uses: ./.github/workflows/auto-release-based-conventional-commits.yaml
     secrets: inherit
     with:
       tag: ${{ needs.read_metadata_and_delegate.outputs.previous_tag }}
