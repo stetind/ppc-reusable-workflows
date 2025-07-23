@@ -65,8 +65,8 @@ env:
 
 jobs:
   validate_serverless:
-    runs-on: ${{ inputs.runner }}
     name: Validate Serverless
+    runs-on: ${{ inputs.runner }}
     environment: ${{ inputs.deploy_environment }}
     env:
       AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -89,36 +89,12 @@ jobs:
         with:
           npm_token: $NPM_TOKEN
 
-      - name: 🔧 Secret to Environment
-        uses: oNaiPs/secrets-to-env-action@v1.5
+      - name: 📓 Create [dot] env
+        uses: stetind/ppc-github-composite-actions/.github/actions/create-dot-env@1.0.0
         with:
+          volume: '/workspace'
           secrets: ${{ toJSON(secrets) }}
-
-      - name: 📓 Fill [dot] Env (Generic)
-        uses: CallePuzzle/envvar-to-dotenv-action@v1.2.4
-        with:
-          variableNamesByFilter: ^[A-Za-z].*
-
-      - name: 🔧 Install jq
-        shell: bash
-        run: apt-get update && apt-get install -y -f jq
-
-      - name: 🔧 Vars to Environment
-        shell: bash
-        run: |
-          declare -A obj
-          echo '${{ toJSON(vars) }}' > /workspace/.vars_json
-          
-          while read -r key value; do
-            obj[$key]=$value
-          done <<< $(jq -r 'to_entries[] | "\(.key) \(.value)"' /workspace/.vars_json)
-
-          echo '' >> /workspace/.env
-
-          for key in "${!obj[@]}"; do
-            value=${obj[$key]}
-            echo "$key=${obj[$key]}" >> /workspace/.env
-          done
+          variables: ${{ toJSON(vars) }}
 
       - name: 🚅 Serverless Validate
         run: npm run sls-print
