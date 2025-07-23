@@ -67,23 +67,17 @@ jobs:
           echo "merge_option=$MERGE_OPTION" >> $GITHUB_OUTPUT
           echo "source_branch=$SOURCE_BRANCH" >> $GITHUB_OUTPUT
 
-      - name: 📟 Final Summary
+      - name: 📟 Summary
         if: always()
         run: |
-          previous_tag="${{ steps.read_meta.outputs.previous_tag }}"
-          new_tag="${{ steps.read_meta.outputs.new_tag }}"
-          prerelease="${{ steps.read_meta.outputs.prerelease }}"
-          merge_option="${{ steps.read_meta.outputs.merge_option }}"
-          source_branch="${{ steps.read_meta.outputs.source_branch }}"
-          
           echo "::notice ::📆 Meta Data"
-          echo "::notice ::🚧 Previous Tag: $previous_tag"
-          echo "::notice ::🚧 New Tag: $new_tag"
-          echo "::notice ::🚧 Pre-release: $prerelease"
-          echo "::notice ::🚧 Merge option: $merge_option"
-          echo "::notice ::🚧 Source Branch: $source_branch"
+          echo "::notice ::🚧 Previous Tag: ${{ steps.read_meta.outputs.previous_tag }}"
+          echo "::notice ::🚧 New Tag: ${{ steps.read_meta.outputs.new_tag }}"
+          echo "::notice ::🚧 Pre-release: ${{ steps.read_meta.outputs.prerelease }}"
+          echo "::notice ::🚧 Merge option: ${{ steps.read_meta.outputs.merge_option }}"
+          echo "::notice ::🚧 Source Branch: ${{ steps.read_meta.outputs.source_branch }}"
 
-  call_reusable_release:
+  release:
     name: Final Release
     needs: read_metadata_and_delegate
     uses: stetind/ppc-reusable-workflows/.github/workflows/auto-release-based-conventional-commits.yaml@releases
@@ -94,13 +88,22 @@ jobs:
       runner: ${{ vars.DEFAULT_RUNNER || 'ubuntu-latest' }}
       job_container: ${{ vars.DEFAULT_NODE_CONTAINER || 'node:22.14' }}
 
-  clear:
-    name: Clear Repository
-    needs: call_reusable_release
+  clean:
+    name: 🧹 Merge and clean branches
+    needs: release
     runs-on: ${{ vars.DEFAULT_RUNNER || 'ubuntu-latest' }}
     container: ${{ vars.DEFAULT_NODE_CONTAINER || 'node:22.14' }}
 
     steps:
+      - name: 📟 Summary
+        run: |
+          echo "::notice ::📆 Meta Data"
+          echo "::notice ::🚧 Previous Tag: ${{ needs.read_metadata_and_delegate.outputs.previous_tag }}"
+          echo "::notice ::🚧 New Tag: ${{ needs.read_metadata_and_delegate.outputs.new_tag }}"
+          echo "::notice ::🚧 Pre-release: ${{ needs.read_metadata_and_delegate.outputs.prerelease }}"
+          echo "::notice ::🚧 Merge option: ${{ needs.read_metadata_and_delegate.outputs.merge_option }}"
+          echo "::notice ::🚧 Source Branch: ${{ needs.read_metadata_and_delegate.outputs.source_branch }}"
+
       - name: 🔄 Merge anc Delete
         id: create_pr
         uses: stetind/ppc-github-composite-actions/.github/actions/create-pr-and-merge@1.0.0
@@ -119,7 +122,7 @@ jobs:
       - name: 📟 Summary
         if: always()
         run: |
-          echo "::notice::🧹 Cleanup Summary"
+          echo "::notice::📟 Cleanup Summary"
           echo "::notice::Branch 'releases' has been deleted"
 
           if [ "${{ steps.create_pr.outputs.pr_url }}" != "" ]; then
