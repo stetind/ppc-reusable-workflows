@@ -111,6 +111,7 @@ jobs:
             gh && \
           echo "✅ Dependencies installed successfully!"
 
+
       - name: 🔐 Authenticate with GitHub CLI
         shell: bash
         run: echo "${{ secrets.WORKFLOW_TOKEN }}" | gh auth login --with-token
@@ -180,7 +181,7 @@ jobs:
               break
             fi
 
-            echo "$response" | jq -r '.workflow_runs[]? | select(.id != null) | "\(.id) \(.status)"' | while read -r run_id status; do
+            echo "$response" | jq -r '.workflow_runs[]? | select(.id != null) | "\(.id) \(.conclusion)"' | while read -r run_id status; do
               if [ "$run_id" = "$current_run_id" ]; then
                 echo "⏭️ Skipping current run $run_id"
                 echo "::debug::⏭️ Skipping current run $run_id"
