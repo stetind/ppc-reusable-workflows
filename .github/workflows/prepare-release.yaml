@@ -72,7 +72,7 @@ jobs:
 
       - name: 🏷️ Select tag
         id: select_tag
-        uses: stetind/ppc-github-composite-actions/.github/actions/get-latest-tag@main
+        uses: stetind/ppc-github-composite-actions/.github/actions/get-latest-tag@1.0.0
         with:
           tag: ${{ github.event.inputs.tag }}
         env:
@@ -80,7 +80,7 @@ jobs:
 
       - name: 🧪 Generate changelog
         id: changelog
-        uses: stetind/ppc-github-composite-actions/.github/actions/generate-changelog-by-tag@main
+        uses: stetind/ppc-github-composite-actions/.github/actions/generate-changelog-by-tag@1.0.0
         with:
           previous_tag: ${{ steps.select_tag.outputs.selected_tag }}
           repository: ${{ github.repository }}
