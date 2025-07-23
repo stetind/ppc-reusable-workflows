@@ -1,5 +1,5 @@
 name: 🧹 Delete All Workflow Runs
-run-name: 🧹 Delete all runs of workflow (${{ inputs.workflow_name }}) with status = ${{ inputs.status }}
+run-name: 🧹 Delete all `${{ inputs.status }}` of (${{ inputs.workflow_name }})
 
 on:
   workflow_call:
