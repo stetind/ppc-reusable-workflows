@@ -29,7 +29,7 @@ on:
       runner:
         description: 'Choose the runner'
         required: false
-        default: 'self-hosted'
+        default: 'ubuntu-latest'
         type: string
       job_container:
         description: 'Select the docker container for the action'
@@ -79,7 +79,7 @@ on:
       runner:
         description: 'Choose the runner'
         required: false
-        default: 'self-hosted'
+        default: 'ubuntu-latest'
         type: choice
         options:
           - 'self-hosted'
