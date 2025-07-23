@@ -121,28 +121,40 @@ jobs:
           GH_TOKEN: ${{ secrets.WORKFLOW_TOKEN }}
         run: |
           echo "🚀 Fetching and deleting all workflow runs..."
-
+          # Initialize counters for different statuses
+          declare -A status_counts=()
+          
           current_run_id="${{ github.run_id }}"
           workflow_name="${{ inputs.workflow_name }}"
+          
+          # GitHub logging for workflow info
+          echo "::notice::Starting cleanup process for repository: ${{ github.repository }}"
           
           # First, let's list all workflows to see the exact name
           echo "📋 Available workflows:"
           gh api "/repos/${{ github.repository }}/actions/workflows" | jq -r '.workflows[].name'
           
           echo "🚫 Current run ID: $current_run_id (will be skipped)"
-          echo "🔍 Targeting workflow: $workflow_name"
+          echo "::debug::🚫 Current run ID: $current_run_id (will be skipped)"
+          if [ -n "$workflow_name" ]; then
+            echo "🔍 Targeting workflow: $workflow_name"
+            echo "::notice::🔍 Targeting specific workflow: $workflow_name"
+          fi
 
           per_page=100
           page=1
           deleted_count=0
+          failed_count=0
 
           while true; do
             echo "🔄 Fetching page $page..."
+            echo "::debug::🔄 Fetching page $page..."
 
             url="/repos/${{ github.repository }}/actions/runs?per_page=$per_page&page=$page"
             if [ -n "${{ inputs.status }}" ]; then
               url="${url}&status=${{ inputs.status }}"
               echo "📎 Filtering runs by status: ${{ inputs.status }}"
+              echo "::debug::Filtering runs by status: ${{ inputs.status }}"
             fi
             
             if [ -n "$workflow_name" ]; then
@@ -151,8 +163,10 @@ jobs:
               if [ -n "$workflow_id" ]; then
                 url="${url}&workflow_id=$workflow_id"
                 echo "🎯 Found workflow ID: $workflow_id"
+                echo "::debug::🎯 Found workflow ID: $workflow_id"
               else
                 echo "❌ Error: Could not find workflow with name: $workflow_name"
+                echo "::error::❌ Could not find workflow with name: $workflow_name"
                 exit 1
               fi
             fi
@@ -162,24 +176,51 @@ jobs:
             
             if [ "$total_count" -eq 0 ]; then
               echo "✅ No more runs to delete."
+              echo "::notice::✅ No more runs to delete."
               break
             fi
 
-            echo "$response" | jq -r '.workflow_runs[]? | select(.id != null) | .id' | while read -r run_id; do
+            echo "$response" | jq -r '.workflow_runs[]? | select(.id != null) | "\(.id) \(.status)"' | while read -r run_id status; do
               if [ "$run_id" = "$current_run_id" ]; then
                 echo "⏭️ Skipping current run $run_id"
+                echo "::debug::⏭️ Skipping current run $run_id"
                 continue
               fi
-              echo "🗑️ Deleting run $run_id"
-              gh api --method DELETE "/repos/${{ github.repository }}/actions/runs/$run_id" || {
+              
+              echo "::debug::Deleting run $run_id (Status: $status)"
+              if gh api --method DELETE "/repos/${{ github.repository }}/actions/runs/$run_id"; then
+                ((deleted_count+=1))
+                # Update status counts (need to use a file due to subshell limitations)
+                echo "$status" >> /tmp/status_counts
+              else
+                ((failed_count+=1))
                 echo "❌ Failed to delete run $run_id"
-                continue
-              }
-              ((deleted_count+=1))
+                echo "::warning::❌ Failed to delete run $run_id"
+              fi
               sleep 0.5
             done
 
             ((page+=1))
           done
 
-          echo "🔥 Deleted $deleted_count workflow runs."
+          # Process status counts from temporary file
+          echo "::notice::=== Deletion Summary ==="
+          echo "::notice::Total deleted runs: $deleted_count"
+          if [ $failed_count -gt 0 ]; then
+            echo "::warning::Failed deletions: $failed_count"
+          fi
+          
+          # Count occurrences of each status
+          if [ -f /tmp/status_counts ]; then
+            echo "::notice::Deleted runs by status:"
+            sort /tmp/status_counts | uniq -c | while read -r count status; do
+              echo "::notice::  - $status: $count"
+            done
+            rm /tmp/status_counts
+          fi
+
+          if [ $failed_count -gt 0 ]; then
+            echo "::warning::Cleanup completed with $failed_count failures"
+          else
+            echo "::notice::Cleanup completed successfully"
+          fi
