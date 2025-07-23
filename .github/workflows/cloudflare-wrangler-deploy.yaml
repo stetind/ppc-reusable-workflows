@@ -61,71 +61,16 @@ jobs:
       - name: 🔧 Building Environment
         run: npm run build --if-present
 
-      - name: 🔧 Install jq
-        shell: bash
-        run: apt-get update && apt-get install -y -f jq
-
-      - name: 🔧 Prepare wrangler environment variables
-        shell: bash
-        run: |
-          declare -A obj
-          echo '${{ toJSON(secrets) }}' > /workspace/.secrets_json
-          echo '${{ toJSON(vars) }}' > /workspace/.vars_json
-          
-          while read -r key value; do
-            obj[$key]=$value
-          done <<< $(jq -r 'to_entries[] | "\(.key) \(.value)"' /workspace/.secrets_json)
-          
-          while read -r key value; do
-            obj[$key]=$value
-          done <<< $(jq -r 'to_entries[] | "\(.key) \(.value)"' /workspace/.vars_json)
-          
-          filename="wrangler.template.temp"
-          
-          for var_name in $(egrep -ohi '(\$(((ENV|VARS)_[A-Z_0-9]+)|(ACCOUNT_ID)))' ${filename} | cut -c 2-)
-          do
-            pattern='$'${var_name}
-            replacement=${obj[${var_name}]}
-          
-            escaped_pattern=$(echo "$pattern" | sed 's/[][\\/\\.^$*+?(){}|]/\\&/g')
-            escaped_replacement=$(echo "$replacement" | sed 's/[][\\/\\.^$*+?(){}|]/\\&/g')
-            sed_pattern="s/${escaped_pattern}/${escaped_replacement}/g"
-          
-            sed -i "$sed_pattern" ${filename}
-          done
-
-      - name: 🔧 Create wrangler file
-        run: cp wrangler.template.temp wrangler.toml
-
-      - name: Prepare Secret Variables
-        shell: bash
-        run: |
-          declare -A obj
-          secret_variable_filename=/workspace/.secrets_variables
-          touch $secret_variable_filename
-          while read -r key value; do
-            obj[$key]=$value
-          done <<< $(jq -r 'to_entries[] | "\(.key) \(.value)"' /workspace/.secrets_json)
-
-          filename="wrangler.toml"
-          for var_name in $(egrep -ohi '(\$SECRET_([A-Z_0-9]+))' ${filename} | cut -c 2-)
-          do
-            key=${var_name#"SECRET_"}
-            echo ${key} >> $secret_variable_filename
-            echo "${key}=${obj[${key}]}" >> $GITHUB_ENV
-          done
-
-          if [[ -s $secret_variable_filename ]];
-          then
-            secret_variables=$(cat $secret_variable_filename)
-            echo "WRANGLER_SECRETS<<EOF" >> $GITHUB_ENV
-            echo "$secret_variables" >> $GITHUB_ENV
-            echo "EOF" >> $GITHUB_ENV
-          fi
+      - name: 📓 Create wrangler configuration
+        id: wrangler
+        uses: stetind/ppc-github-composite-actions/.github/actions/wrangler-replace-varaibles@1.0.0
+        with:
+          secrets: ${{ toJSON(secrets) }}
+          variables: ${{ toJSON(vars) }}
 
       - name: 📦 Publish app
         uses: cloudflare/wrangler-action@v3.14.1
         with:
           apiToken: ${{ secrets.CF_API_TOKEN }}
           environment: ${{ vars.env_environment }}
-          secrets: ${{ env.WRANGLER_SECRETS }}
+          secrets: ${{ steps.wrangler.outputs.wrangler_secrets }}
