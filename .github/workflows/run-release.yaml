@@ -35,6 +35,8 @@ jobs:
       previous_tag: ${{ steps.read_meta.outputs.previous_tag }}
       new_tag: ${{ steps.read_meta.outputs.new_tag }}
       prerelease: ${{ steps.read_meta.outputs.prerelease }}
+      merge_option: ${{ steps.read_meta.outputs.merge_option }}
+      source_branch: ${{ steps.read_meta.outputs.source_branch }}
 
     steps:
       - name: ⬇️ Checkout repository
@@ -42,9 +44,8 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: 🔧 Install jq
-        shell: bash
-        run: apt-get update && apt-get install -y -f jq
+      - name: 🔧 Install Jq
+        uses: stetind/ppc-github-composite-actions/.github/actions/check-install-jq@1.0.0
 
       - name: 🔍 Read .release-meta.json
         id: read_meta
@@ -57,10 +58,14 @@ jobs:
           PREVIOUS_TAG=$(jq -r '.previous_tag' .release-meta.json)
           NEW_TAG=$(jq -r '.new_tag' .release-meta.json)
           PRERELEASE=$(jq -r '.prerelease' .release-meta.json)
+          MERGE_OPTION=$(jq -r '.merge_option' .release-meta.json)
+          SOURCE_BRANCH=$(jq -r '.source_branch' .release-meta.json)
 
           echo "previous_tag=$PREVIOUS_TAG" >> $GITHUB_OUTPUT
           echo "new_tag=$NEW_TAG" >> $GITHUB_OUTPUT
           echo "prerelease=$PRERELEASE" >> $GITHUB_OUTPUT
+          echo "merge_option=$MERGE_OPTION" >> $GITHUB_OUTPUT
+          echo "source_branch=$SOURCE_BRANCH" >> $GITHUB_OUTPUT
 
       - name: 📟 Final Summary
         if: always()
@@ -73,6 +78,8 @@ jobs:
           echo "::notice ::🚧 Previous Tag: $previous_tag"
           echo "::notice ::🚧 New Tag: $new_tag"
           echo "::notice ::🚧 Pre-release: $prerelease"
+          echo "::notice ::🚧 Merge option: $merge_option"
+          echo "::notice ::🚧 Source Branch: $source_branch"
 
   call_reusable_release:
     name: Final Release
@@ -92,14 +99,31 @@ jobs:
     container: ${{ vars.DEFAULT_NODE_CONTAINER || 'node:22.14' }}
 
     steps:
-      - name: 💀 Delete `releases` Branch
-        id: delete_releases
-        uses: dawidd6/action-delete-branch@v3
+      - name: 🔄 Merge anc Delete
+        id: create_pr
+        uses: stetind/ppc-github-composite-actions/.github/actions/create-pr-and-merge@1.0.0
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          branches: releases
+          token: ${{ secrets.GITHUB_TOKEN }}
+          title: 📦 Release ${{ needs.read_metadata_and_delegate.outputs.new_tag }}
+          merge_option: ${{ needs.read_metadata_and_delegate.outputs.merge_option }}
+          source: ${{ needs.read_metadata_and_delegate.outputs.source_branch }}
+
+      - name: 🗑️ Delete `releases` Branch
+        uses: stetind/ppc-github-composite-actions/.github/actions/delete-bracnh@1.0.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: releases
 
       - name: 📟 Summary
-        if: ${{ success() }}
+        if: always()
         run: |
-          echo "::notice ::Branch : `origin/releases` has been deleted"
+          echo "::notice::🧹 Cleanup Summary"
+          echo "::notice::Branch 'releases' has been deleted"
+
+          if [ "${{ steps.create_pr.outputs.pr_url }}" != "" ]; then
+            echo "::notice::✅ PR created and processed: ${{ steps.create_pr.outputs.pr_url }}"
+          fi
+
+          if [ "${{ needs.read_metadata_and_delegate.outputs.merge_option }}" == "merge and delete" ]; then
+            echo "::notice::🗑️ Source branch cleanup was attempted"
+          fi
