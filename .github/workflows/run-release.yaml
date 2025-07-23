@@ -91,7 +91,6 @@ jobs:
       prerelease: ${{ needs.read_metadata_and_delegate.outputs.prerelease }}
       runner: ${{ vars.DEFAULT_RUNNER || 'ubuntu-latest' }}
       job_container: ${{ vars.DEFAULT_NODE_CONTAINER || 'node:22.14' }}
-      source: ${{ needs.read_metadata_and_delegate.outputs.source_branch }}
 
   clear:
     name: Clear Repository
