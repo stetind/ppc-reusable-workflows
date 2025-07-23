@@ -27,16 +27,43 @@ on:
 
 jobs:
   eslint:
-    uses: ./.github/workflows/eslint.yaml
-    secrets: inherit
-    with:
-      job_container: ${{ inputs.job_container }}
-      runner: ${{ inputs.runner }}
+    name: Run EsLint
+    runs-on: ${{ inputs.runner }}
+    container: ${{ inputs.job_container }}
+    env:
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+    steps:
+      - name: 🛫 Checkout
+        uses: actions/checkout@v4
+
+      - name: 🔧 Setup Node and NPM
+        uses: stetind/ppc-github-composite-actions/.github/actions/intall-global-dependencies@1.0.0
+        with:
+          npm_token: $NPM_TOKEN
+
+      - name: 🚀 Run Eslint
+        run: npm run lint-quiet
 
   testing:
-    needs: eslint
-    uses: ./.github/workflows/tests.yaml
-    secrets: inherit
-    with:
-      job_container: ${{ inputs.job_container }}
-      runner: ${{ inputs.runner }}
+    name: Run Jest Tests
+    runs-on: ${{ inputs.runner }}
+    container: ${{ inputs.job_container }}
+    env:
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+    steps:
+      - name: 🛫 Checkout
+        uses: actions/checkout@v4
+
+      - name: 🔧 Setup Node and NPM
+        uses: stetind/ppc-github-composite-actions/.github/actions/intall-global-dependencies@1.0.0
+        with:
+          npm_token: $NPM_TOKEN
+
+      - name: 🔧 Building Environment
+        run: npm run build --if-present && npx browserslist@latest --update-db
+
+      - name: 🔧 Run Tests
+        id: run_test
+        run: npm run test:ci
