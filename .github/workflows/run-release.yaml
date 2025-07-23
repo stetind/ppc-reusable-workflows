@@ -73,6 +73,8 @@ jobs:
           previous_tag="${{ steps.read_meta.outputs.previous_tag }}"
           new_tag="${{ steps.read_meta.outputs.new_tag }}"
           prerelease="${{ steps.read_meta.outputs.prerelease }}"
+          merge_option="${{ steps.read_meta.outputs.merge_option }}"
+          source_branch="${{ steps.read_meta.outputs.source_branch }}"
           
           echo "::notice ::📆 Meta Data"
           echo "::notice ::🚧 Previous Tag: $previous_tag"
