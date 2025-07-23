@@ -95,6 +95,11 @@ jobs:
     container: ${{ vars.DEFAULT_NODE_CONTAINER || 'node:22.14' }}
 
     steps:
+      - name: ⬇️ Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - name: 🔄 Merge anc Delete
         id: create_pr
         uses: stetind/ppc-github-composite-actions/.github/actions/create-pr-and-merge@1.0.0
