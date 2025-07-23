@@ -90,20 +90,11 @@ jobs:
 
   clean:
     name: 🧹 Merge and clean branches
-    needs: release
+    needs: [release, read_metadata_and_delegate]
     runs-on: ${{ vars.DEFAULT_RUNNER || 'ubuntu-latest' }}
     container: ${{ vars.DEFAULT_NODE_CONTAINER || 'node:22.14' }}
 
     steps:
-      - name: 📟 Summary
-        run: |
-          echo "::notice ::📆 Meta Data"
-          echo "::notice ::🚧 Previous Tag: ${{ needs.read_metadata_and_delegate.outputs.previous_tag }}"
-          echo "::notice ::🚧 New Tag: ${{ needs.read_metadata_and_delegate.outputs.new_tag }}"
-          echo "::notice ::🚧 Pre-release: ${{ needs.read_metadata_and_delegate.outputs.prerelease }}"
-          echo "::notice ::🚧 Merge option: ${{ needs.read_metadata_and_delegate.outputs.merge_option }}"
-          echo "::notice ::🚧 Source Branch: ${{ needs.read_metadata_and_delegate.outputs.source_branch }}"
-
       - name: 🔄 Merge anc Delete
         id: create_pr
         uses: stetind/ppc-github-composite-actions/.github/actions/create-pr-and-merge@1.0.0
