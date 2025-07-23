@@ -1,32 +1,25 @@
-# =====================================================================
-# 🧹 Delete All GitHub Actions Workflow Runs
-#
-# This workflow allows you to delete all GitHub Actions workflow runs
-# for a given repository, optionally filtering by `status`.
-#
-# It supports deletion of:
-# - All workflow runs (no filter)
-# - Only completed / failed / cancelled / in_progress / queued runs
-#
-# Inputs:
-#   - github_repository: Full repository name (e.g., owner/repo) [required]
-#   - status: Optional status filter (completed, in_progress, queued)
-#
-# Environment:
-#   - Requires WORKFLOW_TOKEN and GITHUB_TOKEN with repo scope
-#
-# Example usage:
-#   - Delete all runs: Set only github_repository
-#   - Delete only completed runs: Set status to "completed"
-# =====================================================================
-
 name: 🧹 Delete All Workflow Runs
+run-name: 🧹 Delete all `${{ inputs.status }}` of (${{ inputs.workflow_name }})
 
 on:
   workflow_call:
     inputs:
       status:
-        description: 'Optional status filter (e.g., completed, action_required, cancelled, failure, neutral, skipped, stale, success, timed_out, queued, requested, waiting, pending, etc.)'
+        description: |
+          Optional status filter for workflow runs. Available options:
+          • completed - All completed runs
+          • action_required - Runs that require action
+          • cancelled - Manually cancelled runs
+          • failure - Failed runs
+          • neutral - Runs with neutral outcome
+          • skipped - Skipped runs
+          • stale - Stale runs
+          • success - Successful runs
+          • timed_out - Runs that exceeded time limit
+          • queued - Queued runs
+          • requested - Requested runs
+          • waiting - Waiting runs
+          • pending - Pending runs
         type: string
         required: false
         default: 'cancelled'
@@ -34,73 +27,202 @@ on:
         description: 'The name of the workflow to delete runs for (e.g., "CI Workflow")'
         required: false
         type: string
+      runner:
+        description: 'Choose the runner'
+        required: false
+        default: 'ubuntu-latest'
+        type: string
+      job_container:
+        description: 'Select the docker container for the action'
+        required: false
+        default: 'node:22.14'
+        type: string
 
   workflow_dispatch:
     inputs:
       status:
-        description: 'Optional status filter (e.g., completed, action_required, cancelled, failure, neutral, skipped, stale, success, timed_out, queued, requested, waiting, pending, etc.)'
-        type: string
+        description: |
+          Optional status filter for workflow runs. Available options:
+          • completed - All completed runs
+          • action_required - Runs that require action
+          • cancelled - Manually cancelled runs
+          • failure - Failed runs
+          • neutral - Runs with neutral outcome
+          • skipped - Skipped runs
+          • stale - Stale runs
+          • success - Successful runs
+          • timed_out - Runs that exceeded time limit
+          • queued - Queued runs
+          • requested - Requested runs
+          • waiting - Waiting runs
+          • pending - Pending runs
+        type: choice
         required: false
+        default: 'cancelled'
+        options:
+          - completed
+          - action_required
+          - cancelled
+          - failure
+          - neutral
+          - skipped
+          - stale
+          - success
+          - timed_out
+          - queued
+          - requested
+          - waiting
+          - pending
       workflow_name:
         description: 'The name of the workflow to delete runs for (e.g., "CI Workflow")'
         required: false
         type: string
+      runner:
+        description: 'Choose the runner'
+        required: false
+        default: 'ubuntu-latest'
+        type: choice
+        options:
+          - 'self-hosted'
+          - 'ubuntu-latest'
+      job_container:
+        description: 'Select the docker container for the action'
+        required: false
+        default: 'node:22.14'
+        type: choice
+        options:
+          - 'node:22.14'
+          - 'ubuntu:latest'
 
 jobs:
   cleanup:
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runner }}
+    container: ${{ inputs.job_container }}
+
     steps:
+      - name: 📦 Install dependencies
+        run: |
+          echo "📥 Updating package lists..."
+          apt-get update && \
+          echo "⚙️ Installing required packages..." && \
+          apt-get install -y \
+            jq \
+            bash \
+            curl \
+            gh && \
+          echo "✅ Dependencies installed successfully!"
+
+
       - name: 🔐 Authenticate with GitHub CLI
+        shell: bash
         run: echo "${{ secrets.WORKFLOW_TOKEN }}" | gh auth login --with-token
 
       - name: 🧼 Delete all workflow runs
+        shell: bash
         env:
           GH_TOKEN: ${{ secrets.WORKFLOW_TOKEN }}
         run: |
-          echo "Fetching and deleting all workflow runs..."
-
-          current_run_id=${{ github.run_id }}
+          echo "🚀 Fetching and deleting all workflow runs..."
+          # Initialize counters for different statuses
+          declare -A status_counts=()
+          
+          current_run_id="${{ github.run_id }}"
           workflow_name="${{ inputs.workflow_name }}"
+          
+          # GitHub logging for workflow info
+          echo "::notice::Starting cleanup process for repository: ${{ github.repository }}"
+          
+          # First, let's list all workflows to see the exact name
+          echo "📋 Available workflows:"
+          gh api "/repos/${{ github.repository }}/actions/workflows" | jq -r '.workflows[].name'
+          
           echo "🚫 Current run ID: $current_run_id (will be skipped)"
-          echo "🔍 Targeting workflow: $workflow_name (only deleting runs for this workflow)"
+          echo "::debug::🚫 Current run ID: $current_run_id (will be skipped)"
+          if [ -n "$workflow_name" ]; then
+            echo "🔍 Targeting workflow: $workflow_name"
+            echo "::notice::🔍 Targeting specific workflow: $workflow_name"
+          fi
 
           per_page=100
           page=1
           deleted_count=0
+          failed_count=0
 
           while true; do
             echo "🔄 Fetching page $page..."
+            echo "::debug::🔄 Fetching page $page..."
 
-            # URL with workflow name filtering
             url="/repos/${{ github.repository }}/actions/runs?per_page=$per_page&page=$page"
-            if [[ -n "${{ inputs.status }}" ]]; then
+            if [ -n "${{ inputs.status }}" ]; then
               url="${url}&status=${{ inputs.status }}"
               echo "📎 Filtering runs by status: ${{ inputs.status }}"
+              echo "::debug::Filtering runs by status: ${{ inputs.status }}"
             fi
-            if [[ -n "$workflow_name" ]]; then
-              url="${url}&workflow=$workflow_name"
-              echo "📎 Filtering runs by workflow: $workflow_name"
+            
+            if [ -n "$workflow_name" ]; then
+              workflow_id=$(gh api "/repos/${{ github.repository }}/actions/workflows" | \
+                          jq -r --arg name "$workflow_name" '.workflows[] | select(.name==$name) | .id')
+              if [ -n "$workflow_id" ]; then
+                url="${url}&workflow_id=$workflow_id"
+                echo "🎯 Found workflow ID: $workflow_id"
+                echo "::debug::🎯 Found workflow ID: $workflow_id"
+              else
+                echo "❌ Error: Could not find workflow with name: $workflow_name"
+                echo "::error::❌ Could not find workflow with name: $workflow_name"
+                exit 1
+              fi
             fi
 
-            runs=$(gh api -X GET "$url" --jq '.workflow_runs[]? | select(.status != "in_progress" and .status != "waiting" and .status != "pending") | .id')
-
-            if [[ -z "$runs" ]]; then
+            response=$(gh api -X GET "$url")
+            total_count=$(echo "$response" | jq -r '.total_count')
+            
+            if [ "$total_count" -eq 0 ]; then
               echo "✅ No more runs to delete."
+              echo "::notice::✅ No more runs to delete."
               break
             fi
 
-            for run_id in $runs; do
-              if [[ "$run_id" == "$current_run_id" ]]; then
+            echo "$response" | jq -r '.workflow_runs[]? | select(.id != null) | "\(.id) \(.conclusion)"' | while read -r run_id status; do
+              if [ "$run_id" = "$current_run_id" ]; then
                 echo "⏭️ Skipping current run $run_id"
+                echo "::debug::⏭️ Skipping current run $run_id"
                 continue
               fi
-              echo "🗑️ Deleting run $run_id"
-              gh api --method DELETE "/repos/${{ github.repository }}/actions/runs/$run_id"
-              ((deleted_count+=1))
-              sleep 0.3 # avoid rate limits
+              
+              echo "::debug::Deleting run $run_id (Status: $status)"
+              if gh api --method DELETE "/repos/${{ github.repository }}/actions/runs/$run_id"; then
+                ((deleted_count+=1))
+                # Update status counts (need to use a file due to subshell limitations)
+                echo "$status" >> /tmp/status_counts
+              else
+                ((failed_count+=1))
+                echo "❌ Failed to delete run $run_id"
+                echo "::warning::❌ Failed to delete run $run_id"
+              fi
+              sleep 0.5
             done
 
             ((page+=1))
           done
 
-          echo "🔥 Deleted $deleted_count workflow runs."
+          # Process status counts from temporary file
+          echo "::notice::=== Deletion Summary ==="
+          echo "::notice::Total deleted runs: $deleted_count"
+          if [ $failed_count -gt 0 ]; then
+            echo "::warning::Failed deletions: $failed_count"
+          fi
+          
+          # Count occurrences of each status
+          if [ -f /tmp/status_counts ]; then
+            echo "::notice::Deleted runs by status:"
+            sort /tmp/status_counts | uniq -c | while read -r count status; do
+              echo "::notice::  - $status: $count"
+            done
+            rm /tmp/status_counts
+          fi
+
+          if [ $failed_count -gt 0 ]; then
+            echo "::warning::Cleanup completed with $failed_count failures"
+          else
+            echo "::notice::Cleanup completed successfully"
+          fi

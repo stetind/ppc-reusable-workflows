@@ -1,17 +1,26 @@
 # =============================================================================
 # 🚧 Prepare Reusable Release
 #
-# This workflow prepares a new release:
-# - Computes the next semantic version based on commits
-# - Replaces `__VERSION__` placeholders in workflows/files
-# - Writes a `.release-meta.json` file with previous/new tags and prerelease info
-# - Commits and force-pushes to the `releases` branch
+# Description:
+#   Automates the release preparation process by handling versioning and file updates.
+#
+# Key Functions:
+#   • Computes next semantic version from commit history
+#   • Updates __VERSION__ placeholders in workflow files
+#   • Creates version metadata in .release-meta.json
+#   • Pushes changes to releases branch
 #
 # Inputs:
-#   - tag (optional): Use a specific version tag instead of computing
-#   - prerelease (optional): e.g., "beta", "rc", or empty for stable
+#   • tag: Optional specific version tag (e.g., v1.0.0)
+#   • prerelease: Optional prerelease identifier (beta/rc)
+#   • runner: Custom runner selection
+#   • job_container: Docker container for the action
 #
-# Trigger: workflow_dispatch
+# Requirements:
+#   • WORKFLOW_TOKEN with repository write access
+#   • Git history access (fetch-depth: 0)
+#
+# Trigger: Manual (workflow_dispatch)
 # =============================================================================
 
 name: 🚧 Prepare Reusable Release
@@ -28,6 +37,31 @@ on:
         description: 'Optional prerelease identifier (e.g., beta, rc). Leave empty for stable.'
         required: false
         type: string
+      merge_option:
+        description: 'Merge and cleanup option'
+        required: false
+        type: choice
+        default: ' none'
+        options:
+          - 'merge and delete'
+          - 'merge'
+          - 'none'
+      runner:
+        description: 'Choose the runner'
+        required: false
+        default: 'ubuntu-latest'
+        type: choice
+        options:
+          - 'self-hosted'
+          - 'ubuntu-latest'
+      job_container:
+        description: 'Select the docker container for the action'
+        required: false
+        default: 'node:22.14'
+        type: choice
+        options:
+          - 'node:22.14'
+          - 'ubuntu:latest'
 
 env:
   TEMP_BRANCH: releases
@@ -35,8 +69,8 @@ env:
 jobs:
   prepare:
     name: Prepare & Push
-    runs-on: ${{ vars.DEFAULT_RUNNER || 'ubuntu-latest' }}
-    container: ${{ vars.DEFAULT_NODE_CONTAINER || 'node:22.14' }}
+    runs-on: ${{ inputs.runner || vars.DEFAULT_RUNNER }}
+    container: ${{ inputs.job_container || vars.DEFAULT_NODE_CONTAINER}}
 
     steps:
       - name: ⬇️ Checkout repository
@@ -47,7 +81,7 @@ jobs:
 
       - name: 🏷️ Select tag
         id: select_tag
-        uses: stetind/ppc-github-composite-actions/.github/actions/get-latest-tag@main
+        uses: stetind/ppc-github-composite-actions/.github/actions/get-latest-tag@1.0.0
         with:
           tag: ${{ github.event.inputs.tag }}
         env:
@@ -55,7 +89,7 @@ jobs:
 
       - name: 🧪 Generate changelog
         id: changelog
-        uses: stetind/ppc-github-composite-actions/.github/actions/generate-changelog-by-tag@main
+        uses: stetind/ppc-github-composite-actions/.github/actions/generate-changelog-by-tag@1.0.0
         with:
           previous_tag: ${{ steps.select_tag.outputs.selected_tag }}
           repository: ${{ github.repository }}
@@ -75,7 +109,9 @@ jobs:
           {
             "previous_tag": "${{ steps.select_tag.outputs.selected_tag }}",
             "new_tag": "${{ steps.changelog.outputs.new_tag }}",
-            "prerelease": "${{ github.event.inputs.prerelease || '' }}"
+            "prerelease": "${{ github.event.inputs.prerelease || '' }}",
+            "merge_option": "${{ github.event.inputs.merge_option || 'none' }}",
+            "source_branch": "${{ github.ref_name }}"
           }
           EOF
 

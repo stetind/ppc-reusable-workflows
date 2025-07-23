@@ -45,7 +45,7 @@ on:
       runner:
         description: 'Choose the runner'
         required: false
-        default: 'self-hosted'
+        default: 'ubuntu-latest'
         type: string
       job_container:
         description: 'Select the docker container for the action'
@@ -58,6 +58,7 @@ env:
   AWS_SDK_LOAD_CONFIG: 1
   AWS_REGION: ${{ inputs.region }}
   debugMode: ${{ inputs.debug }}
+
 jobs:
   deploy:
     runs-on: ${{ inputs.runner }}
@@ -80,40 +81,17 @@ jobs:
         uses: actions/checkout@v4
 
       - name: 🧙 Install Node
-        uses: stetind/ppc-npm-global-dependencies-action@v5.0
+        uses: stetind/ppc-github-composite-actions/.github/actions/intall-global-dependencies@1.0.0
         with:
           npm_token: $NPM_TOKEN
 
-      - name: 🔧 Secret to Environment
-        uses: oNaiPs/secrets-to-env-action@v1.5
+      - name: 📓 Create [dot] env
+        uses: stetind/ppc-github-composite-actions/.github/actions/create-dot-env@1.0.0
         with:
+          volume: '/workspace'
           secrets: ${{ toJSON(secrets) }}
+          variables: ${{ toJSON(vars) }}
 
-      - name: 📓 Fill [dot] Env (Generic)
-        uses: CallePuzzle/envvar-to-dotenv-action@v1.2.4
-        with:
-          variableNamesByFilter: ^[A-Za-z].*
-
-      - name: 🔧 Install jq
-        shell: bash
-        run: apt-get update && apt-get install -y -f jq
-
-      - name: 🔧 Vars to Environment
-        shell: bash
-        run: |
-          declare -A obj
-          echo '${{ toJSON(vars) }}' > /workspace/.vars_json
-          
-          while read -r key value; do
-            obj[$key]=$value
-          done <<< $(jq -r 'to_entries[] | "\(.key) \(.value)"' /workspace/.vars_json)
-
-          echo '' >> /workspace/.env
-
-          for key in "${!obj[@]}"; do
-            value=${obj[$key]}
-            echo "$key=${obj[$key]}" >> /workspace/.env
-          done
       - name: 🚅 Force Deploy to AWS (Force)
         if: ${{ inputs.force == 'true' }}
         run: PPC_STAGE=$PPC_STAGE REGION=$REGION  npm run sls-deploy --force

@@ -1,29 +1,28 @@
-# ============================================================================
+# =============================================================================
 # 🚀 Run Release from Branch
 #
-# This workflow is triggered when the `releases` branch is updated.
-# It reads metadata from `.release-meta.json`, then delegates to the
-# reusable release workflow to publish the release.
+# This workflow automates the release process when the `releases` branch updates:
+# - Reads metadata from .release-meta.json
+# - Triggers the reusable release workflow
+# - Cleans up after successful release
 #
-# This file supports the two-stage release flow:
-#   1. Prepare: Generates `.release-meta.json` with the new version.
-#   2. Release: This workflow consumes that metadata to trigger release.
+# Required Files:
+#   - .release-meta.json containing:
+#     - previous_tag: Tag to compare from
+#     - new_tag: Tag to be released
+#     - prerelease: Optional prerelease identifier
 #
-# Inputs:
-#   - .release-meta.json must exist in the repo and include:
-#       - previous_tag: Tag to compare from
-#       - new_tag: Tag to be released
-#       - prerelease: Optional prerelease identifier
+# Dependencies:
+#   - stetind/ppc-reusable-workflows/.github/workflows/auto-release-based-conventional-commits.yaml
 #
-# Requires:
-#   - Proper setup of the reusable workflow at:
-#     `stetind/ppc-reusable-workflows/.github/workflows/auto-release-based-conventional-commits.yaml`
-#
-# Usage:
-#   Push to the `releases` branch with a valid `.release-meta.json` file.
-# ============================================================================
+# Trigger: push (branch: releases)
+# =============================================================================
 
 name: 🚀 Run Release from Branch
+
+permissions:
+  contents: write
+  pull-requests: write
 
 on:
   push:
@@ -40,6 +39,8 @@ jobs:
       previous_tag: ${{ steps.read_meta.outputs.previous_tag }}
       new_tag: ${{ steps.read_meta.outputs.new_tag }}
       prerelease: ${{ steps.read_meta.outputs.prerelease }}
+      merge_option: ${{ steps.read_meta.outputs.merge_option }}
+      source_branch: ${{ steps.read_meta.outputs.source_branch }}
 
     steps:
       - name: ⬇️ Checkout repository
@@ -47,9 +48,8 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: 🔧 Install jq
-        shell: bash
-        run: apt-get update && apt-get install -y -f jq
+      - name: 🔧 Install Jq
+        uses: stetind/ppc-github-composite-actions/.github/actions/check-install-jq@1.0.0
 
       - name: 🔍 Read .release-meta.json
         id: read_meta
@@ -62,24 +62,26 @@ jobs:
           PREVIOUS_TAG=$(jq -r '.previous_tag' .release-meta.json)
           NEW_TAG=$(jq -r '.new_tag' .release-meta.json)
           PRERELEASE=$(jq -r '.prerelease' .release-meta.json)
+          MERGE_OPTION=$(jq -r '.merge_option' .release-meta.json)
+          SOURCE_BRANCH=$(jq -r '.source_branch' .release-meta.json)
 
           echo "previous_tag=$PREVIOUS_TAG" >> $GITHUB_OUTPUT
           echo "new_tag=$NEW_TAG" >> $GITHUB_OUTPUT
           echo "prerelease=$PRERELEASE" >> $GITHUB_OUTPUT
+          echo "merge_option=$MERGE_OPTION" >> $GITHUB_OUTPUT
+          echo "source_branch=$SOURCE_BRANCH" >> $GITHUB_OUTPUT
 
-      - name: 📟 Final Summary
+      - name: 📟 Summary
         if: always()
         run: |
-          previous_tag="${{ steps.read_meta.outputs.previous_tag }}"
-          new_tag="${{ steps.read_meta.outputs.new_tag }}"
-          prerelease="${{ steps.read_meta.outputs.prerelease }}"
-          
           echo "::notice ::📆 Meta Data"
-          echo "::notice ::🚧 Previous Tag: $previous_tag"
-          echo "::notice ::🚧 New Tag: $new_tag"
-          echo "::notice ::🚧 Pre-release: $prerelease"
+          echo "::notice ::🚧 Previous Tag: ${{ steps.read_meta.outputs.previous_tag }}"
+          echo "::notice ::🚧 New Tag: ${{ steps.read_meta.outputs.new_tag }}"
+          echo "::notice ::🚧 Pre-release: ${{ steps.read_meta.outputs.prerelease }}"
+          echo "::notice ::🚧 Merge option: ${{ steps.read_meta.outputs.merge_option }}"
+          echo "::notice ::🚧 Source Branch: ${{ steps.read_meta.outputs.source_branch }}"
 
-  call_reusable_release:
+  release:
     name: Final Release
     needs: read_metadata_and_delegate
     uses: stetind/ppc-reusable-workflows/.github/workflows/auto-release-based-conventional-commits.yaml@releases
@@ -90,21 +92,43 @@ jobs:
       runner: ${{ vars.DEFAULT_RUNNER || 'ubuntu-latest' }}
       job_container: ${{ vars.DEFAULT_NODE_CONTAINER || 'node:22.14' }}
 
-  clear:
-    name: Clear Repository
-    needs: call_reusable_release
+  clean:
+    name: 🧹 Merge and clean branches
+    needs: [release, read_metadata_and_delegate]
     runs-on: ${{ vars.DEFAULT_RUNNER || 'ubuntu-latest' }}
     container: ${{ vars.DEFAULT_NODE_CONTAINER || 'node:22.14' }}
 
     steps:
-      - name: 💀 Delete `releases` Branch
-        id: delete_releases
-        uses: dawidd6/action-delete-branch@v3
+      - name: ⬇️ Checkout repository
+        uses: actions/checkout@v4
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          branches: releases
+          fetch-depth: 0
+
+      - name: 🔄 Merge anc Delete
+        id: create_pr
+        uses: stetind/ppc-github-composite-actions/.github/actions/create-pr-and-merge@1.0.0
+        with:
+          token: ${{ secrets.WORKFLOW_TOKEN }}
+          title: Release ${{ needs.read_metadata_and_delegate.outputs.new_tag }}
+          merge_option: ${{ needs.read_metadata_and_delegate.outputs.merge_option }}
+          source: ${{ needs.read_metadata_and_delegate.outputs.source_branch }}
+
+      - name: 🗑️ Delete `releases` Branch
+        uses: stetind/ppc-github-composite-actions/.github/actions/delete-bracnh@1.0.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: releases
 
       - name: 📟 Summary
-        if: ${{ success() }}
+        if: always()
         run: |
-          echo "::notice ::Branch : `origin/releases` has been deleted"
+          echo "::notice::📟 Cleanup Summary"
+          echo "::notice::Branch 'releases' has been deleted"
+
+          if [ "${{ steps.create_pr.outputs.pr_url }}" != "" ]; then
+            echo "::notice::✅ PR created and processed: ${{ steps.create_pr.outputs.pr_url }}"
+          fi
+
+          if [ "${{ needs.read_metadata_and_delegate.outputs.merge_option }}" == "merge and delete" ]; then
+            echo "::notice::🗑️ Source branch cleanup was attempted"
+          fi

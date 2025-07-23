@@ -1,25 +1,43 @@
 # =============================================================================
 # 📦 NPM Publish
-# Publishes a Node.js package to npm. Designed for use with semantic versioning and GitHub Actions.
+#
+# This workflow publishes Node.js packages to npm registry:
+# - Supports both production and development releases
+# - Handles version updates automatically
+# - Configurable for different environments and runners
+#
 # Inputs:
-#   - npm_token: Required npm access token
-#   - production: Boolean to determine if production publishing (true) or dry-run
+#   - release_version_name: Version for npm package
+#   - is_dev_release: Whether this is a development release
+#   - dev_release_tag_name: Tag for dev releases (default: dev)
+#   - runner: GitHub runner to use (default: ubuntu-latest)
+#   - job_container: Docker container image (default: node:22.14)
+#
+# Required Secrets:
+#   - NPM_TOKEN: npm registry authentication token
+#
+# Trigger: workflow_call
 # =============================================================================
+
 
 name: Npm - Publish
 
 on:
   workflow_call:
     inputs:
+      release_version_name:
+        description: The name of the version that will be used to publish release on NPM.
+        type: string
+        required: true
+      is_dev_release:
+        description: Mark the publish as dev or not.
+        type: boolean
+        default: false
+        required: false
       dev_release_tag_name:
         description: The name of the tag that will be used to publish a dev release on NPM.
         type: string
         default: dev
-        required: false
-      release_version_name:
-        description: The name of the version that will be used to publish release on NPM.
-        type: string
-        default: ${{ github.event.release.tag_name }}
         required: false
       runner:
         description: 'Choose the runner'
@@ -38,15 +56,17 @@ jobs:
     container: ${{ inputs.job_container }}
     env:
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      NODE_ENV: ${{ inputs.is_dev_release && 'development' || 'production' }}
 
     steps:
       - name: 🛫 Checkout
         uses: actions/checkout@v4
 
       - name: 🔧 Setup Node and NPM
-        uses: stetind/ppc-npm-global-dependencies-action@v5.0
+        uses: stetind/ppc-github-composite-actions/.github/actions/intall-global-dependencies@1.0.0
         with:
           npm_token: $NPM_TOKEN
+          production: ${{ !inputs.is_dev_release }}
 
       - name: 🏗️ Building Environment
         run: npm run build --if-present && npx browserslist@latest --update-db
@@ -57,13 +77,13 @@ jobs:
           NODE_AUTH_TOKEN: $NPM_TOKEN
 
       - name: 🐱‍🚀 Publish Dev
-        if: "github.event.release.prerelease"
+        if: "inputs.is_dev_release"
         run: npm publish --tag ${{ inputs.dev_release_tag_name }}
         env:
           NODE_AUTH_TOKEN: $NPM_TOKEN
 
       - name: 🐱‍🚀 Publish Release
-        if: "!github.event.release.prerelease"
+        if: "!inputs.is_dev_release"
         run: npm publish
         env:
           NODE_AUTH_TOKEN: $NPM_TOKEN
