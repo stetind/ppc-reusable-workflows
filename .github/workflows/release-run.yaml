@@ -43,6 +43,7 @@ jobs:
   clean:
     name: 🧹 Merge and clean branches
     needs: [ release, metadata ]
+    if: needs.metadata.outputs.source_branch != 'main'
     uses: stetind/ppc-reusable-workflows/.github/workflows/release-clean.yaml@releases
     secrets:
       GH_TOKEN: ${{ secrets.WORKFLOW_TOKEN }}
@@ -53,3 +54,15 @@ jobs:
       target: 'main'
       runner: ${{ vars.DEFAULT_RUNNER }}
       job_container: ${{ vars.DEFAULT_NODE_CONTAINER }}
+
+  clean_release:
+    name: 🧹 Merge and clean branches
+    needs: [ release, metadata ]
+    runs-on: ${{ vars.DEFAULT_RUNNER }}
+    container: ${{ vars.DEFAULT_NODE_CONTAINER }}
+    steps:
+      - name: 🗑️ Delete `releases` Branch
+        uses: stetind/ppc-github-composite-actions/.github/actions/delete-bracnh@1.0.0
+        with:
+          token: ${{ secrets.WORKFLOW_TOKEN }}
+          branch: releases
