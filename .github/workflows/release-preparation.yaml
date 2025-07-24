@@ -103,7 +103,8 @@ jobs:
         if: steps.changelog.outputs.has_changes != ''
         run: |
           echo "Replacing version with ${{ steps.changelog.outputs.new_tag }}"
-          find .github/workflows -type f -name "*.yaml" \
+          current_file="release-prepare.yaml"
+          find .github/workflows -type f -name "*.yaml" ! -name "$current_file" \
             -exec sed -i "s|__VERSION__|${{ steps.changelog.outputs.new_tag }}|g" {} +
 
       - name: 💾 Write release metadata
