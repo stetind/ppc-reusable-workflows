@@ -31,7 +31,7 @@ name: 🧹 Merge and clean branches
 on:
   workflow_call:
     secrets:
-      GITHUB_TOKEN:
+      GH_TOKEN:
         description: ''
         required: true
     inputs:
@@ -77,7 +77,7 @@ jobs:
         id: create_pr
         uses: stetind/ppc-github-composite-actions/.github/actions/create-pr-and-merge@1.0.0
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GH_TOKEN }}
           title: Release ${{ inputs.title }}
           merge_option: ${{ inputs.merge_option }}
           source: ${{ inputs.source_branch }}
@@ -86,7 +86,7 @@ jobs:
       - name: 🗑️ Delete `releases` Branch
         uses: stetind/ppc-github-composite-actions/.github/actions/delete-bracnh@1.0.0
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GH_TOKEN }}
           branch: releases
 
       - name: 📟 Summary
