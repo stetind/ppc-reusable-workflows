@@ -33,11 +33,22 @@ name: 🧹 Merge and clean branches
 on:
   workflow_call:
     outputs:
-      previous_tag: ${{ jobs.metadata.outputs.previous_tag }}
-      new_tag: ${{ jobs.metadata.outputs.new_tag }}
-      prerelease: ${{ jobs.metadata.outputs.prerelease }}
-      merge_option: ${{ jobs.metadata.outputs.merge_option }}
-      source_branch: ${{ jobs.metadata.outputs.source_branch }}
+      previous_tag:
+        description: "Previous release tag"
+        value: ${{ jobs.metadata.outputs.previous_tag }}
+        new_tag:
+          description: "New release tag"
+          value: ${{ jobs.metadata.outputs.new_tag }}
+        prerelease:
+          description: "Pre-release identifier"
+          value: ${{ jobs.metadata.outputs.prerelease }}
+        merge_option:
+          description: "Merge strategy"
+          value: ${{ jobs.metadata.outputs.merge_option }}
+        source_branch:
+          description: "Source branch"
+          value: ${{ jobs.metadata.outputs.source_branch }}
+
     inputs:
       runner:
         description: 'Choose the runner'
