@@ -37,11 +37,6 @@ on:
           - 'merge and delete'
           - 'merge'
           - 'none'
-      temp_branch:
-        description: 'Name of the temporary branch for staging release changes. Must match branch used in run-release workflow'
-        required: false
-        default: 'releases'
-        type: string
       runner:
         description: 'Choose the runner'
         required: false
@@ -58,6 +53,8 @@ on:
         options:
           - 'node:22.14'
           - 'ubuntu:latest'
+env:
+  TEMP_BRANCH: 'releases'
 
 jobs:
   prepare:
