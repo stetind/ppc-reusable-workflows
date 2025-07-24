@@ -32,8 +32,8 @@
 # =============================================================================
 
 
-name: 🚧 Prepare Reusable Release
-run-name: 🚧 Prepare Reusable Release
+name: 🚧 Release Preparation Workflow
+run-name: 🚧 Release Preparation Workflow
 
 on:
   workflow_call:
