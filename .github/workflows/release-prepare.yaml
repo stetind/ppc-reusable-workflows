@@ -16,6 +16,7 @@
 
 
 name: 🎯 Prepare New Release
+run-name: 🎯 Prepare New Release
 
 on:
   workflow_dispatch:
