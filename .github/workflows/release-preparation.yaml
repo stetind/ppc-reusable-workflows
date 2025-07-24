@@ -120,15 +120,12 @@ jobs:
       - name: ⬇️ Checkout repository
         uses: actions/checkout@v4
         with:
-          token: ${{ secrets.WORKFLOW_TOKEN }}
           fetch-depth: 0
 
       - name: 🏷️ Select tag
         id: latest_tag
         if: inputs.tag == ''
         uses: stetind/ppc-github-composite-actions/.github/actions/get-latest-tag@v1.0.0
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 📦 Get commits since selected tag
         id: get_commits
