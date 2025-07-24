@@ -114,7 +114,10 @@ jobs:
   prepare:
     name: Prepare & Push
     runs-on: ${{ inputs.runner }}
-    container: ${{ inputs.job_container }}
+    container:
+      image: ${{ inputs.job_container }}
+      volumes:
+        - ${{ github.workspace }}:/workspace
 
     steps:
       - name: ⬇️ Checkout repository
