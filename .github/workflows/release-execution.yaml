@@ -15,7 +15,7 @@
 #   • .release-meta.json with release configuration
 #
 # Dependencies:
-#   • auto-release-based-conventional-commits.yaml
+#   • release-conventional.yaml
 #
 # Inputs:
 #   • runner: CI runner selection
@@ -27,7 +27,7 @@
 #   • Release documentation
 #
 # Usage:
-#   Called by execute-release.yaml
+#   Called by release-run.yaml
 # =============================================================================
 
 
@@ -108,7 +108,7 @@ jobs:
   release:
     name: Final Release
     needs: read_metadata_and_delegate
-    uses: stetind/ppc-reusable-workflows/.github/workflows/auto-release-based-conventional-commits.yaml@releases
+    uses: stetind/ppc-reusable-workflows/.github/workflows/release-conventional.yaml@releases
     secrets: inherit
     with:
       tag: ${{ needs.read_metadata_and_delegate.outputs.previous_tag }}
