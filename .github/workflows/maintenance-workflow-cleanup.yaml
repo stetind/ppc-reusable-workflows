@@ -98,7 +98,9 @@ jobs:
   cleanup:
     runs-on: ${{ inputs.runner }}
     container: ${{ inputs.job_container }}
-    uses: stetind/ppc-github-composite-actions/.github/actions/maintenance-cleanup@1.1.0
-    with:
-      status: ${{ inputs.status }}
-      workflow_name: ${{ inputs.workflow_name }}
+    steps:
+      - name: Cleanup
+        uses: stetind/ppc-github-composite-actions/.github/actions/maintenance-cleanup@1.1.0
+        with:
+          status: ${{ inputs.status }}
+          workflow_name: ${{ inputs.workflow_name }}
