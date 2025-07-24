@@ -76,7 +76,6 @@ on:
         required: false
         default: 'releases'
         type: string
-
   workflow_call:
     inputs:
       tag:
