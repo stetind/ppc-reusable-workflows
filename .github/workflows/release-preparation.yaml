@@ -50,7 +50,7 @@ on:
         description: 'Merge and cleanup option'
         required: false
         type: choice
-        default: ' none'
+        default: 'none'
         options:
           - 'merge and delete'
           - 'merge'
@@ -58,7 +58,7 @@ on:
       runner:
         description: 'Choose the runner'
         required: false
-        default: ${{ vars.DEFAULT_NODE_CONTAINER }}
+        default: 'ubuntu-latest'
         type: choice
         options:
           - 'self-hosted'
@@ -66,7 +66,7 @@ on:
       job_container:
         description: 'Select the docker container for the action'
         required: false
-        default: ${{ vars.DEFAULT_RUNNER }}
+        default: 'ubuntu:latest'
         type: choice
         options:
           - 'node:22.14'
@@ -113,8 +113,8 @@ on:
 jobs:
   prepare:
     name: Prepare & Push
-    runs-on: ${{ inputs.runner }}
-    container: ${{ inputs.job_container }}
+    runs-on: ${{ inputs.runner || vars.DEFAULT_RUNNER }}
+    container: ${{ inputs.job_container || vars.DEFAULT_NODE_CONTAINER }}
 
     steps:
       - name: ⬇️ Checkout repository
