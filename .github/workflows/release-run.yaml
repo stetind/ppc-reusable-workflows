@@ -26,8 +26,8 @@ jobs:
     name: Read Metadata & Trigger Reusable Release Workflow
     uses: stetind/ppc-reusable-workflows/.github/workflows/release-checkout.yaml@releases
     with:
-      runner: ${{ inputs.runner }}
-      job_container: ${{ inputs.job_container }}
+      runner: ${{ vars.DEFAULT_RUNNER }}
+      job_container: ${{ vars.DEFAULT_NODE_CONTAINER }}
 
   release:
     name: 📟 Final Release
@@ -37,8 +37,8 @@ jobs:
     with:
       tag: ${{ needs.metadata.outputs.previous_tag }}
       prerelease: ${{ needs.metadata.outputs.prerelease }}
-      runner: ${{ inputs.runner }}
-      job_container: ${{ inputs.job_container }}
+      runner: ${{ vars.DEFAULT_RUNNER }}
+      job_container: ${{ vars.DEFAULT_NODE_CONTAINER }}
 
   clean:
     name: 🧹 Merge and clean branches
@@ -51,3 +51,5 @@ jobs:
       merge_option: ${{ needs.metadata.outputs.merge_option }}
       source: ${{ needs.metadata.outputs.source_branch }}
       target: 'main'
+      runner: ${{ vars.DEFAULT_RUNNER }}
+      job_container: ${{ vars.DEFAULT_NODE_CONTAINER }}

@@ -48,7 +48,6 @@ on:
       source_branch:
         description: "Source branch"
         value: ${{ jobs.metadata.outputs.source_branch }}
-
     inputs:
       runner:
         description: 'Choose the runner'
