@@ -15,8 +15,8 @@
 # =============================================================================
 
 
-name: 🚧 Prepare Reusable Release
-run-name: 🚧 Prepare Reusable Release
+name: 🎯 Prepare New Release
+run-name: 🎯 Prepare New Release
 
 on:
   workflow_dispatch:

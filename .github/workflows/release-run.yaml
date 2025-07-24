@@ -14,7 +14,7 @@
 # Dependencies: reusable-release-execution.yaml
 # =============================================================================
 
-name: 🚀 Run Release from Branch
+name: 📦 Execute Release Process
 
 on:
   push:
