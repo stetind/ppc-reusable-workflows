@@ -36,6 +36,11 @@ name: 🚀 Release Execution Workflow
 on:
   workflow_call:
     inputs:
+      target:
+        description: 'The target branch name for merge'
+        required: false
+        default: 'main'
+        type: string
       runner:
         description: 'GitHub runner to execute the workflow (e.g., ubuntu-latest, self-hosted)'
         required: false
@@ -84,4 +89,6 @@ jobs:
       title: Release ${{ needs.metadata.outputs.new_tag }}
       merge_option: ${{ needs.metadata.outputs.merge_option }}
       source: ${{ needs.metadata.outputs.source_branch }}
-      target: 'main'
+      target: ${{ inputs.target }}
+      runner: ${{ inputs.runner }}
+      job_container: ${{ inputs.job_container }}
