@@ -124,35 +124,49 @@ jobs:
           fetch-depth: 0
 
       - name: 🏷️ Select tag
-        id: select_tag
+        id: latest_tag
+        if: inputs.tag == ''
         uses: stetind/ppc-github-composite-actions/.github/actions/get-latest-tag@v1.0.0
-        with:
-          tag: ${{ inputs.tag }}
         env:
-          GH_TOKEN: ${{ secrets.WORKFLOW_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 📦 Get commits since selected tag
+        id: get_commits
+        uses: stetind/ppc-github-composite-actions/.github/actions/get-commits-since-tag@v1.0.0
+        with:
+          tag: ${{ inputs.tag || steps.latest_tag.outputs.latest_tag }}
+
+      - name: 🔍 Detect version bump and compute new version
+        id: detect_version
+        if: steps.get_commits.outputs.commits != ''
+        uses: stetind/ppc-github-composite-actions/.github/actions/detect-version-bump@v1.0.0
+        with:
+          commits: ${{ steps.get_commits.outputs.commits }}
+          tag: ${{ inputs.previous_tag }}
 
       - name: 🧪 Generate changelog
         id: changelog
-        uses: stetind/ppc-github-composite-actions/.github/actions/generate-changelog-by-tag@v1.0.0
+        if: steps.get_commits.outputs.commits != ''
+        uses: stetind/ppc-github-composite-actions/.github/actions/generate-changelog@v1.0.0
         with:
-          previous_tag: ${{ steps.select_tag.outputs.selected_tag }}
+          commits: ${{ steps.get_commits.outputs.commits }}
+          previous_tag: ${{ inputs.tag || steps.latest_tag.outputs.latest_tag }}
+          new_tag: ${{ steps.detect_version.outputs.new_version }}
           repository: ${{ github.repository }}
-          new_tag: ''
 
       - name: Replace __VERSION__ placeholders
-        if: steps.changelog.outputs.has_changes != ''
+        if: steps.get_commits.outputs.commits != ''
         run: |
           echo "Replacing version with ${{ steps.changelog.outputs.new_tag }}"
-          current_file="release-prepare.yaml"
-          find .github/workflows -type f -name "*.yaml" ! -name "$current_file" \
+          find .github/workflows -type f -name "*.yaml" \
             -exec sed -i "s|__VERSION__|${{ steps.changelog.outputs.new_tag }}|g" {} +
 
       - name: 💾 Write release metadata
-        if: steps.changelog.outputs.has_changes != ''
+        if: steps.get_commits.outputs.commits != ''
         run: |
           cat <<EOF > .release-meta.json
           {
-            "previous_tag": "${{ steps.select_tag.outputs.selected_tag }}",
+            "previous_tag": "${{ steps.latest_tag.outputs.selected_tag }}",
             "new_tag": "${{ steps.changelog.outputs.new_tag }}",
             "prerelease": "${{ github.event.inputs.prerelease || '' }}",
             "merge_option": "${{ github.event.inputs.merge_option || 'none' }}",
@@ -160,8 +174,8 @@ jobs:
           }
           EOF
 
-      - name: Commit & Push to ${{ env.TEMP_BRANCH }}
-        if: steps.changelog.outputs.has_changes != ''
+      - name: Commit & Push to ${{ inputs.temp_branch }}
+        if: steps.get_commits.outputs.commits != ''
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
