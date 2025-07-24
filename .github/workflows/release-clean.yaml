@@ -75,7 +75,7 @@ jobs:
 
       - name: 🔄 Merge anc Delete
         id: create_pr
-        uses: stetind/ppc-github-composite-actions/.github/actions/create-pr-and-merge@1.0.0
+        uses: stetind/ppc-github-composite-actions/.github/actions/create-pr-and-merge@v1.0.0
         with:
           token: ${{ secrets.GH_TOKEN }}
           title: Release ${{ inputs.title }}

@@ -80,7 +80,7 @@ jobs:
           fetch-depth: 0
 
       - name: 🔧 Install Jq
-        uses: stetind/ppc-github-composite-actions/.github/actions/check-install-jq@1.0.0
+        uses: stetind/ppc-github-composite-actions/.github/actions/check-install-jq@v1.0.0
 
       - name: 🔍 Read .release-meta.json
         id: read_meta
