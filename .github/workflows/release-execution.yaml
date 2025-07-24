@@ -57,6 +57,8 @@ jobs:
   metadata:
     name: Read Metadata & Trigger Reusable Release Workflow
     uses: stetind/ppc-reusable-workflows/.github/workflows/release-checkout.yaml@__VERSION__
+    secrets:
+      GH_TOKEN: ${{ secrets.WORFLOW_TOKEN }}
     with:
       runner: ${{ inputs.runner }}
       job_container: ${{ inputs.job_container }}
@@ -77,7 +79,7 @@ jobs:
     needs: [release, metadata]
     uses: stetind/ppc-reusable-workflows/.github/workflows/release-clean.yaml@__VERSION__
     secrets:
-      GITHUB_TOKEN: ${{ secrets.WORKFLOW_TOKEN }}
+      GH_TOKEN: ${{ secrets.WORKFLOW_TOKEN }}
     with:
       title: Release ${{ needs.metadata.outputs.new_tag }}
       merge_option: ${{ needs.metadata.outputs.merge_option }}

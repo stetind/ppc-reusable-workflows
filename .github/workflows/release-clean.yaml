@@ -32,32 +32,32 @@ on:
   workflow_call:
     secrets:
       GH_TOKEN:
-        description: ''
+        description: 'GitHub token with permissions for PR creation, branch merging, and deletion'
         required: true
     inputs:
       title:
-        description: ''
+        description: 'Title of the pull request to be created (typically includes version number)'
         required: true
         type: string
       merge_option:
-        description: ''
+        description: 'Strategy for branch handling (merge and delete, merge, or none)'
         required: true
         type: string
       source:
-        description: ''
+        description: 'Source branch containing the changes to be merged'
         required: true
         type: string
       target:
-        description: ''
+        description: 'Target branch where changes will be merged (typically main)'
         required: true
         type: string
       runner:
-        description: 'Choose the runner'
+        description: 'GitHub-hosted runner or self-hosted runner label for job execution'
         required: false
         default: 'ubuntu-latest'
         type: string
       job_container:
-        description: 'Select the docker container for the action'
+        description: 'Docker container image and tag for running the job'
         required: false
         default: 'node:22.14'
         type: string

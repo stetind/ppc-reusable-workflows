@@ -45,7 +45,7 @@ jobs:
     needs: [ release, metadata ]
     uses: stetind/ppc-reusable-workflows/.github/workflows/release-clean.yaml@releases
     secrets:
-      GITHUB_TOKEN: ${{ secrets.WORKFLOW_TOKEN }}
+      GH_TOKEN: ${{ secrets.WORKFLOW_TOKEN }}
     with:
       title: Release ${{ needs.metadata.outputs.new_tag }}
       merge_option: ${{ needs.metadata.outputs.merge_option }}
