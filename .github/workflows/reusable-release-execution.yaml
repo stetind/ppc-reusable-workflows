@@ -1,39 +1,63 @@
 # =============================================================================
-# 🚀 Run Release from Branch
+# 🚀 Release Execution Workflow
 #
-# This workflow automates the release process when the `releases` branch updates:
-# - Reads metadata from .release-meta.json
-# - Triggers the reusable release workflow
-# - Cleans up after successful release
+# Description:
+#   A reusable workflow that processes prepared release data and executes
+#   the release process including changelog generation and branch cleanup.
+#
+# Key Features:
+#   • Metadata processing from .release-meta.json
+#   • Release creation via conventional commits
+#   • Branch merging and cleanup
+#   • Release documentation generation
 #
 # Required Files:
-#   - .release-meta.json containing:
-#     - previous_tag: Tag to compare from
-#     - new_tag: Tag to be released
-#     - prerelease: Optional prerelease identifier
+#   • .release-meta.json with release configuration
 #
 # Dependencies:
-#   - stetind/ppc-reusable-workflows/.github/workflows/auto-release-based-conventional-commits.yaml
+#   • auto-release-based-conventional-commits.yaml
 #
-# Trigger: push (branch: releases)
+# Inputs:
+#   • runner: CI runner selection
+#   • job_container: Container configuration
+#
+# Outputs:
+#   • GitHub Release
+#   • Updated branch state
+#   • Release documentation
+#
+# Usage:
+#   Called by execute-release.yaml
 # =============================================================================
+
 
 name: 🚀 Run Release from Branch
 
-permissions:
-  contents: write
-  pull-requests: write
-
 on:
-  push:
-    branches:
-      - releases
+  workflow_call:
+    inputs:
+      runner:
+        description: 'GitHub runner to execute the workflow (e.g., ubuntu-latest, self-hosted)'
+        required: false
+        default: ${{ vars.DEFAULT_RUNNER }}
+        type: string
+      job_container:
+        description: 'Docker container image to run the job (e.g., node:22.14)'
+        required: false
+        default: ${{ vars.DEFAULT_NODE_CONTAINER }}
+        type: string
+    outputs:
+      previous_tag: ${{ job.read_metadata_and_delegate.outputs.previous_tag }}
+      new_tag: ${{ steps.read_metadata_and_delegate.outputs.new_tag }}
+      prerelease: ${{ steps.read_metadata_and_delegate.outputs.prerelease }}
+      merge_option: ${{ steps.read_metadata_and_delegate.outputs.merge_option }}
+      source_branch: ${{ steps.read_metadata_and_delegate.outputs.source_branch }}
 
 jobs:
   read_metadata_and_delegate:
     name: Read Metadata & Trigger Reusable Release Workflow
-    runs-on: ${{ vars.DEFAULT_RUNNER || 'ubuntu-latest' }}
-    container: ${{ vars.DEFAULT_NODE_CONTAINER || 'node:22.14' }}
+    runs-on: ${{ inputs.runner }}
+    container: ${{ inputs.job_container }}
 
     outputs:
       previous_tag: ${{ steps.read_meta.outputs.previous_tag }}
@@ -89,14 +113,14 @@ jobs:
     with:
       tag: ${{ needs.read_metadata_and_delegate.outputs.previous_tag }}
       prerelease: ${{ needs.read_metadata_and_delegate.outputs.prerelease }}
-      runner: ${{ vars.DEFAULT_RUNNER || 'ubuntu-latest' }}
-      job_container: ${{ vars.DEFAULT_NODE_CONTAINER || 'node:22.14' }}
+      runner: ${{ inputs.runner }}
+      job_container: ${{ inputs.job_container }}
 
   clean:
     name: 🧹 Merge and clean branches
     needs: [release, read_metadata_and_delegate]
-    runs-on: ${{ vars.DEFAULT_RUNNER || 'ubuntu-latest' }}
-    container: ${{ vars.DEFAULT_NODE_CONTAINER || 'node:22.14' }}
+    runs-on: ${{ inputs.runner }}
+    container: ${{ inputs.job_container }}
 
     steps:
       - name: ⬇️ Checkout repository
