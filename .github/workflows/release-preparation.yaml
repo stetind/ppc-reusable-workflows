@@ -1,76 +1,80 @@
 # =============================================================================
-# 🚧 Prepare Reusable Release
+# 🚧 Release Preparation Workflow
 #
 # Description:
-#   Automates the release preparation process by handling versioning and file updates.
+#   A reusable workflow that prepares repository for a new release by handling
+#   versioning, file updates, and metadata creation.
 #
-# Key Functions:
-#   • Computes next semantic version from commit history
-#   • Updates __VERSION__ placeholders in workflow files
-#   • Creates version metadata in .release-meta.json
-#   • Pushes changes to releases branch
+# Key Features:
+#   • Semantic version computation from commit history
+#   • Automated version placeholder updates
+#   • Release metadata generation
+#   • Temporary branch management
+#
+# Required Permissions:
+#   • WORKFLOW_TOKEN: Repository write access
+#   • Git: Full history access (fetch-depth: 0)
 #
 # Inputs:
-#   • tag: Optional specific version tag (e.g., v1.0.0)
-#   • prerelease: Optional prerelease identifier (beta/rc)
-#   • runner: Custom runner selection
-#   • job_container: Docker container for the action
+#   • tag: Release version override (optional)
+#   • prerelease: Pre-release identifier (optional)
+#   • merge_option: Branch handling strategy
+#   • runner: CI runner selection
+#   • job_container: Container configuration
+#   • temp_branch: Temporary branch name
 #
-# Requirements:
-#   • WORKFLOW_TOKEN with repository write access
-#   • Git history access (fetch-depth: 0)
+# Outputs:
+#   • Metadata file (.release-meta.json)
+#   • Updated workflow files with new version
 #
-# Trigger: Manual (workflow_dispatch)
+# Usage:
+#   Called by prepare-new-release.yaml
 # =============================================================================
+
 
 name: 🚧 Prepare Reusable Release
 run-name: 🚧 Prepare Reusable Release
 
 on:
-  workflow_dispatch:
+  workflow_call:
     inputs:
       tag:
-        description: 'Optional tag version (e.g., v1.0.0). Leave empty for the latest tag.'
+        description: 'Version tag to use for the release (e.g., v1.0.0). If not specified, will use the latest tag'
         required: false
         type: string
       prerelease:
-        description: 'Optional prerelease identifier (e.g., beta, rc). Leave empty for stable.'
+        description: 'Identifier for pre-release versions (e.g., beta, rc). Leave empty for stable releases'
         required: false
         type: string
       merge_option:
-        description: 'Merge and cleanup option'
+        description: 'Controls how changes are merged after release preparation:
+          - merge and delete: merges changes and removes temporary branch
+          - merge: only merges changes
+          - none: keeps changes in temporary branch'
         required: false
-        type: choice
-        default: ' none'
-        options:
-          - 'merge and delete'
-          - 'merge'
-          - 'none'
+        type: string
+        default: 'merge and delete'
       runner:
-        description: 'Choose the runner'
+        description: 'GitHub runner to execute the workflow (e.g., ubuntu-latest, self-hosted)'
         required: false
-        default: 'ubuntu-latest'
-        type: choice
-        options:
-          - 'self-hosted'
-          - 'ubuntu-latest'
+        default: ${{ vars.DEFAULT_RUNNER }}
+        type: string
       job_container:
-        description: 'Select the docker container for the action'
+        description: 'Docker container image to run the job (e.g., node:22.14)'
         required: false
-        default: 'node:22.14'
-        type: choice
-        options:
-          - 'node:22.14'
-          - 'ubuntu:latest'
-
-env:
-  TEMP_BRANCH: releases
+        default: ${{ vars.DEFAULT_NODE_CONTAINER }}
+        type: string
+      temp_branch:
+        description: 'Name of the temporary branch for staging release changes. Must match branch used in run-release workflow'
+        required: false
+        default: 'releases'
+        type: string
 
 jobs:
   prepare:
     name: Prepare & Push
-    runs-on: ${{ inputs.runner || vars.DEFAULT_RUNNER }}
-    container: ${{ inputs.job_container || vars.DEFAULT_NODE_CONTAINER}}
+    runs-on: ${{ inputs.runner }}
+    container: ${{ inputs.job_container }}
 
     steps:
       - name: ⬇️ Checkout repository
@@ -83,7 +87,7 @@ jobs:
         id: select_tag
         uses: stetind/ppc-github-composite-actions/.github/actions/get-latest-tag@1.0.0
         with:
-          tag: ${{ github.event.inputs.tag }}
+          tag: ${{ inputs.tag }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -121,10 +125,10 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          git checkout -B ${{ env.TEMP_BRANCH }}
+          git checkout -B ${{ inputs.temp_branch }}
           git add .github/workflows/*.yaml
           git add .github/*.yaml
           git add .release-meta.json
           git add README.md
           git commit -m "Prepare release for version ${{ steps.changelog.outputs.new_tag }}"
-          git push origin ${{ env.TEMP_BRANCH }} --force
+          git push origin ${{ inputs.temp_branch }} --force

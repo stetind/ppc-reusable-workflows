@@ -52,7 +52,7 @@ on:
 
 jobs:
   publish:
-    runs-on: ${{ inputs.runner  }}
+    runs-on: ${{ inputs.runner }}
     container: ${{ inputs.job_container }}
     env:
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

@@ -1,0 +1,67 @@
+# =============================================================================
+# 🎯 Prepare New Release
+#
+# Description:
+#   Workflow that initiates the release preparation process by calling
+#   the reusable release preparation workflow with repository-specific settings.
+#
+# Features:
+#   • Manual trigger support
+#   • Configurable release parameters
+#   • Default runner and container settings
+#
+# Trigger: Manual (workflow_dispatch)
+# Dependencies: reusable-release-preparation.yaml
+# =============================================================================
+
+
+name: 🚧 Prepare Reusable Release
+run-name: 🚧 Prepare Reusable Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Optional tag version (e.g., v1.0.0). Leave empty for the latest tag.'
+        required: false
+        type: string
+      prerelease:
+        description: 'Optional prerelease identifier (e.g., beta, rc). Leave empty for stable.'
+        required: false
+        type: string
+      merge_option:
+        description: 'Merge and cleanup option'
+        required: false
+        type: choice
+        default: ' none'
+        options:
+          - 'merge and delete'
+          - 'merge'
+          - 'none'
+      runner:
+        description: 'Choose the runner'
+        required: false
+        default: 'ubuntu-latest'
+        type: choice
+        options:
+          - 'self-hosted'
+          - 'ubuntu-latest'
+      job_container:
+        description: 'Select the docker container for the action'
+        required: false
+        default: 'node:22.14'
+        type: choice
+        options:
+          - 'node:22.14'
+          - 'ubuntu:latest'
+
+jobs:
+  prepare:
+    uses: stetind/ppc-reusable-workflows/.github/workflows/release-preparation.yaml@__VERSION__
+    secrets: inherit
+    with:
+      tag: ${{ inputs.tag }}
+      prerelease: ${{ inputs.prerelease }}
+      merge_option: ${{ inputs.merge_option }}
+      runner: ${{ inputs.runner }}
+      job_container: 'releases'
