@@ -55,13 +55,68 @@ on:
           - 'node:22.14'
           - 'ubuntu:latest'
 
+env:
+  TEMP_BRANCH: releases
+
 jobs:
   prepare:
-    uses: stetind/ppc-reusable-workflows/.github/workflows/release-preparation.yaml@__VERSION__
-    secrets: inherit
-    with:
-      tag: ${{ inputs.tag }}
-      prerelease: ${{ inputs.prerelease }}
-      merge_option: ${{ inputs.merge_option }}
-      runner: ${{ inputs.runner }}
-      job_container: 'releases'
+    name: Prepare & Push
+    runs-on: ${{ inputs.runner }}
+    container: ${{ inputs.job_container }}
+
+    steps:
+      - name: ⬇️ Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.WORKFLOW_TOKEN }}
+          fetch-depth: 0
+
+      - name: 🏷️ Select tag
+        id: select_tag
+        uses: stetind/ppc-github-composite-actions/.github/actions/get-latest-tag@1.0.0
+        with:
+          tag: ${{ inputs.tag }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🧪 Generate changelog
+        id: changelog
+        uses: stetind/ppc-github-composite-actions/.github/actions/generate-changelog-by-tag@1.0.0
+        with:
+          previous_tag: ${{ steps.select_tag.outputs.selected_tag }}
+          repository: ${{ github.repository }}
+          new_tag: ''
+
+      - name: Replace v9.0.0 placeholders
+        if: steps.changelog.outputs.has_changes != ''
+        run: |
+          echo "Replacing version with ${{ steps.changelog.outputs.new_tag }}"
+          find .github/workflows -type f -name "*.yaml" \
+            -exec sed -i "s|v9.0.0|${{ steps.changelog.outputs.new_tag }}|g" {} +
+
+      - name: 💾 Write release metadata
+        if: steps.changelog.outputs.has_changes != ''
+        run: |
+          cat <<EOF > .release-meta.json
+          {
+            "previous_tag": "${{ steps.select_tag.outputs.selected_tag }}",
+            "new_tag": "${{ steps.changelog.outputs.new_tag }}",
+            "prerelease": "${{ github.event.inputs.prerelease || '' }}",
+            "merge_option": "${{ github.event.inputs.merge_option || 'none' }}",
+            "source_branch": "${{ github.ref_name }}"
+          }
+          EOF
+
+      - name: Commit & Push to ${{ env.TEMP_BRANCH }}
+        if: steps.changelog.outputs.has_changes != ''
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git checkout -B ${{ env.TEMP_BRANCH }}
+          git add .github/workflows/*.yaml
+          git add .github/*.yaml
+          git add .release-meta.json
+          git add README.md
+          git commit -m "Prepare release for version ${{ steps.changelog.outputs.new_tag }}"
+          git push origin ${{ env.TEMP_BRANCH }} --force

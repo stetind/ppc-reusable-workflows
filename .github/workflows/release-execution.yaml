@@ -36,6 +36,11 @@ name: 🚀 Release Execution Workflow
 on:
   workflow_call:
     inputs:
+      target:
+        description: 'The target branch name for merge'
+        required: false
+        default: 'main'
+        type: string
       runner:
         description: 'GitHub runner to execute the workflow (e.g., ubuntu-latest, self-hosted)'
         required: false
@@ -47,112 +52,43 @@ on:
         default: ${{ vars.DEFAULT_NODE_CONTAINER }}
         type: string
     outputs:
-      previous_tag: ${{ job.read_metadata_and_delegate.outputs.previous_tag }}
-      new_tag: ${{ steps.read_metadata_and_delegate.outputs.new_tag }}
-      prerelease: ${{ steps.read_metadata_and_delegate.outputs.prerelease }}
-      merge_option: ${{ steps.read_metadata_and_delegate.outputs.merge_option }}
-      source_branch: ${{ steps.read_metadata_and_delegate.outputs.source_branch }}
+      previous_tag: ${{ jobs.metadata.outputs.previous_tag }}
+      new_tag: ${{ jobs.metadata.outputs.new_tag }}
+      prerelease: ${{ jobs.metadata.outputs.prerelease }}
+      merge_option: ${{ jobs.metadata.outputs.merge_option }}
+      source_branch: ${{ jobs.metadata.outputs.source_branch }}
 
 jobs:
-  read_metadata_and_delegate:
+  metadata:
     name: Read Metadata & Trigger Reusable Release Workflow
-    runs-on: ${{ inputs.runner }}
-    container: ${{ inputs.job_container }}
-
-    outputs:
-      previous_tag: ${{ steps.read_meta.outputs.previous_tag }}
-      new_tag: ${{ steps.read_meta.outputs.new_tag }}
-      prerelease: ${{ steps.read_meta.outputs.prerelease }}
-      merge_option: ${{ steps.read_meta.outputs.merge_option }}
-      source_branch: ${{ steps.read_meta.outputs.source_branch }}
-
-    steps:
-      - name: ⬇️ Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: 🔧 Install Jq
-        uses: stetind/ppc-github-composite-actions/.github/actions/check-install-jq@1.0.0
-
-      - name: 🔍 Read .release-meta.json
-        id: read_meta
-        run: |
-          if [ ! -f .release-meta.json ]; then
-            echo "::error ::.release-meta.json file not found!"
-            exit 1
-          fi
-
-          PREVIOUS_TAG=$(jq -r '.previous_tag' .release-meta.json)
-          NEW_TAG=$(jq -r '.new_tag' .release-meta.json)
-          PRERELEASE=$(jq -r '.prerelease' .release-meta.json)
-          MERGE_OPTION=$(jq -r '.merge_option' .release-meta.json)
-          SOURCE_BRANCH=$(jq -r '.source_branch' .release-meta.json)
-
-          echo "previous_tag=$PREVIOUS_TAG" >> $GITHUB_OUTPUT
-          echo "new_tag=$NEW_TAG" >> $GITHUB_OUTPUT
-          echo "prerelease=$PRERELEASE" >> $GITHUB_OUTPUT
-          echo "merge_option=$MERGE_OPTION" >> $GITHUB_OUTPUT
-          echo "source_branch=$SOURCE_BRANCH" >> $GITHUB_OUTPUT
-
-      - name: 📟 Summary
-        if: always()
-        run: |
-          echo "::notice ::📆 Meta Data"
-          echo "::notice ::🚧 Previous Tag: ${{ steps.read_meta.outputs.previous_tag }}"
-          echo "::notice ::🚧 New Tag: ${{ steps.read_meta.outputs.new_tag }}"
-          echo "::notice ::🚧 Pre-release: ${{ steps.read_meta.outputs.prerelease }}"
-          echo "::notice ::🚧 Merge option: ${{ steps.read_meta.outputs.merge_option }}"
-          echo "::notice ::🚧 Source Branch: ${{ steps.read_meta.outputs.source_branch }}"
+    uses: stetind/ppc-reusable-workflows/.github/workflows/release-checkout.yaml@v9.0.0
+    secrets:
+      GH_TOKEN: ${{ secrets.WORFLOW_TOKEN }}
+    with:
+      runner: ${{ inputs.runner }}
+      job_container: ${{ inputs.job_container }}
 
   release:
-    name: Final Release
-    needs: read_metadata_and_delegate
-    uses: stetind/ppc-reusable-workflows/.github/workflows/release-conventional.yaml@releases
+    name: 📟 Final Release
+    needs: metadata
+    uses: stetind/ppc-reusable-workflows/.github/workflows/release-conventional.yaml@v9.0.0
     secrets: inherit
     with:
-      tag: ${{ needs.read_metadata_and_delegate.outputs.previous_tag }}
-      prerelease: ${{ needs.read_metadata_and_delegate.outputs.prerelease }}
+      tag: ${{ needs.metadata.outputs.previous_tag }}
+      prerelease: ${{ needs.metadata.outputs.prerelease }}
       runner: ${{ inputs.runner }}
       job_container: ${{ inputs.job_container }}
 
   clean:
     name: 🧹 Merge and clean branches
-    needs: [release, read_metadata_and_delegate]
-    runs-on: ${{ inputs.runner }}
-    container: ${{ inputs.job_container }}
-
-    steps:
-      - name: ⬇️ Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: 🔄 Merge anc Delete
-        id: create_pr
-        uses: stetind/ppc-github-composite-actions/.github/actions/create-pr-and-merge@1.0.0
-        with:
-          token: ${{ secrets.WORKFLOW_TOKEN }}
-          title: Release ${{ needs.read_metadata_and_delegate.outputs.new_tag }}
-          merge_option: ${{ needs.read_metadata_and_delegate.outputs.merge_option }}
-          source: ${{ needs.read_metadata_and_delegate.outputs.source_branch }}
-
-      - name: 🗑️ Delete `releases` Branch
-        uses: stetind/ppc-github-composite-actions/.github/actions/delete-bracnh@1.0.0
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          branch: releases
-
-      - name: 📟 Summary
-        if: always()
-        run: |
-          echo "::notice::📟 Cleanup Summary"
-          echo "::notice::Branch 'releases' has been deleted"
-
-          if [ "${{ steps.create_pr.outputs.pr_url }}" != "" ]; then
-            echo "::notice::✅ PR created and processed: ${{ steps.create_pr.outputs.pr_url }}"
-          fi
-
-          if [ "${{ needs.read_metadata_and_delegate.outputs.merge_option }}" == "merge and delete" ]; then
-            echo "::notice::🗑️ Source branch cleanup was attempted"
-          fi
+    needs: [release, metadata]
+    uses: stetind/ppc-reusable-workflows/.github/workflows/release-clean.yaml@v9.0.0
+    secrets:
+      GH_TOKEN: ${{ secrets.WORKFLOW_TOKEN }}
+    with:
+      title: Release ${{ needs.metadata.outputs.new_tag }}
+      merge_option: ${{ needs.metadata.outputs.merge_option }}
+      source: ${{ needs.metadata.outputs.source_branch }}
+      target: ${{ inputs.target }}
+      runner: ${{ inputs.runner }}
+      job_container: ${{ inputs.job_container }}

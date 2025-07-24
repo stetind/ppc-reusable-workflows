@@ -1,0 +1,104 @@
+# =============================================================================
+# 🧹 Release Branch Cleanup
+#
+# Description:
+#   A reusable workflow for handling post-release branch management, including
+#   merging changes and cleaning up temporary branches.
+#
+# Key Features:
+#   • Creates and processes pull requests
+#   • Merges changes to target branch
+#   • Cleans up temporary branches
+#   • Provides execution summary
+#
+# Required Inputs:
+#   • title: PR title for the merge
+#   • merge_option: Strategy for branch handling
+#   • source: Source branch to merge from
+#   • target: Target branch to merge into
+#   • runner: (optional) CI runner selection
+#   • job_container: (optional) Container configuration
+#
+# Required Permissions:
+#   • GITHUB_TOKEN with repository write access
+#
+# Usage:
+#   Called by release-execution.yaml during release process
+# =============================================================================
+
+name: 🧹 Merge and clean branches
+
+on:
+  workflow_call:
+    secrets:
+      GH_TOKEN:
+        description: 'GitHub token with permissions for PR creation, branch merging, and deletion'
+        required: true
+    inputs:
+      title:
+        description: 'Title of the pull request to be created (typically includes version number)'
+        required: true
+        type: string
+      merge_option:
+        description: 'Strategy for branch handling (merge and delete, merge, or none)'
+        required: true
+        type: string
+      source:
+        description: 'Source branch containing the changes to be merged'
+        required: true
+        type: string
+      target:
+        description: 'Target branch where changes will be merged (typically main)'
+        required: true
+        type: string
+      runner:
+        description: 'GitHub-hosted runner or self-hosted runner label for job execution'
+        required: false
+        default: 'ubuntu-latest'
+        type: string
+      job_container:
+        description: 'Docker container image and tag for running the job'
+        required: false
+        default: 'node:22.14'
+        type: string
+
+jobs:
+  release:
+    name: Merge and clean branches
+    runs-on: ${{ inputs.runner }}
+    container: ${{ inputs.job_container }}
+    steps:
+      - name: ⬇️ Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🔄 Merge anc Delete
+        id: create_pr
+        uses: stetind/ppc-github-composite-actions/.github/actions/create-pr-and-merge@1.0.0
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+          title: Release ${{ inputs.title }}
+          merge_option: ${{ inputs.merge_option }}
+          source: ${{ inputs.source_branch }}
+          target: ${{ inputs.target }}
+
+      - name: 🗑️ Delete `releases` Branch
+        uses: stetind/ppc-github-composite-actions/.github/actions/delete-bracnh@1.0.0
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+          branch: releases
+
+      - name: 📟 Summary
+        if: always()
+        run: |
+          echo "::notice::📟 Cleanup Summary"
+          echo "::notice::Branch 'releases' has been deleted"
+
+          if [ "${{ steps.create_pr.outputs.pr_url }}" != "" ]; then
+            echo "::notice::✅ PR created and processed: ${{ steps.create_pr.outputs.pr_url }}"
+          fi
+
+          if [ "${{ inputs.merge_option }}" == "merge and delete" ]; then
+            echo "::notice::🗑️ Source branch cleanup was attempted"
+          fi

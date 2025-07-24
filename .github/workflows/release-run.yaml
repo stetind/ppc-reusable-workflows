@@ -14,7 +14,7 @@
 # Dependencies: reusable-release-execution.yaml
 # =============================================================================
 
-name: 📦 Execute Release Process
+name: 📦 Execute Release
 
 on:
   push:
@@ -22,9 +22,34 @@ on:
       - releases
 
 jobs:
+  metadata:
+    name: Read Metadata & Trigger Reusable Release Workflow
+    uses: stetind/ppc-reusable-workflows/.github/workflows/release-checkout.yaml@releases
+    with:
+      runner: ${{ vars.DEFAULT_RUNNER }}
+      job_container: ${{ vars.DEFAULT_NODE_CONTAINER }}
+
   release:
-    uses: stetind/ppc-reusable-workflows/.github/workflows/release-execution.yaml@__VERSION__
+    name: 📟 Final Release
+    needs: metadata
+    uses: stetind/ppc-reusable-workflows/.github/workflows/release-conventional.yaml@releases
     secrets: inherit
     with:
-      runner: ${{ vars.DEFAULT_RUNNER || 'ubuntu-latest' }}
-      job_container: ${{ vars.DEFAULT_NODE_CONTAINER || 'node:22.14' }}
+      tag: ${{ needs.metadata.outputs.previous_tag }}
+      prerelease: ${{ needs.metadata.outputs.prerelease }}
+      runner: ${{ vars.DEFAULT_RUNNER }}
+      job_container: ${{ vars.DEFAULT_NODE_CONTAINER }}
+
+  clean:
+    name: 🧹 Merge and clean branches
+    needs: [ release, metadata ]
+    uses: stetind/ppc-reusable-workflows/.github/workflows/release-clean.yaml@releases
+    secrets:
+      GH_TOKEN: ${{ secrets.WORKFLOW_TOKEN }}
+    with:
+      title: Release ${{ needs.metadata.outputs.new_tag }}
+      merge_option: ${{ needs.metadata.outputs.merge_option }}
+      source: ${{ needs.metadata.outputs.source_branch }}
+      target: 'main'
+      runner: ${{ vars.DEFAULT_RUNNER }}
+      job_container: ${{ vars.DEFAULT_NODE_CONTAINER }}

@@ -99,12 +99,12 @@ jobs:
           repository: ${{ github.repository }}
           new_tag: ''
 
-      - name: Replace __VERSION__ placeholders
+      - name: Replace v9.0.0 placeholders
         if: steps.changelog.outputs.has_changes != ''
         run: |
           echo "Replacing version with ${{ steps.changelog.outputs.new_tag }}"
           find .github/workflows -type f -name "*.yaml" \
-            -exec sed -i "s|__VERSION__|${{ steps.changelog.outputs.new_tag }}|g" {} +
+            -exec sed -i "s|v9.0.0|${{ steps.changelog.outputs.new_tag }}|g" {} +
 
       - name: 💾 Write release metadata
         if: steps.changelog.outputs.has_changes != ''

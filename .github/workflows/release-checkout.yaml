@@ -1,0 +1,113 @@
+# =============================================================================
+# 📦 Release Metadata Reader
+#
+# Description:
+#   A reusable workflow that reads and processes release metadata from
+#   .release-meta.json, providing structured data for the release process.
+#
+# Key Features:
+#   • Reads and validates release metadata
+#   • Provides structured outputs for release process
+#   • Generates execution summary
+#
+# Outputs:
+#   • previous_tag: Last release tag
+#   • new_tag: Next release version
+#   • prerelease: Pre-release identifier
+#   • merge_option: Branch merge strategy
+#   • source_branch: Source branch for changes
+#
+# Required Files:
+#   • .release-meta.json containing release configuration
+#
+# Inputs:
+#   • runner: (optional) CI runner selection
+#   • job_container: (optional) Container configuration
+#
+# Usage:
+#   Called by release-execution.yaml to process release metadata
+# =============================================================================
+
+name: 🧹 Merge and clean branches
+
+on:
+  workflow_call:
+    outputs:
+      previous_tag:
+        description: "Previous release tag"
+        value: ${{ jobs.metadata.outputs.previous_tag }}
+      new_tag:
+        description: "New release tag"
+        value: ${{ jobs.metadata.outputs.new_tag }}
+      prerelease:
+        description: "Pre-release identifier"
+        value: ${{ jobs.metadata.outputs.prerelease }}
+      merge_option:
+        description: "Merge strategy"
+        value: ${{ jobs.metadata.outputs.merge_option }}
+      source_branch:
+        description: "Source branch"
+        value: ${{ jobs.metadata.outputs.source_branch }}
+    inputs:
+      runner:
+        description: 'Choose the runner'
+        required: false
+        default: 'ubuntu-latest'
+        type: string
+      job_container:
+        description: 'Select the docker container for the action'
+        required: false
+        default: 'node:22.14'
+        type: string
+
+jobs:
+  metadata:
+    name: Read Metadata & Trigger Reusable Release Workflow
+    runs-on: ${{ inputs.runner }}
+    container: ${{ inputs.job_container }}
+
+    outputs:
+      previous_tag: ${{ steps.read_meta.outputs.previous_tag }}
+      new_tag: ${{ steps.read_meta.outputs.new_tag }}
+      prerelease: ${{ steps.read_meta.outputs.prerelease }}
+      merge_option: ${{ steps.read_meta.outputs.merge_option }}
+      source_branch: ${{ steps.read_meta.outputs.source_branch }}
+
+    steps:
+      - name: ⬇️ Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🔧 Install Jq
+        uses: stetind/ppc-github-composite-actions/.github/actions/check-install-jq@1.0.0
+
+      - name: 🔍 Read .release-meta.json
+        id: read_meta
+        run: |
+          if [ ! -f .release-meta.json ]; then
+            echo "::error ::.release-meta.json file not found!"
+            exit 1
+          fi
+
+          PREVIOUS_TAG=$(jq -r '.previous_tag' .release-meta.json)
+          NEW_TAG=$(jq -r '.new_tag' .release-meta.json)
+          PRERELEASE=$(jq -r '.prerelease' .release-meta.json)
+          MERGE_OPTION=$(jq -r '.merge_option' .release-meta.json)
+          SOURCE_BRANCH=$(jq -r '.source_branch' .release-meta.json)
+
+          echo "previous_tag=$PREVIOUS_TAG" >> $GITHUB_OUTPUT
+          echo "new_tag=$NEW_TAG" >> $GITHUB_OUTPUT
+          echo "prerelease=$PRERELEASE" >> $GITHUB_OUTPUT
+          echo "merge_option=$MERGE_OPTION" >> $GITHUB_OUTPUT
+          echo "source_branch=$SOURCE_BRANCH" >> $GITHUB_OUTPUT
+
+      - name: 📟 Summary
+        if: always()
+        run: |
+          echo "::notice ::📆 Meta Data"
+          echo "::notice ::🚧 Previous Tag: ${{ steps.read_meta.outputs.previous_tag }}"
+          echo "::notice ::🚧 New Tag: ${{ steps.read_meta.outputs.new_tag }}"
+          echo "::notice ::🚧 Pre-release: ${{ steps.read_meta.outputs.prerelease }}"
+          echo "::notice ::🚧 Merge option: ${{ steps.read_meta.outputs.merge_option }}"
+          echo "::notice ::🚧 Source Branch: ${{ steps.read_meta.outputs.source_branch }}"
