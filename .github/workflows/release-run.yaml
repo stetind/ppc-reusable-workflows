@@ -26,8 +26,8 @@ jobs:
     name: Read Metadata & Trigger Reusable Release Workflow
     uses: stetind/ppc-reusable-workflows/.github/workflows/release-checkout.yaml@releases
     with:
-      runs-on: ${{ inputs.runner }}
-      container: ${{ inputs.job_container }}
+      runner: ${{ inputs.runner }}
+      job_container: ${{ inputs.job_container }}
 
   release:
     name: 📟 Final Release
