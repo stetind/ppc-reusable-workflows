@@ -1,5 +1,5 @@
 name: 🧹 Delete All Workflow Runs
-run-name: 🧹 Delete all `${{ inputs.status }}` of (${{ inputs.workflow_name }})
+run-name: 🧹 Delete all `${{ inputs.status }}` of (${{ inputs.workflow_name || 'all' }} )
 
 on:
   workflow_call:
@@ -105,8 +105,8 @@ jobs:
 
     steps:
       - name: Cleanup
-        uses: stetind/ppc-github-composite-actions/.github/actions/maintenance-cleanup@1.1.0
+        uses: stetind/ppc-github-composite-actions/.github/actions/maintenance-cleanup@1.0.0
         with:
-          token: ${{ secrets.GH_TOKEN || secrets.WORKFLOW_TOKEN }}
+          token: ${{ secrets.GH_TOKEN || secrets.WORKFLOW_TOKEN || secrets.GITHUB_TOKEN }}
           status: ${{ inputs.status }}
           workflow_name: ${{ inputs.workflow_name }}
