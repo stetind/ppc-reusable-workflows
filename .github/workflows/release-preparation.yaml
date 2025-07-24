@@ -114,15 +114,13 @@ jobs:
   prepare:
     name: Prepare & Push
     runs-on: ${{ inputs.runner }}
-    container:
-      image: ${{ inputs.job_container }}
-      volumes:
-        - ${{ github.workspace }}:/workspace
+    container: ${{ inputs.job_container }}
 
     steps:
       - name: ⬇️ Checkout repository
         uses: actions/checkout@v4
         with:
+          token: ${{ secrets.WORKFLOW_TOKEN }}
           fetch-depth: 0
 
       - name: 🏷️ Select tag
