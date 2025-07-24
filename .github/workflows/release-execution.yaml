@@ -39,7 +39,12 @@ on:
       target:
         description: 'The target branch name for merge'
         required: false
-        default: 'main'
+        default: ${{ github.event.repository.default_branch }}
+        type: string
+      temporary:
+        description: 'The temporary branch name for merge'
+        required: false
+        default: 'release'
         type: string
       runner:
         description: 'GitHub runner to execute the workflow (e.g., ubuntu-latest, self-hosted)'
@@ -61,9 +66,7 @@ on:
 jobs:
   metadata:
     name: Read Metadata & Trigger Reusable Release Workflow
-    uses: stetind/ppc-reusable-workflows/.github/workflows/release-checkout.yaml@v9.0.0
-    secrets:
-      GH_TOKEN: ${{ secrets.WORFLOW_TOKEN }}
+    uses: stetind/ppc-reusable-workflows/.github/workflows/release-checkout.yaml@__VERSION__
     with:
       runner: ${{ inputs.runner }}
       job_container: ${{ inputs.job_container }}
@@ -71,7 +74,7 @@ jobs:
   release:
     name: 📟 Final Release
     needs: metadata
-    uses: stetind/ppc-reusable-workflows/.github/workflows/release-conventional.yaml@v9.0.0
+    uses: stetind/ppc-reusable-workflows/.github/workflows/release-conventional.yaml@__VERSION__
     secrets: inherit
     with:
       tag: ${{ needs.metadata.outputs.previous_tag }}
@@ -82,7 +85,8 @@ jobs:
   clean:
     name: 🧹 Merge and clean branches
     needs: [release, metadata]
-    uses: stetind/ppc-reusable-workflows/.github/workflows/release-clean.yaml@v9.0.0
+    if: needs.metadata.outputs.source_branch !=  github.event.repository.default_branch
+    uses: stetind/ppc-reusable-workflows/.github/workflows/release-clean.yaml@__VERSION__
     secrets:
       GH_TOKEN: ${{ secrets.WORKFLOW_TOKEN }}
     with:
@@ -92,3 +96,15 @@ jobs:
       target: ${{ inputs.target }}
       runner: ${{ inputs.runner }}
       job_container: ${{ inputs.job_container }}
+
+  clean_release:
+    name: 🧹 Clean Temporary branch
+    needs: [ release, metadata ]
+    runs-on: ${{ inputs.runner }}
+    container: ${{ inputs.job_container }}
+    steps:
+      - name: 🗑️ Delete `${{ inputs.temporary }}` Branch
+        uses: stetind/ppc-github-composite-actions/.github/actions/delete-bracnh@1.0.0
+        with:
+          token: ${{ secrets.WORKFLOW_TOKEN }}
+          branch: ${{ inputs.temporary }}
