@@ -47,11 +47,11 @@ on:
         default: ${{ vars.DEFAULT_NODE_CONTAINER }}
         type: string
     outputs:
-      previous_tag: ${{ job.metadata.outputs.previous_tag }}
-      new_tag: ${{ steps.metadata.outputs.new_tag }}
-      prerelease: ${{ steps.metadata.outputs.prerelease }}
-      merge_option: ${{ steps.metadata.outputs.merge_option }}
-      source_branch: ${{ steps.metadata.outputs.source_branch }}
+      previous_tag: ${{ jobs.metadata.outputs.previous_tag }}
+      new_tag: ${{ jobs.metadata.outputs.new_tag }}
+      prerelease: ${{ jobs.metadata.outputs.prerelease }}
+      merge_option: ${{ jobs.metadata.outputs.merge_option }}
+      source_branch: ${{ jobs.metadata.outputs.source_branch }}
 
 jobs:
   metadata:
