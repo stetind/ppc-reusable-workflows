@@ -87,7 +87,7 @@ jobs:
           repository: ${{ github.repository }}
           new_tag: ''
 
-      - name: Replace v9.0.0 placeholders
+      - name: Replace _VERSION_ placeholders
         if: steps.changelog.outputs.has_changes != ''
         run: |
           echo "Replacing version with ${{ steps.changelog.outputs.new_tag }}"
