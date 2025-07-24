@@ -53,8 +53,9 @@ on:
         options:
           - 'node:22.14'
           - 'ubuntu:latest'
+
 env:
-  TEMP_BRANCH: 'releases'
+  TEMP_BRANCH: releases
 
 jobs:
   prepare:
@@ -111,10 +112,10 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          git checkout -B ${{ inputs.temp_branch }}
+          git checkout -B ${{ env.TEMP_BRANCH }}
           git add .github/workflows/*.yaml
           git add .github/*.yaml
           git add .release-meta.json
           git add README.md
           git commit -m "Prepare release for version ${{ steps.changelog.outputs.new_tag }}"
-          git push origin ${{ inputs.temp_branch }} --force
+          git push origin ${{ env.TEMP_BRANCH }} --force
