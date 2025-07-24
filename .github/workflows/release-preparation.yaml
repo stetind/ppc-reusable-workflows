@@ -50,7 +50,7 @@ on:
         description: 'Merge and cleanup option'
         required: false
         type: choice
-        default: 'none'
+        default: 'merge and delete'
         options:
           - 'merge and delete'
           - 'merge'
@@ -129,7 +129,7 @@ jobs:
         with:
           tag: ${{ inputs.tag }}
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.WORKFLOW_TOKEN }}
 
       - name: 🧪 Generate changelog
         id: changelog
