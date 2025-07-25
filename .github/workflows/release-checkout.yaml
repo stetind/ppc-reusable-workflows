@@ -131,4 +131,3 @@ jobs:
           echo "::notice ::🚧 Pre-release: ${{ steps.read_meta.outputs.prerelease }}"
           echo "::notice ::🚧 Merge option: ${{ steps.read_meta.outputs.merge_option }}"
           echo "::notice ::🚧 Source Branch: ${{ steps.read_meta.outputs.source_branch }}"
-          echo "::notice ::🚧 Release Notes Preview: "${{ steps.release_notes.outputs.release_notes }}""
