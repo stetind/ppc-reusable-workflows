@@ -114,7 +114,6 @@ jobs:
   prepare:
     name: Prepare & Push
     runs-on: ${{ inputs.runner }}
-    container: '${{ inputs.job_container }}'
 
     steps:
       - name: 🔧 Install gh
