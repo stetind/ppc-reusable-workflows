@@ -114,19 +114,47 @@ jobs:
   prepare:
     name: Prepare & Push
     runs-on: ${{ inputs.runner }}
-    container: 'maniator/gh:latest'
+    container: '${{ inputs.job_container }}'
 
     steps:
+      - name: 🔧 Install gh
+        uses: stetind/ppc-github-composite-actions/.github/actions/check-install-gh@v1.0.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🔧 Install Jq
+        uses: stetind/ppc-github-composite-actions/.github/actions/check-install-jq@v1.0.0
+
+      - name: 🔧 Install Git
+        uses: stetind/ppc-github-composite-actions/.github/actions/check-install-git@v1.0.0
+
+      - name: 🔧 Setup Git
+        uses: stetind/ppc-github-composite-actions/.github/actions/git-setup@v1.0.0
+
       - name: ⬇️ Checkout repository
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.WORKFLOW_TOKEN }}
           fetch-depth: 0
 
-      - name: 🏷️ Select tag
-        id: latest_tag
-        if: inputs.tag == ''
-        uses: stetind/ppc-github-composite-actions/.github/actions/get-latest-tag@v1.0.0
+      - name: 🏷️ Get latest tag
+        id: get_tag
+        shell: bash
+        run: |
+          # Loop through the latest releases and find the most recent published release tag
+            set -e
+          
+            latest_tag=$(gh release list --limit 100 --json tagName,isDraft,isPrerelease \
+              --jq '.[] | select(.isDraft == false and .isPrerelease == false) | .tagName' \
+              | head -n 1)
+          
+          if [[ -n "$latest_tag" ]]; then
+            echo "latest_tag=$latest_tag" >> $GITHUB_OUTPUT
+            echo "::notice ::Latest published semver tag found: $latest_tag"
+          else
+            echo "::warning ::No valid semver published release tag found, using 0.0.0"
+            echo "latest_tag=0.0.0" >> $GITHUB_OUTPUT
+          fi
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
