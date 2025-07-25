@@ -121,19 +121,12 @@ jobs:
             echo "::notice ::No existing release found, proceeding with release creation."
           fi
 
-      - name: Force Base64 Encode
-        id: release_notes
-        if: inputs.release_notes != '' && steps.check_release_exists.outcome == 'success'
-        uses: stetind/ppc-github-composite-actions/.github/actions/base64-encode@v1.0.0
-        with:
-          text: ${{ inputs.release_notes }}
-
       - name: 📤 Create GitHub Release
         if: inputs.release_notes != '' && steps.release_notes.outcome == 'success'
         uses: stetind/ppc-github-composite-actions/.github/actions/create-github-release@v1.0.0
         with:
           version: ${{ inputs.tag }}
-          changelog: ${{ steps.release_notes.outputs.notes }}
+          changelog: ${{ inputs.release_notes }}
           changelog_file: ${{ inputs.release_note_file }}
           prerelease: ${{ inputs.prerelease != '' && inputs.prerelease != 'none' }}
           target_branch: ${{ inputs.branch }}
