@@ -127,7 +127,7 @@ jobs:
         if: inputs.tag == ''
         uses: stetind/ppc-github-composite-actions/.github/actions/get-latest-tag@v1.0.0
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.WORKFLOW_TOKEN }}
 
       - name: 📦 Get commits since selected tag
         id: get_commits
