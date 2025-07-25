@@ -73,6 +73,10 @@ on:
         required: true
         type: string
         default: ''
+      release_note_file:
+        required: true
+        type: string
+        default: ''
       draft:
         required: false
         type: boolean
@@ -117,30 +121,12 @@ jobs:
             echo "::notice ::No existing release found, proceeding with release creation."
           fi
 
-      - name: Decode Release Notes
+      - name: Force Base64 Encode
         id: release_notes
         if: inputs.release_notes != '' && steps.check_release_exists.outcome == 'success'
-        run: |
-          # Define the function
-          is_base64() {
-            local string="$1"
-            echo "$string" | base64 -d > /dev/null 2>&1
-            return $?
-          }
-            
-          CONTENT="${{ inputs.release_notes }}"
-          
-          if is_base64 "$CONTENT"; then
-            RELEASE_NOTES=$($CONTENT | base64 -d)
-            echo "::notice ::Content was base64 encoded"
-          else
-            RELEASE_NOTES=$CONTENT 
-            echo "::notice ::Content was not encoded to base64"
-          fi
-          
-          echo "notes<<EOF" >> $GITHUB_OUTPUT
-          echo "$RELEASE_NOTES" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+        uses: stetind/ppc-github-composite-actions/.github/actions/base64-encode@v1.0.0
+        with:
+          text: ${{ inputs.release_notes }}
 
       - name: 📤 Create GitHub Release
         if: inputs.release_notes != '' && steps.release_notes.outcome == 'success'
@@ -148,6 +134,7 @@ jobs:
         with:
           version: ${{ inputs.tag }}
           changelog: ${{ steps.release_notes.outputs.notes }}
+          changelog_file: ${{ inputs.release_note_file }}
           prerelease: ${{ inputs.prerelease != '' && inputs.prerelease != 'none' }}
           target_branch: ${{ inputs.branch }}
           draft: ${{ inputs.draft }}
@@ -168,3 +155,5 @@ jobs:
           fi
           echo "::notice ::🔗 URL: $release_url"
           echo "::notice ::🎉 Release successfully created!"
+          
+          echo "::notice :: BASE64 ${{ steps.release_notes.outputs.text }}"

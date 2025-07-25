@@ -38,6 +38,7 @@ jobs:
       tag: ${{ needs.metadata.outputs.new_tag }}
       prerelease: ${{ needs.metadata.outputs.prerelease }}
       release_notes: ${{ needs.metadata.outputs.release_notes }}
+      release_notes_file: '.release_notes.md'
       runner: ${{ vars.DEFAULT_RUNNER }}
       job_container: ${{ vars.DEFAULT_NODE_CONTAINER }}
 
