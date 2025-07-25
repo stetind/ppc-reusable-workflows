@@ -141,7 +141,7 @@ jobs:
         uses: stetind/ppc-github-composite-actions/.github/actions/detect-version-bump@v1.0.0
         with:
           commits: ${{ steps.get_commits.outputs.commits }}
-          tag: ${{ inputs.previous_tag }}
+          tag: ${{ inputs.tag || steps.latest_tag.outputs.latest_tag }}
 
       - name: 🧪 Generate changelog
         id: changelog
@@ -166,7 +166,9 @@ jobs:
           cat <<EOF > .release-meta.json
           {
             "previous_tag": "${{ steps.latest_tag.outputs.selected_tag }}",
-            "new_tag": "${{ steps.changelog.outputs.new_tag }}",
+            "new_tag": "${{ steps.detect_version.outputs.new_version }}",
+            "commits" : "${{ steps.get_commits.outputs.commits }}"
+            "changelog": "${{ steps.changelog.outputs.changelog }}"
             "prerelease": "${{ github.event.inputs.prerelease || '' }}",
             "merge_option": "${{ github.event.inputs.merge_option || 'none' }}",
             "source_branch": "${{ github.ref_name }}"
@@ -184,5 +186,5 @@ jobs:
           git add .github/*.yaml
           git add .release-meta.json
           git add README.md
-          git commit -m "Prepare release for version ${{ steps.changelog.outputs.new_tag }}"
+          git commit -m "Prepare release for version ${{ steps.detect_version.outputs.new_version }}"
           git push origin ${{ inputs.temp_branch }} --force

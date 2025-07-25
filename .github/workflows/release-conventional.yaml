@@ -25,7 +25,6 @@
 # =============================================================================
 
 name: 🚀 Auto Release Based on Conventional Commits
-
 run-name: >-
   ${{ 
     format(
@@ -70,6 +69,10 @@ on:
         required: false
         type: string
         default: ${{ github.ref_name }}
+      release_notes:
+        required: true
+        type: string
+        default: ''
       draft:
         required: false
         type: boolean
@@ -103,54 +106,23 @@ jobs:
           ref: ${{ inputs.branch }}
           fetch-depth: 0
 
-      - name: 🏷️ Select tag
-        id: latest_tag
-        if: inputs.tag == ''
-        uses: stetind/ppc-github-composite-actions/.github/actions/get-latest-tag@v1.0.0
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: 📦 Get commits since selected tag
-        id: get_commits
-        uses: stetind/ppc-github-composite-actions/.github/actions/get-commits-since-tag@v1.0.0
-        with:
-          tag: ${{ inputs.tag || steps.latest_tag.outputs.latest_tag }}
-
-      - name: 🔍 Detect version bump and compute new version
-        id: detect_version
-        if: steps.get_commits.outputs.commits != ''
-        uses: stetind/ppc-github-composite-actions/.github/actions/detect-version-bump@v1.0.0
-        with:
-          commits: ${{ steps.get_commits.outputs.commits }}
-          tag: ${{ inputs.previous_tag }}
-
-      - name: 🧪 Generate changelog
-        id: changelog
-        if: steps.get_commits.outputs.commits != ''
-        uses: stetind/ppc-github-composite-actions/.github/actions/generate-changelog@v1.0.0
-        with:
-          commits: ${{ steps.get_commits.outputs.commits }}
-          previous_tag: ${{ inputs.tag || steps.latest_tag.outputs.latest_tag }}
-          new_tag: ${{ steps.detect_version.outputs.new_version }}
-          repository: ${{ github.repository }}
-
       - name: 📦 Check if release exists
         id: check_release_exists
         run: |
-          release_exists=$(gh release view ${{ steps.detect_version.outputs.new_version }} --json name --jq ".name" || echo "not_found")
+          release_exists=$(gh release view ${{ inputs.tag }} --json name --jq ".name" || echo "not_found")
           if [[ "$release_exists" != "not_found" ]]; then
-            echo "::error ::Release with tag ${{ steps.detect_version.outputs.new_version }} already exists. Exiting."
+            echo "::error ::Release with tag ${{ inputs.tag }} already exists. Exiting."
             exit 1
           else
             echo "::notice ::No existing release found, proceeding with release creation."
           fi      
 
       - name: 📤 Create GitHub Release
-        if: steps.get_commits.outputs.commits != '' && steps.check_release_exists.outcome == 'success'
+        if: inputs.release_notes != '' && steps.check_release_exists.outcome == 'success'
         uses: stetind/ppc-github-composite-actions/.github/actions/create-github-release@v1.0.0
         with:
-          version: ${{ steps.detect_version.outputs.new_version }}
-          changelog: ${{ steps.changelog.outputs.changelog }}
+          version: ${{ inputs.tag }}
+          changelog: ${{ inputs.release_notes }}
           prerelease: ${{ inputs.prerelease != '' && inputs.prerelease != 'none' }}
           target_branch: ${{ inputs.branch }}
           draft: ${{ inputs.draft }}

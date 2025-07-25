@@ -30,13 +30,14 @@ jobs:
       job_container: ${{ vars.DEFAULT_NODE_CONTAINER }}
 
   release:
-    name: 📟 Final Release
+    name: Create Release
     needs: metadata
     uses: stetind/ppc-reusable-workflows/.github/workflows/release-conventional.yaml@releases
     secrets: inherit
     with:
-      tag: ${{ needs.metadata.outputs.previous_tag }}
+      tag: v${{ needs.metadata.outputs.new_tag }}
       prerelease: ${{ needs.metadata.outputs.prerelease }}
+      release_notes: ${{ needs.metadata.outputs.release_notes }}
       runner: ${{ vars.DEFAULT_RUNNER }}
       job_container: ${{ vars.DEFAULT_NODE_CONTAINER }}
 
