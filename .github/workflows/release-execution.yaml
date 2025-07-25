@@ -66,7 +66,7 @@ on:
 jobs:
   metadata:
     name: Read Metadata & Trigger Reusable Release Workflow
-    uses: stetind/ppc-reusable-workflows/.github/workflows/release-checkout.yaml@__VERSION__
+    uses: stetind/ppc-reusable-workflows/.github/workflows/release-checkout.yaml@9.0.0
     with:
       runner: ${{ inputs.runner }}
       job_container: ${{ inputs.job_container }}
@@ -74,7 +74,7 @@ jobs:
   release:
     name: Create Release
     needs: metadata
-    uses: stetind/ppc-reusable-workflows/.github/workflows/release-conventional.yaml@__VERSION__
+    uses: stetind/ppc-reusable-workflows/.github/workflows/release-conventional.yaml@9.0.0
     secrets: inherit
     with:
       tag: v${{ needs.metadata.outputs.new_tag }}
@@ -87,7 +87,7 @@ jobs:
     needs: [ release, metadata ]
     name: 🧹 Create PR from `${{ needs.metadata.outputs.source_branch }}` to `${{ inputs.target }} `
     if: ${{ needs.metadata.outputs.source_branch !=  inputs.target &&  needs.metadata.outputs.merge_option != 'none' }}
-    uses: stetind/ppc-reusable-workflows/.github/workflows/release-cleanup.yaml@__VERSION__
+    uses: stetind/ppc-reusable-workflows/.github/workflows/release-cleanup.yaml@9.0.0
     secrets: inherit
     with:
       runner: ${{ inputs.runner }}
