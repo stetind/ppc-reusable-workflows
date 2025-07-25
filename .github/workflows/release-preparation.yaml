@@ -124,7 +124,7 @@ jobs:
 
       - name: 🏷️ Select tag
         id: latest_tag
-        if: inputs.tag == ''
+        if: ${{ inputs.tag == '' }}
         uses: stetind/ppc-github-composite-actions/.github/actions/get-latest-tag@v1.1.1
         env:
           GH_TOKEN: ${{ secrets.WORKFLOW_TOKEN }}
@@ -137,7 +137,7 @@ jobs:
 
       - name: 🔍 Detect version bump and compute new version
         id: detect_version
-        if: steps.get_commits.outputs.commits != ''
+        if: ${{ steps.get_commits.outputs.commits != '' }}
         uses: stetind/ppc-github-composite-actions/.github/actions/detect-version-bump@v1.1.1
         with:
           commits: ${{ steps.get_commits.outputs.commits }}
@@ -145,7 +145,7 @@ jobs:
 
       - name: 🧪 Generate changelog
         id: changelog
-        if: steps.get_commits.outputs.commits != ''
+        if: ${{ steps.get_commits.outputs.commits != '' }}
         uses: stetind/ppc-github-composite-actions/.github/actions/generate-changelog@v1.1.1
         with:
           commits: ${{ steps.get_commits.outputs.commits }}
@@ -154,14 +154,14 @@ jobs:
           repository: ${{ github.repository }}
 
       - name: Replace __VERSION__ placeholders
-        if: steps.get_commits.outputs.commits != ''
+        if: ${{ steps.get_commits.outputs.commits != '' }}
         run: |
           echo "Replacing version with ${{ steps.detect_version.outputs.new_version }}"
           find .github/workflows -type f -name "*.yaml" \
             -exec sed -i "s|__VERSION__|${{ steps.detect_version.outputs.new_version }}|g" {} +
 
       - name: 💾 Write release metadata
-        if: steps.get_commits.outputs.commits != ''
+        if: ${{ steps.get_commits.outputs.commits != '' }}
         run: |
           
           # Write commits to separate file
@@ -182,7 +182,7 @@ jobs:
           EOF
 
       - name: Commit & Push to ${{ inputs.temp_branch }}
-        if: steps.get_commits.outputs.commits != ''
+        if: ${{ steps.get_commits.outputs.commits != '' }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
