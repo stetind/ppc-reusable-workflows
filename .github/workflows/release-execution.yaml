@@ -97,7 +97,7 @@ jobs:
 
       - name: 🔄 Merge and Delete
         id: create_pr
-        uses: stetind/ppc-github-composite-actions/.github/actions/create-pr-and-merge@v1.0.0
+        uses: stetind/ppc-github-composite-actions/.github/actions/create-pr-and-merge@v1.1.0
         with:
           token: ${{ secrets.WORKFLOW_TOKEN }}
           title: Release ${{ needs.metadata.outputs.new_tag }}
@@ -112,7 +112,7 @@ jobs:
     container: ${{ inputs.job_container }}
     steps:
       - name: 🗑️ Delete `${{ inputs.temporary }}` Branch
-        uses: stetind/ppc-github-composite-actions/.github/actions/delete-bracnh@v1.0.0
+        uses: stetind/ppc-github-composite-actions/.github/actions/delete-bracnh@v1.1.0
         with:
           token: ${{ secrets.WORKFLOW_TOKEN }}
           branch: ${{ inputs.temporary }}

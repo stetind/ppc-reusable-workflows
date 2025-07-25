@@ -40,7 +40,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: 🔧 Setup Node and NPM
-        uses: stetind/ppc-github-composite-actions/.github/actions/intall-global-dependencies@v1.0.0
+        uses: stetind/ppc-github-composite-actions/.github/actions/intall-global-dependencies@v1.1.0
         with:
           npm_token: $NPM_TOKEN
 

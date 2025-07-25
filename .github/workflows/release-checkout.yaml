@@ -84,7 +84,7 @@ jobs:
           fetch-depth: 0
 
       - name: 🔧 Install Jq
-        uses: stetind/ppc-github-composite-actions/.github/actions/check-install-jq@v1.0.0
+        uses: stetind/ppc-github-composite-actions/.github/actions/check-install-jq@v1.1.0
 
       - name: 🔍 Read .release-meta.json
         id: read_meta
@@ -131,5 +131,4 @@ jobs:
           echo "::notice ::🚧 Pre-release: ${{ steps.read_meta.outputs.prerelease }}"
           echo "::notice ::🚧 Merge option: ${{ steps.read_meta.outputs.merge_option }}"
           echo "::notice ::🚧 Source Branch: ${{ steps.read_meta.outputs.source_branch }}"
-          # Decode and display
-          echo "::notice ::🚧 Release Notes Preview: $(echo "${{ steps.release_notes.outputs.release_notes }}" | base64 -d | head -n 3)"
+          echo "::notice ::🚧 Release Notes Preview: "${{ steps.release_notes.outputs.release_notes }}""
