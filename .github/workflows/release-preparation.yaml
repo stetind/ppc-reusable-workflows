@@ -134,7 +134,7 @@ jobs:
       - name: ⬇️ Checkout repository
         uses: actions/checkout@v4
         with:
-          token: ${{ secrets.WORKFLOW_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
 
       - name: 🏷️ Get latest tag
@@ -155,8 +155,8 @@ jobs:
             echo "::warning ::No valid semver published release tag found, using 0.0.0"
             echo "latest_tag=0.0.0" >> $GITHUB_OUTPUT
           fi
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        env:
+#          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 📦 Get commits since selected tag
         id: get_commits
