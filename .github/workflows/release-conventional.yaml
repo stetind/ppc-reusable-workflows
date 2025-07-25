@@ -115,14 +115,44 @@ jobs:
             exit 1
           else
             echo "::notice ::No existing release found, proceeding with release creation."
-          fi      
+          fi
+
+      - name: Decode Release Notes
+        id: release_notes
+        if: inputs.release_notes != '' && steps.check_release_exists.outcome == 'success'
+        run: |
+          # Define the function
+          is_base64() {
+            local string="$1"
+            echo "$string" | base64 -d > /dev/null 2>&1
+            return $?
+          }
+            
+          decode() {
+            local string="$1"
+            echo "$string" | base64 -d
+          }
+            
+          CONTENT="${{ inputs.release_notes }}"
+          
+          if is_base64 "$CONTENT"; then
+            RELEASE_NOTES=$(decode "$CONTENT")
+            echo "::notice ::Content was base64 encoded"
+          else
+            RELEASE_NOTES=$CONTENT
+            echo "::notice ::Content was not encoded to base64"
+          fi
+          
+          echo "notes=$RELEASE_NOTES" >> $GITHUB_OUTPUT
+
+
 
       - name: 📤 Create GitHub Release
-        if: inputs.release_notes != '' && steps.check_release_exists.outcome == 'success'
+        if: inputs.release_notes != '' && steps.release_notes.outcome == 'success'
         uses: stetind/ppc-github-composite-actions/.github/actions/create-github-release@v1.0.0
         with:
           version: ${{ inputs.tag }}
-          changelog: ${{ inputs.release_notes }}
+          changelog: ${{ steps.release_notes.outputs.notes }}
           prerelease: ${{ inputs.prerelease != '' && inputs.prerelease != 'none' }}
           target_branch: ${{ inputs.branch }}
           draft: ${{ inputs.draft }}
