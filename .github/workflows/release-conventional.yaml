@@ -131,21 +131,23 @@ jobs:
           CONTENT="${{ inputs.release_notes }}"
           
           if is_base64 "$CONTENT"; then
-            RELEASE_NOTES=$CONTENT
+            RELEASE_NOTES=$($CONTENT | base64 -d)
             echo "::notice ::Content was base64 encoded"
           else
-            RELEASE_NOTES=$($CONTENT | base64) 
+            RELEASE_NOTES=$CONTENT 
             echo "::notice ::Content was not encoded to base64"
           fi
           
-          echo "notes=$RELEASE_NOTES" >> $GITHUB_OUTPUT
+          echo "notes<<EOF" >> $GITHUB_OUTPUT
+          echo "$RELEASE_NOTES" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
       - name: 📤 Create GitHub Release
         if: inputs.release_notes != '' && steps.release_notes.outcome == 'success'
         uses: stetind/ppc-github-composite-actions/.github/actions/create-github-release@v1.0.0
         with:
           version: ${{ inputs.tag }}
-          changelog: ${{ format('$(echo "{0}" | base64 -d)', steps.release_notes.outputs.notes) }}
+          changelog: ${{ steps.release_notes.outputs.notes }}
           prerelease: ${{ inputs.prerelease != '' && inputs.prerelease != 'none' }}
           target_branch: ${{ inputs.branch }}
           draft: ${{ inputs.draft }}
