@@ -114,6 +114,7 @@ jobs:
   prepare:
     name: Prepare & Push
     runs-on: ${{ inputs.runner }}
+    container: 'maniator/gh:latest'
 
     steps:
       - name: ⬇️ Checkout repository
