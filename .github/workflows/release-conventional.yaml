@@ -118,7 +118,7 @@ jobs:
           version: ${{ inputs.tag }}
 
       - name: 📤 Create GitHub Release
-        if: inputs.release_notes != '' && steps.release_notes.exists == 'true'
+        if: inputs.release_notes != '' && steps.check_release_exists.exists != 'false'
         uses: stetind/ppc-github-composite-actions/.github/actions/create-github-release@v1.1.1
         with:
           version: ${{ inputs.tag }}
