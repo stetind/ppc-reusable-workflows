@@ -129,5 +129,4 @@ jobs:
           echo "::notice ::🚧 Previous Tag: ${{ steps.read_meta.outputs.previous_tag }}"
           echo "::notice ::🚧 New Tag: ${{ steps.read_meta.outputs.new_tag }}"
           echo "::notice ::🚧 Pre-release: ${{ steps.read_meta.outputs.prerelease }}"
-          echo "::notice ::🚧 Merge option: ${{ steps.read_meta.outputs.merge_option }}"
           echo "::notice ::🚧 Source Branch: ${{ steps.read_meta.outputs.source_branch }}"
