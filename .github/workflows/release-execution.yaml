@@ -72,38 +72,30 @@ jobs:
       job_container: ${{ inputs.job_container }}
 
   release:
-    name: 📟 Final Release
+    name: Create Release
     needs: metadata
     uses: stetind/ppc-reusable-workflows/.github/workflows/release-conventional.yaml@__VERSION__
     secrets: inherit
     with:
-      tag: ${{ needs.metadata.outputs.previous_tag }}
-      prerelease: ${{ needs.metadata.outputs.prerelease }}
+      tag: v${{ needs.metadata.outputs.new_tag }}
+      prerelease: ${{ needs.metadata.outputs.prerelease || '' }}
+      release_note_file: '.release_notes.md'
       runner: ${{ inputs.runner }}
       job_container: ${{ inputs.job_container }}
 
-  clean:
-    name: 🧹 Merge and clean branches
+  pull_request:
     needs: [ release, metadata ]
-    if: needs.metadata.outputs.source_branch !=  github.event.repository.default_branch
-    runs-on: ${{ inputs.runner }}
-    container: ${{ inputs.job_container }}
-    steps:
-      - name: ⬇️ Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          ref: ${{ needs.metadata.outputs.source_branch }}
-
-      - name: 🔄 Merge and Delete
-        id: create_pr
-        uses: stetind/ppc-github-composite-actions/.github/actions/create-pr-and-merge@v1.1.1
-        with:
-          token: ${{ secrets.WORKFLOW_TOKEN }}
-          title: Release ${{ needs.metadata.outputs.new_tag }}
-          merge_option: ${{ needs.metadata.outputs.merge_option }}
-          source: ${{ needs.metadata.outputs.source_branch }}
-          target: ${{ github.event.repository.default_branch }}
+    name: 🧹 Create PR from `${{ needs.metadata.outputs.source_branch }}` to `${{ inputs.target }} `
+    if: needs.metadata.outputs.source_branch !=  inputs.target
+    uses: stetind/ppc-reusable-workflows/.github/workflows/release-cleanup.yaml@__VERSION__
+    secrets: inherit
+    with:
+      runner: ${{ inputs.runner }}
+      job_container: ${{ inputs.job_container }}
+      source: ${{ needs.metadata.outputs.source_branch }}
+      target: ${{ inputs.target }}
+      title: Release ${{ needs.metadata.outputs.new_tag }}
+      merge_option: ${{ needs.metadata.outputs.merge_option }}
 
   clean_release:
     name: 🧹 Clean Temporary branch
