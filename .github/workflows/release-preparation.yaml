@@ -156,9 +156,9 @@ jobs:
       - name: Replace __VERSION__ placeholders
         if: steps.get_commits.outputs.commits != ''
         run: |
-          echo "Replacing version with ${{ steps.changelog.outputs.new_tag }}"
+          echo "Replacing version with ${{ steps.detect_version.outputs.new_version }}"
           find .github/workflows -type f -name "*.yaml" \
-            -exec sed -i "s|__VERSION__|${{ steps.changelog.outputs.new_tag }}|g" {} +
+            -exec sed -i "s|__VERSION__|${{ steps.detect_version.outputs.new_version }}|g" {} +
 
       - name: 💾 Write release metadata
         if: steps.get_commits.outputs.commits != ''
@@ -173,7 +173,7 @@ jobs:
           # Create JSON with basic metadata
           cat <<EOF > .release-meta.json
           {
-            "previous_tag": "${{ steps.latest_tag.outputs.selected_tag }}",
+            "previous_tag": "${{ inputs.tag || steps.latest_tag.outputs.latest_tag }}",
             "new_tag": "${{ steps.detect_version.outputs.new_version }}",
             "prerelease": "${{ github.event.inputs.prerelease || '' }}",
             "merge_option": "${{ github.event.inputs.merge_option || 'none' }}",
