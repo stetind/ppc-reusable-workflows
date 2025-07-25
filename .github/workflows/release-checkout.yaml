@@ -94,7 +94,7 @@ jobs:
             exit 1
           fi
           
-          if [ ! -f release_notes.md ]; then
+          if [ ! -f .release_notes.md ]; then
             echo "::error ::release_notes.md file not found!"
             exit 1
           fi
@@ -107,7 +107,7 @@ jobs:
 
           # Read release notes from files
           # Using base64 encoding to safely handle multiline content in GitHub Actions outputs
-          RELEASE_NOTES=$(base64 -w 0 release_notes.md)
+          RELEASE_NOTES=$(base64 -w 0 .release_notes.md)
 
           echo "previous_tag=$PREVIOUS_TAG" >> $GITHUB_OUTPUT
           echo "new_tag=$NEW_TAG" >> $GITHUB_OUTPUT
