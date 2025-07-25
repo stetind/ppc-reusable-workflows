@@ -113,9 +113,14 @@ jobs:
             echo "::error ::release_notes.md file not found!"
             exit 1
           fi
+
+          # Read the content and escape it properly for GitHub Actions environment file
           RELEASE_NOTES=$(cat .release_notes.md)
 
-          echo "release_notes=$RELEASE_NOTES" >> $GITHUB_OUTPUT
+          echo "release_notes<<EOF" >> $GITHUB_OUTPUT
+          echo "$RELEASE_NOTES" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
 
       - name: 📟 Summary
         if: always()
