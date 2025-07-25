@@ -37,7 +37,7 @@ jobs:
     with:
       tag: v${{ needs.metadata.outputs.new_tag }}
       prerelease: ${{ needs.metadata.outputs.prerelease }}
-      release_notes: ${{ needs.metadata.outputs.release_notes }}
+      release_notes: ${{ format('$(echo "{0}" | base64 -d)', needs.metadata.outputs.release_notes) }}
       runner: ${{ vars.DEFAULT_RUNNER }}
       job_container: ${{ vars.DEFAULT_NODE_CONTAINER }}
 

@@ -49,11 +49,8 @@ on:
         description: "Source branch"
         value: ${{ jobs.metadata.outputs.source_branch }}
       release_notes:
-        description: "Release Notes (Marked Down format)"
+        description: "Release Notes in base64 format. To use: echo \"$content\" | base64 -d > release_notes.md"
         value: ${{ jobs.metadata.outputs.release_notes }}
-      commits:
-        description: "Commit list"
-        value: ${{ jobs.metadata.outputs.commits }}
     inputs:
       runner:
         description: 'Choose the runner'
@@ -79,7 +76,6 @@ jobs:
       merge_option: ${{ steps.read_meta.outputs.merge_option }}
       source_branch: ${{ steps.read_meta.outputs.source_branch }}
       release_notes: ${{ steps.read_meta.outputs.release_notes }}
-      commits: ${{ steps.read_meta.outputs.commits }}
 
     steps:
       - name: ⬇️ Checkout repository
@@ -97,14 +93,21 @@ jobs:
             echo "::error ::.release-meta.json file not found!"
             exit 1
           fi
-
+          
+          if [ ! -f release_notes.md ]; then
+            echo "::error ::release_notes.md file not found!"
+            exit 1
+          fi
+    
           PREVIOUS_TAG=$(jq -r '.previous_tag' .release-meta.json)
           NEW_TAG=$(jq -r '.new_tag' .release-meta.json)
           PRERELEASE=$(jq -r '.prerelease' .release-meta.json)
           MERGE_OPTION=$(jq -r '.merge_option' .release-meta.json)
           SOURCE_BRANCH=$(jq -r '.source_branch' .release-meta.json)
-          COMMITS=$(jq -r '.changelog' .release-meta.json)
-          CHANGELOG=$(jq -r '.commits' .release-meta.json)
+
+          # Read release notes from files
+          # Using base64 encoding to safely handle multiline content in GitHub Actions outputs
+          RELEASE_NOTES=$(base64 -w 0 release_notes.md)
 
           echo "previous_tag=$PREVIOUS_TAG" >> $GITHUB_OUTPUT
           echo "new_tag=$NEW_TAG" >> $GITHUB_OUTPUT
@@ -112,7 +115,6 @@ jobs:
           echo "merge_option=$MERGE_OPTION" >> $GITHUB_OUTPUT
           echo "source_branch=$SOURCE_BRANCH" >> $GITHUB_OUTPUT
           echo "release_notes=$CHANGELOG" >> $GITHUB_OUTPUT
-          echo "commits=$COMMITS" >> $GITHUB_OUTPUT
 
       - name: 📟 Summary
         if: always()
@@ -123,5 +125,5 @@ jobs:
           echo "::notice ::🚧 Pre-release: ${{ steps.read_meta.outputs.prerelease }}"
           echo "::notice ::🚧 Merge option: ${{ steps.read_meta.outputs.merge_option }}"
           echo "::notice ::🚧 Source Branch: ${{ steps.read_meta.outputs.source_branch }}"
-          echo "::notice ::🚧 Commits: ${{ steps.read_meta.outputs.commits }}"
-          echo "::notice ::🚧 Release Notes: ${{ steps.read_meta.outputs.release_notes }}"
+          # Decode and display
+          echo "::notice ::🚧 Release Notes Preview: $(echo "${{ steps.read_meta.outputs.release_notes }}" | base64 -d | head -n 3)"

@@ -163,12 +163,18 @@ jobs:
       - name: 💾 Write release metadata
         if: steps.get_commits.outputs.commits != ''
         run: |
+          
+          # Write commits to separate file
+          echo '${{ steps.get_commits.outputs.commits }}' > commits.txt
+          
+          # Write release notes to markdown file
+          echo '${{ steps.changelog.outputs.changelog }}' > release_notes.md
+          
+          # Create JSON with basic metadata
           cat <<EOF > .release-meta.json
           {
             "previous_tag": "${{ steps.latest_tag.outputs.selected_tag }}",
             "new_tag": "${{ steps.detect_version.outputs.new_version }}",
-            "commits" : "${{ steps.get_commits.outputs.commits }}"
-            "changelog": "${{ steps.changelog.outputs.changelog }}"
             "prerelease": "${{ github.event.inputs.prerelease || '' }}",
             "merge_option": "${{ github.event.inputs.merge_option || 'none' }}",
             "source_branch": "${{ github.ref_name }}"
