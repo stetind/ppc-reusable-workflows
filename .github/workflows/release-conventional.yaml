@@ -65,6 +65,7 @@ on:
         description: 'Optional prerelease identifier (e.g., beta, rc). Leave empty for stable.'
         required: false
         type: string
+        default: ''
       branch:
         required: false
         type: string
@@ -112,17 +113,12 @@ jobs:
 
       - name: 📦 Check if release exists
         id: check_release_exists
-        run: |
-          release_exists=$(gh release view ${{ inputs.tag }} --json name --jq ".name" || echo "not_found")
-          if [[ "$release_exists" != "not_found" ]]; then
-            echo "::error ::Release with tag ${{ inputs.tag }} already exists. Exiting."
-            exit 1
-          else
-            echo "::notice ::No existing release found, proceeding with release creation."
-          fi
+        uses: stetind/ppc-github-composite-actions/.github/actions/check-release-exists@v1.0.0
+        with:
+          version: ${{ inputs.tag }}
 
       - name: 📤 Create GitHub Release
-        if: inputs.release_notes != '' && steps.release_notes.outcome == 'success'
+        if: inputs.release_notes != '' && steps.release_notes.exists != 'true'
         uses: stetind/ppc-github-composite-actions/.github/actions/create-github-release@v1.0.0
         with:
           version: ${{ inputs.tag }}
@@ -135,7 +131,7 @@ jobs:
       - name: 📟 Final Summary
         if: success()
         run: |
-          new_version="${{ steps.detect_version.outputs.new_version }}"
+          new_version="${{ inputs.tag }}"
           repo="${{ github.repository }}"
           release_url="https://github.com/${repo}/releases/tag/${new_version}"
           
@@ -148,5 +144,3 @@ jobs:
           fi
           echo "::notice ::🔗 URL: $release_url"
           echo "::notice ::🎉 Release successfully created!"
-          
-          echo "::notice :: BASE64 ${{ steps.release_notes.outputs.text }}"
