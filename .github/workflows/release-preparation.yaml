@@ -157,7 +157,7 @@ jobs:
         if: ${{ steps.get_commits.outputs.commits != '' }}
         run: |
           echo "Replacing version with ${{ steps.detect_version.outputs.new_version }}"
-          find .github/workflows -type f -name "*.yaml" \
+          find .github/workflows -type f -name "*.yaml" ! -name "$current_file" \
             -exec sed -i "s|__VERSION__|${{ steps.detect_version.outputs.new_version }}|g" {} +
 
       - name: 💾 Write release metadata
