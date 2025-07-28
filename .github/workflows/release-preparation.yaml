@@ -158,7 +158,7 @@ jobs:
         run: |
           new_version="${{ steps.detect_version.outputs.new_version }}"
           new_version=v"${new_version#v}"
-          current_file="workflows/release-preparation.yaml"
+          current_file=".github/workflows/release-preparation.yaml"
           echo "Replacing version with $new_version"
           find .github/ -type f -name "*.yaml" ! -name "$current_file" \
             -exec sed -i "s|@__VERSION__|@$new_version|g" {} +
