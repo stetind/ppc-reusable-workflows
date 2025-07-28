@@ -31,7 +31,7 @@ name: 🧹 Merge and clean branches
 on:
   workflow_call:
     secrets:
-      GH_TOKEN:
+      WORKFLOW_TOKEN:
         description: 'GitHub token with permissions for PR creation, branch merging, and deletion'
         required: true
     inputs:
@@ -39,6 +39,11 @@ on:
         description: 'Title of the pull request to be created (typically includes version number)'
         required: true
         type: string
+      body:
+        description: 'Body of the pull request to be created (typically includes version number)'
+        required: false
+        type: string
+        default: ''
       merge_option:
         description: 'Strategy for branch handling (merge and delete, merge, or none)'
         required: true
@@ -73,12 +78,27 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: 🔄 Merge and Delete
-        id: create_pr
-        uses: stetind/ppc-github-composite-actions/.github/actions/create-pr-and-merge@v1.0.0
+      - name: ⬇️ Create Pull Request
+        id: pr
+        uses: stetind/ppc-github-composite-actions/.github/actions/pull-request-create@v1.0.0
         with:
-          token: ${{ secrets.GH_TOKEN }}
-          title: Release ${{ inputs.title }}
-          merge_option: ${{ inputs.merge_option }}
+          token: ${{ secrets.WORKFLOW_TOKEN }}
+          title: ${{ inputs.title }}
           source: ${{ inputs.source }}
           target: ${{ inputs.target }}
+          body: ${{ inputs.body }}
+
+      - name: 🧹 Merge
+        id: merge
+        if: ${{ inputs.merge_option != 'none' }}
+        uses: stetind/ppc-github-composite-actions/.github/actions/pull-request-merge@v1.0.0
+        with:
+          token: ${{ secrets.WORKFLOW_TOKEN }}
+          pr_url: ${{ steps.pr.outputs.pr_url }}
+
+      - name: 🗑️ Delete `releases` Branch
+        if: ${{ inputs.merge_option == 'merge and delete' && steps.merge.outcome == 'success' }}
+        uses: stetind/ppc-github-composite-actions/.github/actions/delete-bracnh@v1.0.0
+        with:
+          token: ${{ secrets.WORKFLOW_TOKEN }}
+          branch: ${{ inputs.source }}

@@ -4,7 +4,7 @@ run-name: 🧹 Delete all `${{ inputs.status }}` of (${{ inputs.workflow_name ||
 on:
   workflow_call:
     secrets:
-      GH_TOKEN:
+      WORKFLOW_TOKEN:
         description: 'GitHub token with permissions for PR creation, branch merging, and deletion'
         required: true
     inputs:
@@ -107,6 +107,6 @@ jobs:
       - name: Cleanup
         uses: stetind/ppc-github-composite-actions/.github/actions/maintenance-cleanup@v1.0.0
         with:
-          token: ${{ secrets.GH_TOKEN || secrets.WORKFLOW_TOKEN || secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.WORKFLOW_TOKEN || secrets.GITHUB_TOKEN }}
           status: ${{ inputs.status }}
           workflow_name: ${{ inputs.workflow_name }}
