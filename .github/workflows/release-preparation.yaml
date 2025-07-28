@@ -63,14 +63,6 @@ on:
         options:
           - 'self-hosted'
           - 'ubuntu-latest'
-      job_container:
-        description: 'Select the docker container for the action'
-        required: false
-        default: 'ubuntu:latest'
-        type: choice
-        options:
-          - 'node:22.14'
-          - 'ubuntu:latest'
       temp_branch:
         description: 'Name of the temporary branch for staging release changes. Must match branch used in run-release workflow'
         required: false
@@ -99,11 +91,6 @@ on:
         required: false
         default: 'ubuntu-latest'
         type: string
-      job_container:
-        description: 'Docker container image to run the job (e.g., node:22.14)'
-        required: false
-        default: 'ubuntu:latest'
-        type: string
       temp_branch:
         description: 'Name of the temporary branch for staging release changes. Must match branch used in run-release workflow'
         required: false
@@ -113,7 +100,7 @@ on:
 jobs:
   prepare:
     name: Prepare & Push
-    runs-on: 'ubuntu-latest'
+    runs-on: ${{ inputs.runner || 'ubuntu-latest' }}
 
     steps:
       - name: ⬇️ Checkout repository
@@ -125,20 +112,20 @@ jobs:
       - name: 🏷️ Select tag
         id: latest_tag
         if: ${{ inputs.tag == '' }}
-        uses: stetind/ppc-github-composite-actions/.github/actions/get-latest-tag@v2.0.0
+        uses: stetind/ppc-github-composite-actions/.github/actions/get-latest-tag@v1.0.0
         with:
           token: ${{ secrets.WORKFLOW_TOKEN }}
 
       - name: 📦 Get commits since selected tag
         id: get_commits
-        uses: stetind/ppc-github-composite-actions/.github/actions/get-commits-since-tag@v2.0.0
+        uses: stetind/ppc-github-composite-actions/.github/actions/get-commits-since-tag@v1.0.0
         with:
           tag: ${{ inputs.tag || steps.latest_tag.outputs.latest_tag }}
 
       - name: 🔍 Detect version bump and compute new version
         id: detect_version
         if: ${{ steps.get_commits.outputs.commits != '' }}
-        uses: stetind/ppc-github-composite-actions/.github/actions/detect-version-bump@v2.0.0
+        uses: stetind/ppc-github-composite-actions/.github/actions/detect-version-bump@v1.0.0
         with:
           commits: ${{ steps.get_commits.outputs.commits }}
           tag: ${{ inputs.tag || steps.latest_tag.outputs.latest_tag }}
@@ -146,7 +133,7 @@ jobs:
       - name: 🧪 Generate changelog
         id: changelog
         if: ${{ steps.get_commits.outputs.commits != '' }}
-        uses: stetind/ppc-github-composite-actions/.github/actions/generate-changelog@v2.0.0
+        uses: stetind/ppc-github-composite-actions/.github/actions/generate-changelog@v1.0.0
         with:
           commits: ${{ steps.get_commits.outputs.commits }}
           previous_tag: ${{ inputs.tag || steps.latest_tag.outputs.latest_tag }}

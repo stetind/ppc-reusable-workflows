@@ -19,7 +19,6 @@
 #
 # Inputs:
 #   • runner: CI runner selection
-#   • job_container: Container configuration
 #
 # Outputs:
 #   • GitHub Release
@@ -51,11 +50,6 @@ on:
         required: false
         default: ${{ vars.DEFAULT_RUNNER }}
         type: string
-      job_container:
-        description: 'Docker container image to run the job (e.g., node:22.14)'
-        required: false
-        default: ${{ vars.DEFAULT_NODE_CONTAINER }}
-        type: string
     outputs:
       previous_tag:
         description: "Previous tag from metadata"
@@ -79,7 +73,6 @@ jobs:
     uses: stetind/ppc-reusable-workflows/.github/workflows/release-checkout.yaml@__VERSION__
     with:
       runner: ${{ inputs.runner }}
-      job_container: ${{ inputs.job_container }}
 
   release:
     name: Create Release
@@ -91,7 +84,6 @@ jobs:
       prerelease: ${{ needs.metadata.outputs.prerelease || '' }}
       release_note_file: '.release_notes.md'
       runner: ${{ inputs.runner }}
-      job_container: ${{ inputs.job_container }}
 
   pull_request:
     needs: [ release, metadata ]
@@ -101,7 +93,6 @@ jobs:
     secrets: inherit
     with:
       runner: ${{ inputs.runner }}
-      job_container: ${{ inputs.job_container }}
       source: ${{ needs.metadata.outputs.source_branch }}
       target: ${{ inputs.target }}
       title: Release ${{ needs.metadata.outputs.new_tag }}
@@ -111,10 +102,10 @@ jobs:
     name: 🧹 Clean Temporary branch
     needs: [ release, metadata ]
     runs-on: ${{ inputs.runner }}
-    container: ${{ inputs.job_container }}
+    container: 'node:22.14'
     steps:
       - name: 🗑️ Delete `${{ inputs.temporary }}` Branch
-        uses: stetind/ppc-github-composite-actions/.github/actions/delete-bracnh@v2.0.0
+        uses: stetind/ppc-github-composite-actions/.github/actions/delete-bracnh@v1.0.0
         with:
           token: ${{ secrets.WORKFLOW_TOKEN }}
           branch: ${{ inputs.temporary }}

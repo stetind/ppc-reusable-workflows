@@ -36,11 +36,6 @@ on:
         required: false
         default: 'ubuntu-latest'
         type: string
-      job_container:
-        description: 'Select the docker container for the action'
-        required: false
-        default: 'node:22.14'
-        type: string
 
   workflow_dispatch:
     inputs:
@@ -89,23 +84,14 @@ on:
         options:
           - 'self-hosted'
           - 'ubuntu-latest'
-      job_container:
-        description: 'Select the docker container for the action'
-        required: false
-        default: 'node:22.14'
-        type: choice
-        options:
-          - 'node:22.14'
-          - 'ubuntu:latest'
 
 jobs:
   cleanup:
     runs-on: ${{ inputs.runner }}
-    container: ${{ inputs.job_container }}
-
+    container: 'node:22.14'
     steps:
       - name: Cleanup
-        uses: stetind/ppc-github-composite-actions/.github/actions/maintenance-cleanup@v2.0.0
+        uses: stetind/ppc-github-composite-actions/.github/actions/maintenance-cleanup@v1.0.0
         with:
           token: ${{ secrets.WORKFLOW_TOKEN || secrets.GITHUB_TOKEN }}
           status: ${{ inputs.status }}

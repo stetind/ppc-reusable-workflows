@@ -13,7 +13,6 @@
 #   - branch: Target branch (default: current ref)
 #   - draft: Create as draft release (default: false)
 #   - runner: GitHub runner to use
-#   - job_container: Docker container image
 #
 # Outputs:
 #   - tag: The version name
@@ -87,17 +86,12 @@ on:
         required: false
         default: 'ubuntu-latest'
         type: string
-      job_container:
-        description: 'Select the docker container for the action'
-        required: false
-        default: 'node:22.14'
-        type: string
 
 jobs:
   release:
     name: Create Release
     runs-on: ${{ inputs.runner }}
-    container: ${{ inputs.job_container }}
+    container: 'node:22.14'
     outputs:
       tag: ${{ steps.changelog.outputs.new_tag }}
       prerelease: ${{ inputs.prerelease != '' && inputs.prerelease != 'none' }}
@@ -113,14 +107,14 @@ jobs:
 
       - name: 📦 Check if release exists
         id: check_release_exists
-        uses: stetind/ppc-github-composite-actions/.github/actions/check-release-exists@v2.0.0
+        uses: stetind/ppc-github-composite-actions/.github/actions/check-release-exists@v1.0.0
         with:
           token: ${{ secrets.WORKFLOW_TOKEN }}
           version: ${{ inputs.tag }}
 
       - name: 📤 Create GitHub Release
         if: ${{ steps.check_release_exists.outputs.exists == 'false' && inputs.release_note_file != '' }}
-        uses: stetind/ppc-github-composite-actions/.github/actions/create-github-release@v2.0.0
+        uses: stetind/ppc-github-composite-actions/.github/actions/create-github-release@v1.0.0
         with:
           token: ${{ secrets.WORKFLOW_TOKEN }}
           version: ${{ inputs.tag }}
