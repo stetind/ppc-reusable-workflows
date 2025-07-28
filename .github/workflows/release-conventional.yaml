@@ -124,7 +124,7 @@ jobs:
         with:
           token: ${{ secrets.WORKFLOW_TOKEN }}
           version: ${{ inputs.tag }}
-          title: "Release automated pull request (${{ inputs.tag }})"
+          title: "Release ${{ inputs.tag }}"
           body: ${{ inputs.release_notes }}
           body_path: ${{ inputs.release_note_file }}
           target_branch: ${{ inputs.branch }}
