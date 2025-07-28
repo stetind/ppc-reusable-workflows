@@ -156,6 +156,7 @@ jobs:
       - name: Replace __VERSION__ placeholders
         if: ${{ steps.get_commits.outputs.commits != '' }}
         run: |
+          current_file="${{ github.workflow }}"
           echo "Replacing version with ${{ steps.detect_version.outputs.new_version }}"
           find .github/workflows -type f -name "*.yaml" ! -name "$current_file" \
             -exec sed -i "s|__VERSION__|${{ steps.detect_version.outputs.new_version }}|g" {} +
