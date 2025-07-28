@@ -57,22 +57,21 @@ on:
         default: ${{ vars.DEFAULT_NODE_CONTAINER }}
         type: string
     outputs:
-      outputs:
-        previous_tag:
-          description: "Previous tag from metadata"
-          value: ${{ jobs.metadata.outputs.previous_tag }}
-        new_tag:
-          description: "New tag from metadata"
-          value: ${{ jobs.metadata.outputs.new_tag }}
-        prerelease:
-          description: "Prerelease flag from metadata"
-          value: ${{ jobs.metadata.outputs.prerelease }}
-        merge_option:
-          description: "Merge option from metadata"
-          value: ${{ jobs.metadata.outputs.merge_option }}
-        source_branch:
-          description: "Source branch from metadata"
-          value: ${{ jobs.metadata.outputs.source_branch }}
+      previous_tag:
+        description: "Previous tag from metadata"
+        value: ${{ jobs.metadata.outputs.previous_tag }}
+      new_tag:
+        description: "New tag from metadata"
+        value: ${{ jobs.metadata.outputs.new_tag }}
+      prerelease:
+        description: "Prerelease flag from metadata"
+        value: ${{ jobs.metadata.outputs.prerelease }}
+      merge_option:
+        description: "Merge option from metadata"
+        value: ${{ jobs.metadata.outputs.merge_option }}
+      source_branch:
+        description: "Source branch from metadata"
+        value: ${{ jobs.metadata.outputs.source_branch }}
 
 jobs:
   metadata:
@@ -115,7 +114,7 @@ jobs:
     container: ${{ inputs.job_container }}
     steps:
       - name: 🗑️ Delete `${{ inputs.temporary }}` Branch
-        uses: stetind/ppc-github-composite-actions/.github/actions/delete-bracnh@v1.0.0
+        uses: stetind/ppc-github-composite-actions/.github/actions/delete-bracnh@v1.0.1
         with:
           token: ${{ secrets.WORKFLOW_TOKEN }}
           branch: ${{ inputs.temporary }}
