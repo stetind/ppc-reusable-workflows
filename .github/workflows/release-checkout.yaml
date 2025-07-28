@@ -22,7 +22,6 @@
 #
 # Inputs:
 #   • runner: (optional) CI runner selection
-#   • job_container: (optional) Container configuration
 #
 # Usage:
 #   Called by release-execution.yaml to process release metadata
@@ -57,17 +56,12 @@ on:
         required: false
         default: 'ubuntu-latest'
         type: string
-      job_container:
-        description: 'Select the docker container for the action'
-        required: false
-        default: 'node:22.14'
-        type: string
 
 jobs:
   metadata:
     name: Read Metadata
     runs-on: ${{ inputs.runner }}
-    container: ${{ inputs.job_container }}
+    container: 'ubuntu:latest'
 
     outputs:
       previous_tag: ${{ steps.read_meta.outputs.previous_tag }}

@@ -19,7 +19,6 @@
 #
 # Inputs:
 #   • runner: CI runner selection
-#   • job_container: Container configuration
 #
 # Outputs:
 #   • GitHub Release
@@ -50,11 +49,6 @@ on:
         description: 'GitHub runner to execute the workflow (e.g., ubuntu-latest, self-hosted)'
         required: false
         default: ${{ vars.DEFAULT_RUNNER }}
-        type: string
-      job_container:
-        description: 'Docker container image to run the job (e.g., node:22.14)'
-        required: false
-        default: 'node:22.14'
         type: string
     outputs:
       previous_tag:
@@ -90,7 +84,6 @@ jobs:
       prerelease: ${{ needs.metadata.outputs.prerelease || '' }}
       release_note_file: '.release_notes.md'
       runner: ${{ inputs.runner }}
-      job_container: ${{ inputs.job_container }}
 
   pull_request:
     needs: [ release, metadata ]
@@ -100,7 +93,6 @@ jobs:
     secrets: inherit
     with:
       runner: ${{ inputs.runner }}
-      job_container: ${{ inputs.job_container }}
       source: ${{ needs.metadata.outputs.source_branch }}
       target: ${{ inputs.target }}
       title: Release ${{ needs.metadata.outputs.new_tag }}
@@ -110,7 +102,7 @@ jobs:
     name: 🧹 Clean Temporary branch
     needs: [ release, metadata ]
     runs-on: ${{ inputs.runner }}
-    container: ${{ inputs.job_container }}
+    container: 'ubuntu:latest'
     steps:
       - name: 🗑️ Delete `${{ inputs.temporary }}` Branch
         uses: stetind/ppc-github-composite-actions/.github/actions/delete-bracnh@v2.0.0

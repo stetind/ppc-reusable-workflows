@@ -22,17 +22,12 @@ on:
         required: false
         default: 'ubuntu-latest'
         type: string
-      job_container:
-        description: 'Select the docker container for the action'
-        required: false
-        default: 'node:22.14'
-        type: string
 
 jobs:
   testing:
     name: Run Sonar Cloud Coverage
     runs-on: ${{ inputs.runner }}
-    container: ${{ inputs.job_container }}
+    container: 'node:22.14'
     env:
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
     steps:

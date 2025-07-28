@@ -17,7 +17,6 @@
 #   • source: Source branch to merge from
 #   • target: Target branch to merge into
 #   • runner: (optional) CI runner selection
-#   • job_container: (optional) Container configuration
 #
 # Required Permissions:
 #   • GITHUB_TOKEN with repository write access
@@ -61,17 +60,12 @@ on:
         required: false
         default: 'ubuntu-latest'
         type: string
-      job_container:
-        description: 'Docker container image and tag for running the job'
-        required: false
-        default: 'node:22.14'
-        type: string
 
 jobs:
   release:
     name: Merge and clean branches
     runs-on: ${{ inputs.runner }}
-    container: ${{ inputs.job_container }}
+    container: 'ubuntu:latest'
     steps:
       - name: ⬇️ Checkout repository
         uses: actions/checkout@v4

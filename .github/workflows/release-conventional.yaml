@@ -13,7 +13,6 @@
 #   - branch: Target branch (default: current ref)
 #   - draft: Create as draft release (default: false)
 #   - runner: GitHub runner to use
-#   - job_container: Docker container image
 #
 # Outputs:
 #   - tag: The version name
@@ -87,17 +86,12 @@ on:
         required: false
         default: 'ubuntu-latest'
         type: string
-      job_container:
-        description: 'Select the docker container for the action'
-        required: false
-        default: 'node:22.14'
-        type: string
 
 jobs:
   release:
     name: Create Release
     runs-on: ${{ inputs.runner }}
-    container: ${{ inputs.job_container }}
+    container: 'ubuntu:latest'
     outputs:
       tag: ${{ steps.changelog.outputs.new_tag }}
       prerelease: ${{ inputs.prerelease != '' && inputs.prerelease != 'none' }}

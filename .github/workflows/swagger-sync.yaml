@@ -8,9 +8,8 @@
 name: SwaggerHub
 run-name: >-
   ${{
-  format('Swagger Hub sync `{0}` & container `{1}`', 
-      github.event.inputs.runner || vars.DEFAULT_RUNNER,
-      github.event.inputs.job_container || vars.DEFAULT_NODE_CONTAINER
+  format('Swagger Hub sync `{0}`', 
+      github.event.inputs.runner || vars.DEFAULT_RUNNER
       )
   }}
 
@@ -25,11 +24,6 @@ on:
         required: false
         default: 'ubuntu-latest'
         type: string
-      job_container:
-        description: 'Select the docker container for the action'
-        required: false
-        default: 'node:22.14'
-        type: string
       owner:
         description: 'Set the swagger hub project owner'
         required: true
@@ -43,7 +37,7 @@ jobs:
   sync:
     name: Run Swagger Hub Sync
     runs-on: ${{ inputs.runner }}
-    container: ${{ inputs.job_container }}
+    container: 'node:22.14'
 
     steps:
       - name: Checkout repository

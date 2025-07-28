@@ -63,14 +63,6 @@ on:
         options:
           - 'self-hosted'
           - 'ubuntu-latest'
-      job_container:
-        description: 'Select the docker container for the action'
-        required: false
-        default: 'ubuntu:latest'
-        type: choice
-        options:
-          - 'node:22.14'
-          - 'ubuntu:latest'
       temp_branch:
         description: 'Name of the temporary branch for staging release changes. Must match branch used in run-release workflow'
         required: false
@@ -99,11 +91,6 @@ on:
         required: false
         default: 'ubuntu-latest'
         type: string
-      job_container:
-        description: 'Docker container image to run the job (e.g., node:22.14)'
-        required: false
-        default: 'ubuntu:latest'
-        type: string
       temp_branch:
         description: 'Name of the temporary branch for staging release changes. Must match branch used in run-release workflow'
         required: false
@@ -113,7 +100,7 @@ on:
 jobs:
   prepare:
     name: Prepare & Push
-    runs-on: 'ubuntu-latest'
+    runs-on: ${{ inputs.runner || 'ubuntu-latest' }}
 
     steps:
       - name: ⬇️ Checkout repository
