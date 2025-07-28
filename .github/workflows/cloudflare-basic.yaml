@@ -54,7 +54,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: 🧙 Install Node
-        uses: stetind/ppc-github-composite-actions/.github/actions/install-global-dependencies@v2.0.0
+        uses: stetind/ppc-github-composite-actions/.github/actions/install-global-dependencies@v1.0.0
         with:
           npm_token: $NPM_TOKEN
 
@@ -63,7 +63,7 @@ jobs:
 
       - name: 📓 Create wrangler configuration
         id: wrangler
-        uses: stetind/ppc-github-composite-actions/.github/actions/wrangler-replace-varaibles@v2.0.0
+        uses: stetind/ppc-github-composite-actions/.github/actions/wrangler-replace-varaibles@v1.0.0
         with:
           secrets: ${{ toJSON(secrets) }}
           variables: ${{ toJSON(vars) }}

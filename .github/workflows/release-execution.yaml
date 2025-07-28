@@ -105,7 +105,7 @@ jobs:
     container: 'ubuntu:latest'
     steps:
       - name: 🗑️ Delete `${{ inputs.temporary }}` Branch
-        uses: stetind/ppc-github-composite-actions/.github/actions/delete-bracnh@v2.0.0
+        uses: stetind/ppc-github-composite-actions/.github/actions/delete-bracnh@v1.0.0
         with:
           token: ${{ secrets.WORKFLOW_TOKEN }}
           branch: ${{ inputs.temporary }}
