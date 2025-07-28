@@ -36,11 +36,6 @@ on:
         required: false
         default: 'ubuntu-latest'
         type: string
-      job_container:
-        description: 'Select the docker container for the action'
-        required: false
-        default: 'node:22.14'
-        type: string
 
   workflow_dispatch:
     inputs:
@@ -89,19 +84,11 @@ on:
         options:
           - 'self-hosted'
           - 'ubuntu-latest'
-      job_container:
-        description: 'Select the docker container for the action'
-        required: false
-        default: 'node:22.14'
-        type: choice
-        options:
-          - 'node:22.14'
-          - 'ubuntu:latest'
 
 jobs:
   cleanup:
     runs-on: ${{ inputs.runner }}
-    container: ${{ inputs.job_container }}
+    container: 'ubuntu:latest'
 
     steps:
       - name: Cleanup

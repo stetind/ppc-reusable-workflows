@@ -54,7 +54,7 @@ on:
       job_container:
         description: 'Docker container image to run the job (e.g., node:22.14)'
         required: false
-        default: ${{ vars.DEFAULT_NODE_CONTAINER }}
+        default: 'node:22.14'
         type: string
     outputs:
       previous_tag:
@@ -79,7 +79,6 @@ jobs:
     uses: stetind/ppc-reusable-workflows/.github/workflows/release-checkout.yaml@__VERSION__
     with:
       runner: ${{ inputs.runner }}
-      job_container: ${{ inputs.job_container }}
 
   release:
     name: Create Release
