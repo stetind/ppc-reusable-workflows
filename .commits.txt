@@ -1,0 +1,5 @@
+chore: downgrade composite action versions from v2.0.0 to v1.0.0 across workflows|
+chore: downgrade composite action versions from v2.0.0 to v1.0.0 across workflows|
+refactor!: remove `job_container` input from workflows and update container defaults|
+chore: update job container defaults and clean up unused inputs in workflows|
+Release 9.0.0 (#95)|
