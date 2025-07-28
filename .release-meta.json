@@ -1,7 +1,7 @@
 {
   "previous_tag": "v8.2.0",
-  "new_tag": "v9.0.0",
+  "new_tag": "9.0.0",
   "prerelease": "",
   "merge_option": "merge and delete",
-  "source_branch": "main"
+  "source_branch": "feat/ak"
 }

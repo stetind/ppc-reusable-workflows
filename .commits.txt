@@ -1,0 +1,93 @@
+chore: downgrade composite action references to v1.0.0 across workflows|
+Merge branch 'main' into feat/ak|
+chore: upgrade composite action references to v2.0.0 across workflows|
+Release 9.0.0 (#94)|
+Merge branch 'main' into feat/ak|
+chore: fix path reference in release-preparation workflow version replacement logic|
+Release 9.0.0 (#93)|
+chore: fix path reference in release-preparation workflow version replacement logic|
+chore: merge main to feat/ak|
+Merge branch 'main' into feat/ak|
+chore: update release PR title in release-conventional workflow|
+Release 9.0.0 (#91)|
+chore: refine find command logic for version replacement in release-preparation workflow|
+chore: refine find command logic for version replacement in release-preparation workflow|
+chore: fix replace_volume default path and adjust version replacement logic in release-preparation workflow|
+chore: add replace_volume input for customizable version replacement path in release-preparation workflow|
+chore: fix typo in composite-action reference across workflows|
+Merge branch 'main' into feat/ak|
+chore: update composite-action references to v1.0.1 across workflows|
+chore: add descriptions to metadata outputs in release-execution workflow|
+Release 9.0.0 (#90)|
+Merge branch 'main' into feat/ak|
+chore: add descriptions to metadata outputs in release-execution workflow|
+chore: simplify version replacement logic in release-preparation workflow|
+Release 9.0.0 (#88)|
+chore: fix `current_file` assignment in release-preparation workflow|
+chore: exclude current workflow file from version replacement logic in release-preparation|
+Merge branch 'main' into feat/ak|
+chore: exclude current file from `find` operation in release-preparation workflow|
+Release 9.0.0 (#86)|
+chore: remove unused `WORKFLOW_TOKEN` input from release workflow|
+chore: update workflows to standardize usage of `WORKFLOW_TOKEN` for secrets handling and simplify token prioritization logic|
+chore: refine conditions in release workflows to handle 'none' merge option correctly|
+chore: downgrade GitHub composite actions to v1.0.0 across all workflows for compatibility adjustments|
+chore: fix conditional expressions in release workflows for proper evaluation|
+chore: fix conditional expressions in release workflows for proper evaluation|
+chore: update condition in release workflow for release notes check|
+chore: fix condition in release workflow to correctly check for release existence|
+chore: refine release workflow to update tag handling, add support for file-based release notes, and improve PR creation logic|
+chore: update workflows to use v1.1.1 of GitHub composite actions for consistency and enhancements|
+chore: remove redundant release notes preview echo step from release workflow|
+chore: remove redundant release notes preview echo step from release workflow|
+chore: update release workflows to use reusable `release-cleanup` workflow and refine input handling for PR creation and merging|
+chore: update release workflows to use reusable `release-cleanup` workflow and refine input handling for PR creation and merging|
+chore: update release workflows to use reusable `release-cleanup` workflow and refine input handling for PR creation and merging|
+chore: update workflows to use v1.1.0 of GitHub composite actions for consistency and feature improvements|
+chore: refine release workflows with default inputs, updated tag syntax, and modular action usage|
+chore: remove redundant base64 encoding step in release workflow|
+chore: update release workflows to streamline base64 handling, add file-based release notes support|
+chore: update release workflows to streamline base64 handling, add file-based release notes support|
+chore: refine release workflow by adjusting base64 handling and output formatting for release notes|
+chore: refine base64 encoding in release workflows and update release notes environment handling|
+chore: replace base64 encoding with direct file content handling in release workflow|
+chore: refine base64 handling in release workflow and adjust release notes processing logic|
+chore: update release workflows to refine base64 handling for release notes and add decoding logic|
+chore: simplify release workflow by removing base64 decoding from release notes handling and adjusting tag syntax|
+chore: simplify release workflow by removing base64 decoding from release notes handling and adjusting tag syntax|
+chore: refactor release workflow to separate release notes processing into dedicated step and update dependencies accordingly|
+chore: update version handling in release workflows and comment out clean-up steps|
+chore: update file names for release notes and commits to use hidden files in release-preparation workflow|
+chore: update release workflows to include `.release_notes.md` and `.commits.txt` in release preparation steps|
+chore: refactor release workflows to enhance release notes handling with base64 encoding and file-based metadata|
+chore: update tagging logic and add release notes to workflows for improved metadata handling|
+chore: add container configuration to Prepare & Push step in release-preparation workflow|
+chore: add container configuration to Prepare & Push step in release-preparation workflow|
+chore: add container configuration to Prepare & Push step in release-preparation workflow|
+chore: add container configuration to Prepare & Push step in release-preparation workflow|
+chore: add container configuration to Prepare & Push step in release-preparation workflow|
+chore: add container configuration to Prepare & Push step in release-preparation workflow|
+chore: remove unused `job_container` input from release-preparation workflow|
+chore: simplify container definition and use WORKFLOW_TOKEN in release-preparation workflow|
+chore: add volume mount to container in release-preparation workflow|
+chore: update default runner and container values in release-preparation workflow|
+chore: replace custom script with composite action to fetch latest tag in release-preparation workflow|
+chore: replace action with custom script to fetch latest tag in release-preparation workflow|
+chore: add `GH_TOKEN` to environment variables in release-preparation workflow|
+chore: refactor workflow steps and update inputs handling across release workflows|
+chore: refactor workflow steps and update inputs handling across release workflows|
+chore: update default option and use WORKFLOW_TOKEN in release-preparation workflow|
+chore: update defaults and input handling in release-preparation workflow|
+chore: remove extra newline in release-preparation workflow inputs|
+chore: remove `release-prepare.yaml` and update workflows with new inputs and corrections|
+fixes: fixes on variables|
+fix: exclude current file from version placeholder replacement logic (#78)|
+Release Release 9.0.0 (#77)|
+Release Release v9.0.0 (#76)|
+Prepare release for version v9.0.0 (#75)|
+chore: change name (#74)|
+feat: update scripts|
+chore: update workflow names (#72)|
+refactor!: standardize and rename workflow files for consistency|
+Release v9.0.0 (#70)|
+fix: fix if clause for final summary in auto-release-based-conventional-commits.yaml (#68)|
