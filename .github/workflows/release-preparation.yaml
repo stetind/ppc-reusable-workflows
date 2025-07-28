@@ -79,10 +79,10 @@ on:
       replace_volume:
         description: 'The path in which the action will try to replace all __VERSION__ to current version'
         required: false
-        default: '.github/workflow'
+        default: '.github/workflows'
         type: choice
         options:
-          - '.github/workflow'
+          - '.github/workflows'
           - '.github/actions'
           - '.github'
   workflow_call:
@@ -121,7 +121,7 @@ on:
       replace_volume:
         description: 'The path in which the action will try to replace all __VERSION__ to current version'
         required: false
-        default: '.github/workflow'
+        default: '.github/workflows'
         type: string
 
 jobs:
@@ -175,7 +175,7 @@ jobs:
           new_version=v"${new_version#v}"
           current_file="release-preparation.yaml"
           echo "Replacing version with $new_version"
-          find $path -type f -name "*.yaml" ! -name "$current_file" \
+          find "$path" -type f -name "*.yaml" ! -name "$current_file" \
             -exec sed -i "s|@__VERSION__|@$new_version|g" {} +
 
       - name: 💾 Write release metadata
