@@ -48,7 +48,6 @@ jobs:
     uses: stetind/ppc-reusable-workflows/.github/workflows/release-cleanup.yaml@releases
     secrets: inherit
     with:
-      token: ${{ secrets.WORKFLOW_TOKEN }}
       runner: ${{ vars.DEFAULT_RUNNER }}
       job_container: ${{ vars.DEFAULT_NODE_CONTAINER }}
       source: ${{ needs.metadata.outputs.source_branch }}
