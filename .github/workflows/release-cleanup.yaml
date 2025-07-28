@@ -65,7 +65,7 @@ jobs:
   release:
     name: Merge and clean branches
     runs-on: ${{ inputs.runner }}
-    container: 'ubuntu:latest'
+    container: 'node:22.14'
     steps:
       - name: ⬇️ Checkout repository
         uses: actions/checkout@v4

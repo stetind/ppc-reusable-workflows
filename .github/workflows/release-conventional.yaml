@@ -91,7 +91,7 @@ jobs:
   release:
     name: Create Release
     runs-on: ${{ inputs.runner }}
-    container: 'ubuntu:latest'
+    container: 'node:22.14'
     outputs:
       tag: ${{ steps.changelog.outputs.new_tag }}
       prerelease: ${{ inputs.prerelease != '' && inputs.prerelease != 'none' }}

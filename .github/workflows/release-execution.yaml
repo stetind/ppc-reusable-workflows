@@ -102,7 +102,7 @@ jobs:
     name: 🧹 Clean Temporary branch
     needs: [ release, metadata ]
     runs-on: ${{ inputs.runner }}
-    container: 'ubuntu:latest'
+    container: 'node:22.14'
     steps:
       - name: 🗑️ Delete `${{ inputs.temporary }}` Branch
         uses: stetind/ppc-github-composite-actions/.github/actions/delete-bracnh@v1.0.0

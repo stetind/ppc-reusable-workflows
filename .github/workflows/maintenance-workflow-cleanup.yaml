@@ -88,7 +88,7 @@ on:
 jobs:
   cleanup:
     runs-on: ${{ inputs.runner }}
-    container: 'ubuntu:latest'
+    container: 'node:22.14'
     steps:
       - name: Cleanup
         uses: stetind/ppc-github-composite-actions/.github/actions/maintenance-cleanup@v1.0.0

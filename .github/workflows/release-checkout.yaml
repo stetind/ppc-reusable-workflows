@@ -61,7 +61,7 @@ jobs:
   metadata:
     name: Read Metadata
     runs-on: ${{ inputs.runner }}
-    container: 'ubuntu:latest'
+    container: 'node:22.14'
 
     outputs:
       previous_tag: ${{ steps.read_meta.outputs.previous_tag }}

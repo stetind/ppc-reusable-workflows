@@ -56,7 +56,7 @@ jobs:
     name: 🧹 Clean Temporary branch
     needs: [ release, metadata ]
     runs-on: ${{ vars.DEFAULT_RUNNER }}
-    container: 'ubuntu:latest'
+    container: 'node:22.14'
     steps:
       - name: 🗑️ Delete `releases` Branch
         uses: stetind/ppc-github-composite-actions/.github/actions/delete-bracnh@v1.0.0
