@@ -1,0 +1,2 @@
+chore: set default branch to 'releases' in release-preparation workflow|
+chore: remove unused `temp_branch` input and update default branch reference in release-preparation workflow|
