@@ -8,7 +8,6 @@
 #
 # Inputs:
 #   - tag: Optional fixed version (skips bump logic)
-#   - new_tag: Optional specific version to use
 #   - prerelease: Optional prerelease identifier (beta/rc)
 #   - branch: Target branch (default: current ref)
 #   - draft: Create as draft release (default: false)
@@ -55,11 +54,6 @@ on:
         description: 'Optional tag version (e.g., v1.0.0). Leave empty for the latest tag.'
         required: false
         type: string
-      new_tag:
-        description: 'Optional tag version (e.g., v1.0.0).'
-        required: false
-        type: string
-        default: ''
       prerelease:
         description: 'Optional prerelease identifier (e.g., beta, rc). Leave empty for stable.'
         required: false
@@ -93,10 +87,8 @@ jobs:
     runs-on: ${{ inputs.runner }}
     container: 'node:22.14'
     outputs:
-      tag: ${{ steps.changelog.outputs.new_tag }}
       prerelease: ${{ inputs.prerelease != '' && inputs.prerelease != 'none' }}
       prerelease_suffix: ${{ inputs.prerelease }}
-      has_changes: ${{ steps.changelog.outputs.has_changes }}
 
     steps:
       - name: ⬇️ Checkout repository

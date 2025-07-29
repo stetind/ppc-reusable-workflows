@@ -45,8 +45,24 @@ on:
         type: string
 
 jobs:
+  decuple_release_name:
+    runs-on: ${{ inputs.runner }}
+    container: 'ubuntu:latest'
+    steps:
+      - name: Extract dev tag from release tag
+        run: |
+          RELEASE_TAG="${{ inputs.release_version_name }}"
+          if [[ $RELEASE_TAG == *-* ]]; then
+            TAG=$(echo $RELEASE_TAG | cut -d'-' -f2- | cut -d'.' -f1 )
+          else
+            TAG="dev"
+          fi
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+
   publish:
     runs-on: ${{ inputs.runner }}
+    needs:
+      - decuple_release_name
     container: 'node:22.14'
     env:
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
@@ -70,16 +86,9 @@ jobs:
         env:
           NODE_AUTH_TOKEN: $NPM_TOKEN
 
-      - name: Extract dev tag from release tag
-        if: "inputs.is_dev_release"
-        id: extract-tag
-        uses: stetind/ppc-github-composite-actions/.github/actions/extract-dev-tag@v1.0.2
-        with:
-          tag: ${{ inputs.release_version_name }}
-
       - name: 🐱‍🚀 Publish Dev
         if: "inputs.is_dev_release"
-        run: npm publish --tag ${{ steps.extract-tag.outputs.dev_tag || 'dev' }}
+        run: npm publish --tag ${{ needs.decuple_release_name.outputs.tag || 'dev' }}
         env:
           NODE_AUTH_TOKEN: $NPM_TOKEN
 
