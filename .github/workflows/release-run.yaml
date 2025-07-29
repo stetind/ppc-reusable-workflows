@@ -38,7 +38,7 @@ jobs:
         run: |
           RELEASE_TAG="${{ needs.metadata.outputs.new_tag }}"
           PRERELEASE="${{ needs.metadata.outputs.prerelease }}"
-            if [[ ! $PRERELEASE == "" || ! $PRERELEASE == "none" ]]; then
+            if [[ $PRERELEASE != "" || $PRERELEASE != "none" ]]; then
               RELEASE_TAG+="-"$PRERELEASE
             fi
             echo "tag=v$RELEASE_TAG" >> $GITHUB_OUTPUT
