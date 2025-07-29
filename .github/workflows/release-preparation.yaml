@@ -178,8 +178,7 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
           git checkout -B ${{ inputs.temp_branch }}
-          git add .github/workflows/*.yaml
-          git add .github/*.yaml
+          git add .github/
           git add .release-meta.json
           git add .commits.txt
           git add .release_notes.md
