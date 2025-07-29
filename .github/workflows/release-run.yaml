@@ -59,7 +59,7 @@ jobs:
     container: 'node:22.14'
     steps:
       - name: 🗑️ Delete `releases` Branch
-        uses: stetind/ppc-github-composite-actions/.github/actions/delete-bracnh@v1.0.0
+        uses: stetind/ppc-github-composite-actions/.github/actions/delete-bracnh@v1.0.1
         with:
           token: ${{ secrets.WORKFLOW_TOKEN }}
           branch: releases
