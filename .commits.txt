@@ -1,0 +1,7 @@
+chore: update browserslist update command with `--yes` flag in npm-publication workflow|
+Merge branch 'main' into chore/ak/update_job_container|
+chore: update composite actions to version 1.0.4 across workflows|
+Release v10.0.5 (#102)|
+Merge branch 'main' into chore/ak/update_job_container|
+chore: consolidate release tag handling logic across workflows and improve version replacement in release-preparation|
+Release v10.0.4 (#101)|
