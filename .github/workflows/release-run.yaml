@@ -34,6 +34,7 @@ jobs:
     container: 'ubuntu:latest'
     steps:
       - name: Concat release name
+        id: release_tag
         shell: bash
         run: |
           RELEASE_TAG="${{ needs.metadata.outputs.new_tag }}"
@@ -41,7 +42,7 @@ jobs:
             if [[ $PRERELEASE != "" || $PRERELEASE != "none" ]]; then
               RELEASE_TAG+="-"$PRERELEASE
             fi
-            echo "tag=v$RELEASE_TAG" >> $GITHUB_OUTPUT
+            echo "tag=v$RELEASE_TAG" >> "$GITHUB_OUTPUT"
             echo "::notice ::Release Tag v$RELEASE_TAG"
 
   release:
