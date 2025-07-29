@@ -135,11 +135,24 @@ jobs:
           new_tag: ${{ steps.detect_version.outputs.new_version }}
           repository: ${{ github.repository }}
 
+      - name: Concat release name
+        id: concat_release_tag
+        if: ${{ steps.get_commits.outputs.commits != '' }}
+        shell: bash
+        run: |
+          RELEASE_TAG="${{ steps.detect_version.outputs.new_version }}"
+          PRERELEASE="${{ github.event.inputs.prerelease }}"
+            if [[ $PRERELEASE != "" && $PRERELEASE != "none" ]]; then
+              RELEASE_TAG+="-"$PRERELEASE
+            fi
+            echo "tag=v$RELEASE_TAG" >> "$GITHUB_OUTPUT"
+            echo "::notice ::Release Tag v$RELEASE_TAG"
+
       - name: Replace __VERSION__ placeholders
         if: ${{ steps.get_commits.outputs.commits != '' }}
         run: |
           # Store the version in a variable for clarity
-          new_version="${{ steps.detect_version.outputs.new_version }}"
+          new_version="${{ steps.concat_release_tag.outputs.tag }}"
           new_version=v"${new_version#v}"
           current_file="release-preparation.yaml"
           echo "Replacing version with $new_version"
@@ -170,7 +183,7 @@ jobs:
           cat <<EOF > .release-meta.json
           {
             "previous_tag": "${{ inputs.tag || steps.latest_tag.outputs.latest_tag }}",
-            "new_tag": "${{ steps.detect_version.outputs.new_version }}",
+            "new_tag": "${{ steps.concat_release_tag.outputs.tag }}",
             "prerelease": "${{ github.event.inputs.prerelease || '' }}",
             "merge_option": "${{ github.event.inputs.merge_option || 'none' }}",
             "source_branch": "${{ github.ref_name }}"
@@ -189,5 +202,5 @@ jobs:
           git add .commits.txt
           git add .release_notes.md
           git add README.md
-          git commit -m "Prepare release for version ${{ steps.detect_version.outputs.new_version }}"
+          git commit -m "Prepare release for version ${{ steps.concat_release_tag.outputs.tag }}"
           git push origin ${{ inputs.temp_branch || 'releases' }} --force
