@@ -57,7 +57,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: 🔧 Setup Node and NPM
-        uses: stetind/ppc-github-composite-actions/.github/actions/install-global-dependencies@v1.0.1
+        uses: stetind/ppc-github-composite-actions/.github/actions/install-global-dependencies@v1.0.2
         with:
           npm_token: $NPM_TOKEN
           production: ${{ !inputs.is_dev_release }}
@@ -70,9 +70,16 @@ jobs:
         env:
           NODE_AUTH_TOKEN: $NPM_TOKEN
 
+      - name: Extract dev tag from release tag
+        if: "inputs.is_dev_release"
+        id: extract-tag
+        uses: stetind/ppc-github-composite-actions/.github/actions/extract-dev-tag@v1.0.2
+        with:
+          tag: ${{ inputs.release_version_name }}
+
       - name: 🐱‍🚀 Publish Dev
         if: "inputs.is_dev_release"
-        run: npm publish --tag ${{ inputs.dev_release_tag_name }}
+        run: npm publish --tag ${{ steps.extract-tag.outputs.dev_tag || 'dev' }}
         env:
           NODE_AUTH_TOKEN: $NPM_TOKEN
 

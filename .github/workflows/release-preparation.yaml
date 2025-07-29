@@ -112,20 +112,20 @@ jobs:
       - name: 🏷️ Select tag
         id: latest_tag
         if: ${{ inputs.tag == '' }}
-        uses: stetind/ppc-github-composite-actions/.github/actions/get-latest-tag@v1.0.1
+        uses: stetind/ppc-github-composite-actions/.github/actions/get-latest-tag@v1.0.2
         with:
           token: ${{ secrets.WORKFLOW_TOKEN }}
 
       - name: 📦 Get commits since selected tag
         id: get_commits
-        uses: stetind/ppc-github-composite-actions/.github/actions/get-commits-since-tag@v1.0.1
+        uses: stetind/ppc-github-composite-actions/.github/actions/get-commits-since-tag@v1.0.2
         with:
           tag: ${{ inputs.tag || steps.latest_tag.outputs.latest_tag }}
 
       - name: 🔍 Detect version bump and compute new version
         id: detect_version
         if: ${{ steps.get_commits.outputs.commits != '' }}
-        uses: stetind/ppc-github-composite-actions/.github/actions/detect-version-bump@v1.0.1
+        uses: stetind/ppc-github-composite-actions/.github/actions/detect-version-bump@v1.0.2
         with:
           commits: ${{ steps.get_commits.outputs.commits }}
           tag: ${{ inputs.tag || steps.latest_tag.outputs.latest_tag }}
@@ -133,7 +133,7 @@ jobs:
       - name: 🧪 Generate changelog
         id: changelog
         if: ${{ steps.get_commits.outputs.commits != '' }}
-        uses: stetind/ppc-github-composite-actions/.github/actions/generate-changelog@v1.0.1
+        uses: stetind/ppc-github-composite-actions/.github/actions/generate-changelog@v1.0.2
         with:
           commits: ${{ steps.get_commits.outputs.commits }}
           previous_tag: ${{ inputs.tag || steps.latest_tag.outputs.latest_tag }}
@@ -143,12 +143,23 @@ jobs:
       - name: Replace __VERSION__ placeholders
         if: ${{ steps.get_commits.outputs.commits != '' }}
         run: |
+          # Store the version in a variable for clarity
           new_version="${{ steps.detect_version.outputs.new_version }}"
           new_version=v"${new_version#v}"
           current_file="release-preparation.yaml"
           echo "Replacing version with $new_version"
-          find .github/ -type f -name "*.yaml" ! -name "$current_file" \
+
+          # First, let's see what files contain the placeholder
+          echo "Files containing @__VERSION__:"
+          grep -l "@__VERSION__" .github/**/*.{yaml,yml} || true
+
+          # Perform the replacement for both .yaml and .yml files
+          find .github/ -type f \( -name "*.yaml" -o -name "*.yml" \) ! -name "$current_file" \
             -exec sed -i "s|@__VERSION__|@$new_version|g" {} +
+
+          # Verify the changes
+          echo "Files after replacement (showing lines with the new version):"
+          grep -r "@$new_version" .github/ || true
 
       - name: 💾 Write release metadata
         if: ${{ steps.get_commits.outputs.commits != '' }}
