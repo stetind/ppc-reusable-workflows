@@ -63,11 +63,6 @@ on:
         options:
           - 'self-hosted'
           - 'ubuntu-latest'
-      temp_branch:
-        description: 'Name of the temporary branch for staging release changes. Must match branch used in run-release workflow'
-        required: false
-        default: 'releases'
-        type: string
   workflow_call:
     inputs:
       tag:
@@ -182,17 +177,17 @@ jobs:
           }
           EOF
 
-      - name: Commit & Push to ${{ inputs.temp_branch }}
+      - name: Commit & Push to ${{ inputs.temp_branch || 'releases' }}
         if: ${{ steps.get_commits.outputs.commits != '' }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          git checkout -B ${{ inputs.temp_branch }}
+          git checkout -B ${{ inputs.temp_branch || 'releases' }}
           git add .github/
           git add .release-meta.json
           git add .commits.txt
           git add .release_notes.md
           git add README.md
           git commit -m "Prepare release for version ${{ steps.detect_version.outputs.new_version }}"
-          git push origin ${{ inputs.temp_branch }} --force
+          git push origin ${{ inputs.temp_branch || 'releases' }} --force
