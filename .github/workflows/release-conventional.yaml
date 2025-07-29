@@ -99,14 +99,14 @@ jobs:
 
       - name: 📦 Check if release exists
         id: check_release_exists
-        uses: stetind/ppc-github-composite-actions/.github/actions/check-release-exists@v1.0.2
+        uses: stetind/ppc-github-composite-actions/.github/actions/check-release-exists@v1.0.4
         with:
           token: ${{ secrets.WORKFLOW_TOKEN }}
           version: ${{ inputs.tag }}
 
       - name: 📤 Create GitHub Release
         if: ${{ steps.check_release_exists.outputs.exists == 'false' && inputs.release_note_file != '' }}
-        uses: stetind/ppc-github-composite-actions/.github/actions/create-github-release@v1.0.2
+        uses: stetind/ppc-github-composite-actions/.github/actions/create-github-release@v1.0.4
         with:
           token: ${{ secrets.WORKFLOW_TOKEN }}
           version: ${{ inputs.tag }}
