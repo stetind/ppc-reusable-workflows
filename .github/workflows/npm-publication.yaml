@@ -48,8 +48,11 @@ jobs:
   decuple_release_name:
     runs-on: ${{ inputs.runner }}
     container: 'ubuntu:latest'
+    outputs:
+      tag: ${{ steps.extract.outputs.tag }}
     steps:
       - name: Extract dev tag from release tag
+        id: extract
         run: |
           RELEASE_TAG="${{ inputs.release_version_name }}"
           if [[ $RELEASE_TAG == *-* ]]; then

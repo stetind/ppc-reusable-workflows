@@ -32,6 +32,8 @@ jobs:
     runs-on: ${{ vars.DEFAULT_RUNNER }}
     needs: [ metadata ]
     container: 'ubuntu:latest'
+    outputs:
+      tag: ${{ steps.release_tag.outputs.tag }}
     steps:
       - name: Concat release name
         id: release_tag
