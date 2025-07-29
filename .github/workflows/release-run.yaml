@@ -30,6 +30,7 @@ jobs:
 
   merge_release_tag_name:
     runs-on: ${{ vars.DEFAULT_RUNNER }}
+    needs: [ metadata ]
     container: 'ubuntu:latest'
     steps:
       - name: Concat release name
@@ -41,6 +42,7 @@ jobs:
               RELEASE_TAG+="-"$PRERELEASE
             fi
             echo "tag=v$RELEASE_TAG" >> $GITHUB_OUTPUT
+            echo "::notice ::Release Tag v$RELEASE_TAG"
 
   release:
     name: Create Release
