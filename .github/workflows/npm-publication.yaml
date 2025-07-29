@@ -82,7 +82,7 @@ jobs:
           production: ${{ !inputs.is_dev_release }}
 
       - name: 🏗️ Building Environment
-        run: npm run build --if-present && npx browserslist@latest --update-db
+        run: npm run build --if-present && npx --yes browserslist@latest --update-db
 
       - name: 🚀 Update version
         run: npm --no-git-tag-version version ${{ inputs.release_version_name }}
