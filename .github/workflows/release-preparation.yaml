@@ -143,12 +143,23 @@ jobs:
       - name: Replace __VERSION__ placeholders
         if: ${{ steps.get_commits.outputs.commits != '' }}
         run: |
+          # Store the version in a variable for clarity
           new_version="${{ steps.detect_version.outputs.new_version }}"
           new_version=v"${new_version#v}"
           current_file="release-preparation.yaml"
           echo "Replacing version with $new_version"
-          find .github/ -type f -name "*.yaml" ! -name "$current_file" \
+
+          # First, let's see what files contain the placeholder
+          echo "Files containing @__VERSION__:"
+          grep -l "@__VERSION__" .github/**/*.{yaml,yml} || true
+
+          # Perform the replacement for both .yaml and .yml files
+          find .github/ -type f \( -name "*.yaml" -o -name "*.yml" \) ! -name "$current_file" \
             -exec sed -i "s|@__VERSION__|@$new_version|g" {} +
+
+          # Verify the changes
+          echo "Files after replacement (showing lines with the new version):"
+          grep -r "@$new_version" .github/ || true
 
       - name: 💾 Write release metadata
         if: ${{ steps.get_commits.outputs.commits != '' }}
