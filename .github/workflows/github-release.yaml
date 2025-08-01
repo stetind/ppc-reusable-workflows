@@ -1,0 +1,143 @@
+name: Github Release
+
+on:
+  workflow_call:
+    inputs:
+      tag:
+        description: 'Version tag to use for the release (e.g., v1.0.0). If not specified, will use the latest tag'
+        required: false
+        type: string
+      prerelease:
+        description: 'Identifier for pre-release versions (e.g., beta, rc). Leave empty for stable releases'
+        required: false
+        type: string
+      merge_option:
+        description: 'Controls how changes are merged after release preparation:
+          - merge and delete: merges changes and removes temporary branch
+          - merge: only merges changes
+          - none: keeps changes in temporary branch'
+        required: false
+        type: string
+        default: 'merge and delete'
+      runner:
+        description: 'GitHub runner to execute the workflow (e.g., ubuntu-latest, self-hosted)'
+        required: false
+        default: 'ubuntu-latest'
+        type: string
+
+jobs:
+  prepare:
+    name: Prepare
+    runs-on: ${{ inputs.runner || 'ubuntu-latest' }}
+    container: ${{ vars.DEFAULT_CONTAINER || 'node:22.14' }}
+    outputs:
+      previous_tag: ${{ inputs.tag || steps.latest_tag.outputs.latest_tag }}"
+      new_tag: ${{ steps.concat_release_tag.outputs.tag }}
+      is_prelease: ${{ github.event.inputs.prerelease != 'none' && github.event.inputs.prerelease != '' }}
+      prerelease: ${{ github.event.inputs.prerelease }}
+      merge_option: ${{ github.event.inputs.merge_option || 'none' }}
+      source_branch: ${{ github.ref_name }}
+    steps:
+      - name: ⬇️ Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.WORKFLOW_TOKEN }}
+          fetch-depth: 0
+
+      - name: 🏷️ Select tag
+        id: latest_tag
+        if: ${{ inputs.tag == '' }}
+        uses: stetind/ppc-github-composite-actions/.github/actions/get-latest-tag@v1.0.5
+        with:
+          token: ${{ secrets.WORKFLOW_TOKEN }}
+
+      - name: 📦 Get commits since selected tag
+        id: get_commits
+        uses: stetind/ppc-github-composite-actions/.github/actions/get-commits-since-tag@v1.0.5
+        with:
+          tag: ${{ inputs.tag || steps.latest_tag.outputs.latest_tag }}
+
+      - name: 🔍 Detect version bump and compute new version
+        id: detect_version
+        if: ${{ steps.get_commits.outputs.commits != '' }}
+        uses: stetind/ppc-github-composite-actions/.github/actions/detect-version-bump@v1.0.5
+        with:
+          commits: ${{ steps.get_commits.outputs.commits }}
+          tag: ${{ inputs.tag || steps.latest_tag.outputs.latest_tag }}
+
+      - name: 🧪 Generate changelog
+        id: changelog
+        if: ${{ steps.get_commits.outputs.commits != '' }}
+        uses: stetind/ppc-github-composite-actions/.github/actions/generate-changelog@v1.0.5
+        with:
+          commits: ${{ steps.get_commits.outputs.commits }}
+          previous_tag: ${{ inputs.tag || steps.latest_tag.outputs.latest_tag }}
+          new_tag: ${{ steps.detect_version.outputs.new_version }}
+          repository: ${{ github.repository }}
+
+      - name: Concat release name
+        id: concat_release_tag
+        if: ${{ steps.get_commits.outputs.commits != '' }}
+        shell: bash
+        run: |
+          RELEASE_TAG="${{ steps.detect_version.outputs.new_version }}"
+          PRERELEASE="${{ github.event.inputs.prerelease }}"
+            if [[ $PRERELEASE != "" && $PRERELEASE != "none" ]]; then
+              RELEASE_TAG+="-"$PRERELEASE
+            fi
+            echo "tag=v$RELEASE_TAG" >> "$GITHUB_OUTPUT"
+            echo "::notice ::Release Tag v$RELEASE_TAG"
+  
+
+  pull_request:
+    needs: [ prepare ]
+    name: 🧹 Create PR `${{ needs.prepare.outputs.source_branch }}` -> `${{ github.event.repository.default_branch }}`
+    if: ${{ needs.prepare.outputs.source_branch !=  github.event.repository.default_branch }}
+    uses: stetind/ppc-reusable-workflows/.github/workflows/release-cleanup.yaml@__VERSION__
+    secrets: inherit
+    with:
+      runner: ${{ vars.DEFAULT_RUNNER }}
+      source: ${{ needs.prepare.outputs.source_branch }}
+      target: ${{ github.event.repository.default_branch }}
+      title: Release ${{ needs.prepare.outputs.new_tag }}
+      merge_option: ${{ needs.prepare.outputs.merge_option }}
+
+  release:
+    name: Create Release
+    needs: [ prepare ]
+    runs-on: ${{ inputs.runner || 'ubuntu-latest' }}
+    container: ${{ vars.DEFAULT_CONTAINER || 'node:22.14' }}
+    steps:
+      - name: ⬇️ Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.WORKFLOW_TOKEN }}
+          fetch-depth: 0
+      - name: Create Release files
+        shell: bash
+        run: |
+          # Write commits to separate file
+          echo "${{ needs.prepare.outputs.commits }}" > .commits.txt
+
+          # Write release notes to markdown file
+          echo '${{ needs.prepare.outputs.changelog }}' > .release_notes.md
+
+      - name: 📦 Check if release exists
+        id: check_release_exists
+        uses: stetind/ppc-github-composite-actions/.github/actions/check-release-exists@v1.0.5
+        with:
+          token: ${{ secrets.WORKFLOW_TOKEN }}
+          version: ${{ needs.prepare.outputs.new_tag }}
+
+      - name: 📤 Create GitHub Release
+        if: ${{ steps.check_release_exists.outputs.exists == 'false' }}
+        uses: stetind/ppc-github-composite-actions/.github/actions/create-github-release@v1.0.5
+        with:
+          token: ${{ secrets.WORKFLOW_TOKEN }}
+          version: ${{ needs.prepare.outputs.new_tag }}
+          title: "Release ${{ needs.prepare.outputs.new_tag }}"
+          body: ''
+          body_path: '.release_notes.md'
+          target_branch: ${{ github.ref_name }}
+          prerelease: ${{ needs.prepare.outputs.is_prelease && needs.prepare.outputs.prerelease || '' }}
+          prerelease_suffix: ${{ needs.prepare.outputs.prerelease }}

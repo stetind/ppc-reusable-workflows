@@ -107,20 +107,20 @@ jobs:
       - name: 🏷️ Select tag
         id: latest_tag
         if: ${{ inputs.tag == '' }}
-        uses: stetind/ppc-github-composite-actions/.github/actions/get-latest-tag@v1.0.4
+        uses: stetind/ppc-github-composite-actions/.github/actions/get-latest-tag@v1.0.5
         with:
           token: ${{ secrets.WORKFLOW_TOKEN }}
 
       - name: 📦 Get commits since selected tag
         id: get_commits
-        uses: stetind/ppc-github-composite-actions/.github/actions/get-commits-since-tag@v1.0.4
+        uses: stetind/ppc-github-composite-actions/.github/actions/get-commits-since-tag@v1.0.5
         with:
           tag: ${{ inputs.tag || steps.latest_tag.outputs.latest_tag }}
 
       - name: 🔍 Detect version bump and compute new version
         id: detect_version
         if: ${{ steps.get_commits.outputs.commits != '' }}
-        uses: stetind/ppc-github-composite-actions/.github/actions/detect-version-bump@v1.0.4
+        uses: stetind/ppc-github-composite-actions/.github/actions/detect-version-bump@v1.0.5
         with:
           commits: ${{ steps.get_commits.outputs.commits }}
           tag: ${{ inputs.tag || steps.latest_tag.outputs.latest_tag }}
@@ -128,7 +128,7 @@ jobs:
       - name: 🧪 Generate changelog
         id: changelog
         if: ${{ steps.get_commits.outputs.commits != '' }}
-        uses: stetind/ppc-github-composite-actions/.github/actions/generate-changelog@v1.0.4
+        uses: stetind/ppc-github-composite-actions/.github/actions/generate-changelog@v1.0.5
         with:
           commits: ${{ steps.get_commits.outputs.commits }}
           previous_tag: ${{ inputs.tag || steps.latest_tag.outputs.latest_tag }}
