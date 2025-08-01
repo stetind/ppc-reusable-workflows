@@ -96,6 +96,7 @@ jobs:
   prepare:
     name: Prepare & Push
     runs-on: ${{ inputs.runner || 'ubuntu-latest' }}
+#    container: 'ubuntu:latest'
 
     steps:
       - name: ⬇️ Checkout repository
