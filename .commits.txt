@@ -1,0 +1,19 @@
+Merge branch 'main' into feat/create-single-file-github-release|
+chore: add changelog and commits outputs to `github-release` workflow|
+Release v10.0.6 (#110)|
+chore: comment out unused container definition in `release-preparation` workflow|
+chore: downgrade composite actions to v1.0.5 across all workflows|
+Merge branch 'main' into feat/create-single-file-github-release|
+chore: bump composite actions to v1.0.6 across all workflows|
+Release v10.0.6 (#109)|
+Merge branch 'main' into feat/create-single-file-github-release|
+chore: update container definition in `github-release` workflow to use `ubuntu:latest`|
+Release v10.0.6 (#108)|
+Merge branch 'main' into feat/create-single-file-github-release|
+chore: comment out unused container definition in `github-release` workflow|
+Release v10.0.6 (#107)|
+chore: simplify `github-release` workflow by removing unused `workflow_dispatch` inputs and updating input handling|
+chore: bump composite actions to v1.0.5 across all workflows|
+chore: add `github-release` workflow for GitHub Releases with configurable inputs and actions|
+Release v10.0.5 (#104)|
+Release v10.0.5 (#103)|
