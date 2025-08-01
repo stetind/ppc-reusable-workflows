@@ -29,7 +29,7 @@ jobs:
   prepare:
     name: Prepare
     runs-on: ${{ inputs.runner || 'ubuntu-latest' }}
-#    container: ${{ vars.DEFAULT_CONTAINER || 'node:22.14' }}
+    container: 'ubuntu:latest'
     outputs:
       previous_tag: ${{ inputs.tag || steps.latest_tag.outputs.latest_tag }}"
       new_tag: ${{ steps.concat_release_tag.outputs.tag }}
