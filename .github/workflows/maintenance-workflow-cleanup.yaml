@@ -91,7 +91,7 @@ jobs:
     container: 'node:22.14'
     steps:
       - name: Cleanup
-        uses: stetind/ppc-github-composite-actions/.github/actions/maintenance-cleanup@v1.0.4
+        uses: stetind/ppc-github-composite-actions/.github/actions/maintenance-cleanup@v1.0.5
         with:
           token: ${{ secrets.WORKFLOW_TOKEN || secrets.GITHUB_TOKEN }}
           status: ${{ inputs.status }}
