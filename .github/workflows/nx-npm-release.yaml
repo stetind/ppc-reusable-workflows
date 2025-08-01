@@ -1,0 +1,141 @@
+name: Create Release
+
+on:
+  workflow_call:
+    secrets:
+      NPM_TOKEN:
+        required: true
+    inputs:
+      release_mode:
+        description: 'Release mode (regular, dev, first, specific)'
+        required: true
+        default: 'regular'
+        type: string
+      prerelease_type:
+        description: 'Pre-release type (ONLY for dev release type)'
+        required: false
+        default: ''
+        type: string
+      prerelease_id:
+        description: 'Pre-release identifier (ONLY for dev release type)'
+        required: false
+        default: ''
+        type: string
+      specific_version:
+        description: 'Specific release version (ONLY for specific release mode)'
+        required: false
+        default: ''
+        type: string
+
+permissions:
+  actions: read
+  contents: write
+
+jobs:
+  create_release:
+    name: Create release
+    runs-on: ${{ vars.DEFAULT_RUNNER || 'ubuntu-latest' }}
+    container: ${{ vars.DEFAULT_CONTAINER || 'node:22.14' }}
+    continue-on-error: false
+    steps:
+      - name: Validate input parameters
+        run: |
+          if [ "${{ github.event.inputs.release_mode }}" != "dev" ] && [ "${{ github.event.inputs.release_mode }}" != "specific" ]; then
+            if [ ! -z "${{ github.event.inputs.prerelease_type }}" ] || [ ! -z "${{ github.event.inputs.prerelease_id }}" ]; then
+              echo "Pre-release type and Pre-release identifier should only be used with 'dev' release mode."
+              exit 1
+            fi
+          elif [ "${{ github.event.inputs.release_mode }}" == "dev" ]; then
+            if [ -z "${{ github.event.inputs.prerelease_type }}" ] || [ -z "${{ github.event.inputs.prerelease_id }}" ]; then
+              echo "Please specify Pre-release type and Pre-release identifier to create a 'dev' release."
+              exit 1
+            fi
+          elif [ "${{ github.event.inputs.release_mode }}" == "specific" ]; then
+            if [ -z "${{ github.event.inputs.specific_version }}" ]; then
+              echo "Please specify a version for the 'specific' release mode."
+              exit 1
+            fi
+          fi
+
+      - name: Create GitHub app token
+        uses: actions/create-github-app-token@v1
+        id: app_token
+        with:
+          app-id: ${{ vars.PPC_CI_APP_ID }}
+          private-key: ${{ secrets.PPC_CI_APP_PRIVATE_KEY }}
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ steps.app_token.outputs.token }}
+
+      - name: Get GitHub app user ID
+        uses: octokit/request-action@v2.x
+        id: get_user_id
+        with:
+          route: GET /users/${{ steps.app_token.outputs.app-slug }}[bot]
+        env:
+          GITHUB_TOKEN: ${{ steps.app_token.outputs.token }}
+
+      - name: Setup git details
+        run: |
+          set -e
+          raw_output='${{ steps.get_user_id.outputs.data }}'
+          user_id=$(echo "$raw_output" | jq -r '.id')
+
+          # Confirm user_id is set
+          if [ -z "$user_id" ]; then
+            echo "Failed to parse user ID from the JSON response"
+            exit 1
+          fi
+
+          # Set up Git config with the correct user name and email
+          git config user.name "${{ steps.app_token.outputs.app-slug }}[bot]"
+          git config user.email "${user_id}+${{ steps.app_token.outputs.app-slug }}[bot]@users.noreply.github.com"
+
+      - name: 🧙 Install Node
+        uses: stetind/ppc-github-composite-actions/.github/actions/install-global-dependencies@v1.1.0
+        with:
+          npm_token: ${{ secrets.NPM_TOKEN }}
+
+      - name: Setup SHAs
+        uses: stetind/ppc-github-composite-actions/.github/actions/nx-set-shas@v1.0.0
+
+      - name: Print Environment Info
+        run: npx nx report
+
+      - name: Create release
+        run: |
+          set -e
+          if [ "${{ github.event.inputs.release_mode }}" == "dev" ]; then
+            npx nx release version --specifier ${{ github.event.inputs.prerelease_type }} --preid ${{ github.event.inputs.prerelease_id }}
+          elif [ "${{ github.event.inputs.release_mode }}" == "first" ]; then
+            npx nx release 1.0.0 --first-release --skip-publish
+          elif [ "${{ github.event.inputs.release_mode }}" == "specific" ]; then
+            npx nx release ${{ github.event.inputs.specific_version }} --skip-publish
+          else
+            npx nx release --skip-publish
+          fi
+        env:
+          GITHUB_TOKEN: ${{ steps.app_token.outputs.token }}
+
+      - name: Build
+        run: |
+          set -e
+          if [ "${{ github.event.inputs.release_mode }}" == "first" ]; then
+            npx nx run-many -t build
+          else
+            npx nx affected -t build
+          fi
+
+      - name: Publish packages
+        run: |
+          set -e
+          if [ "${{ github.event.inputs.release_mode }}" == "dev" ]; then
+            npx nx release publish --tag dev
+          else
+            npx nx release publish --tag latest
+          fi
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
