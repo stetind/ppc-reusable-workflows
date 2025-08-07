@@ -33,6 +33,8 @@ jobs:
     steps:
       - name: 🛫 Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: 🔧 Setup Node and NPM
         uses: stetind/ppc-github-composite-actions/.github/actions/install-global-dependencies@v1.0.5
