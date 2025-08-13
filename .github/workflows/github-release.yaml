@@ -37,6 +37,8 @@ jobs:
       prerelease: ${{ github.event.inputs.prerelease }}
       merge_option: ${{ github.event.inputs.merge_option || 'none' }}
       source_branch: ${{ github.ref_name }}
+      changelog: ${{ steps.changelog.outputs.changelog }}
+      commits: ${{ steps.changelog.outputs.commits }}
     steps:
       - name: ⬇️ Checkout repository
         uses: actions/checkout@v4
