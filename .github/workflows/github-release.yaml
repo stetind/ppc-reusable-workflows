@@ -141,5 +141,5 @@ jobs:
           body: ''
           body_path: '.release_notes.md'
           target_branch: ${{ github.ref_name }}
-          prerelease: ${{ needs.prepare.outputs.is_prelease && needs.prepare.outputs.prerelease || '' }}
+          prerelease: ${{ needs.prepare.outputs.is_prelease }}
           prerelease_suffix: ${{ needs.prepare.outputs.prerelease }}
