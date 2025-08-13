@@ -79,7 +79,6 @@ jobs:
         uses: stetind/ppc-github-composite-actions/.github/actions/install-global-dependencies@v1.0.5
         with:
           npm_token: $NPM_TOKEN
-          production: ${{ !inputs.is_dev_release }}
 
       - name: 🏗️ Building Environment
         run: npm run build --if-present && npx --yes browserslist@latest --update-db
