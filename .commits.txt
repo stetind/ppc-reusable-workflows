@@ -1,0 +1,7 @@
+chore: simplify prerelease handling in github-release workflow|
+Merge remote-tracking branch 'origin/main'|
+chore: remove unused `NODE_ENV` variable from npm-publication workflow|
+chore: set `fetch-depth` to 0 in sonar-analysis workflow (#113)|
+chore: remove unused `production` input from npm-publication workflow (#112)|
+chore(deps): bump SonarSource/sonarqube-scan-action from 5.2.0 to 5.3.0 (#105)|
+Release v10.0.6 (#111)|
