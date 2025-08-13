@@ -69,7 +69,6 @@ jobs:
     container: 'node:22.14'
     env:
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-      NODE_ENV: ${{ inputs.is_dev_release && 'development' || 'production' }}
 
     steps:
       - name: 🛫 Checkout
