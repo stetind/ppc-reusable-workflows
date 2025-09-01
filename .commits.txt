@@ -1,0 +1,4 @@
+chore(deps): bump actions/checkout from 4 to 5 (#114)|
+chore(deps): bump stetind/ppc-github-composite-actions (#115)|
+chore(deps): bump SonarSource/sonarqube-scan-action from 5.3.0 to 5.3.1 (#116)|
+feat: apply security patch for SonarQube (#117)|
