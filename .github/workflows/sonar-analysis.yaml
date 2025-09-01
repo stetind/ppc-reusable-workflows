@@ -37,7 +37,7 @@ jobs:
           fetch-depth: 0
 
       - name: 🔧 Setup Node and NPM
-        uses: stetind/ppc-github-composite-actions/.github/actions/install-global-dependencies@v1.0.5
+        uses: stetind/ppc-github-composite-actions/.github/actions/install-global-dependencies@v1.0.6
         with:
           npm_token: $NPM_TOKEN
 
@@ -49,6 +49,6 @@ jobs:
         run: npm run test:ci
 
       - name: SonarCloud Scan
-        uses: SonarSource/sonarqube-scan-action@v5.3.0
+        uses: SonarSource/sonarqube-scan-action@v5.3.1
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN  }}
