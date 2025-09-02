@@ -1,0 +1,1 @@
+chore: update Docker container default to `node:22.14` in aws-serverless-validation workflow|
