@@ -10,7 +10,7 @@
 #   - deploy_environment: Environment to validate (default: staging)
 #   - region: AWS region (default: us-east-1) 
 #   - runner: GitHub runner to use (default: self-hosted)
-#   - job_container: Docker container image (default: node:20.13)
+#   - job_container: Docker container image (default: node:22.14)
 #
 # Required Secrets:
 #   - NPM_TOKEN
@@ -53,7 +53,7 @@ on:
       job_container:
         description: 'Select the docker container for the action'
         required: false
-        default: 'node:20.13'
+        default: 'node:22.14'
         type: string
 
 env:
