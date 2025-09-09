@@ -1,0 +1,2 @@
+chore: update Cypress container image to latest versions of Node and browsers (#119)|
+chore: update Docker container default to `node:22.14` in aws-serverless-validation workflow (#118)|
