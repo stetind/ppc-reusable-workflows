@@ -1,7 +1,7 @@
 {
-  "previous_tag": "v8.2.0",
-  "new_tag": "v9.0.0",
-  "prerelease": "",
+  "previous_tag": "v10.1.1",
+  "new_tag": "v10.1.2-beta",
+  "prerelease": "beta",
   "merge_option": "merge and delete",
-  "source_branch": "main"
+  "source_branch": "ci/r/upgrade-from-wrangler-v3-to-v4"
 }
