@@ -5,5 +5,3 @@ updates:
     directory: "/"
     schedule:
       interval: "monthly"
-    reviewers:
-      - "stetind/teams/ppc"

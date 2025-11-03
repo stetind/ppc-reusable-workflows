@@ -1,0 +1,8 @@
+# .github/CODEOWNERS
+
+# NPM
+**/package.json           @stetind/ppc
+**/package-lock.json      @stetind/ppc
+
+# GitHub Actions updates
+.github/workflows/*.yml   @stetind/ppc
