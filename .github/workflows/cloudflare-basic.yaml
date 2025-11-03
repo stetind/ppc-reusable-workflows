@@ -74,3 +74,4 @@ jobs:
           apiToken: ${{ secrets.CF_API_TOKEN }}
           environment: ${{ vars.env_environment }}
           secrets: ${{ steps.wrangler.outputs.wrangler_secrets }}
+          wranglerVersion: "4.40.2"
