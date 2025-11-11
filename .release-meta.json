@@ -1,7 +1,7 @@
 {
-  "previous_tag": "v8.2.0",
-  "new_tag": "v9.0.0",
-  "prerelease": "",
-  "merge_option": "merge and delete",
-  "source_branch": "main"
+  "previous_tag": "v10.1.3",
+  "new_tag": "v10.1.4-beta.1",
+  "prerelease": "beta.1",
+  "merge_option": "none",
+  "source_branch": "fix/bump-action-to-1.0.7"
 }
