@@ -95,7 +95,7 @@ jobs:
     needs: [ prepare ]
     name: 🧹 Create PR `${{ needs.prepare.outputs.source_branch }}` -> `${{ github.event.repository.default_branch }}`
     if: ${{ needs.prepare.outputs.source_branch !=  github.event.repository.default_branch }}
-    uses: stetind/ppc-reusable-workflows/.github/workflows/release-cleanup.yaml@__VERSION__
+    uses: stetind/ppc-reusable-workflows/.github/workflows/release-cleanup.yaml@v10.1.4
     secrets: inherit
     with:
       runner: ${{ vars.DEFAULT_RUNNER }}
