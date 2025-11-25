@@ -92,10 +92,10 @@ jobs:
           secrets: ${{ toJSON(secrets) }}
           variables: ${{ toJSON(vars) }}
 
-      - name: 🚅 Force Deploy to AWS (Force)
+      - name: 🚅 Deploy to AWS (Force)
         if: ${{ inputs.force == 'true' }}
         run: PPC_STAGE=$PPC_STAGE REGION=$REGION  npm run sls-deploy --force
 
-      - name: 🚅 Force Deploy to AWS
+      - name: 🚅 Deploy to AWS
         if: ${{ inputs.force != 'true' }}
         run: PPC_STAGE=$PPC_STAGE REGION=$REGION  npm run sls-deploy
