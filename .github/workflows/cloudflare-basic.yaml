@@ -51,7 +51,7 @@ jobs:
         - ${{ github.workspace }}:/workspace
     steps:
       - name: 🛫 Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: 🧙 Install Node
         uses: stetind/ppc-github-composite-actions/.github/actions/install-global-dependencies@v1.0.7
