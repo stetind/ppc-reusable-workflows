@@ -39,6 +39,11 @@ on:
         description: 'Set the release version or tag name'
         required: true
         type: string
+      private:
+        description: 'Set the release visibility'
+        required: false
+        default: 'false'
+        type: string
 
 jobs:
   generate_and_sync:
@@ -65,7 +70,7 @@ jobs:
 
       - name: Sync with SwaggerHub
         run: |
-          curl -X POST "https://api.swaggerhub.com/apis/${{ inputs.owner }}/${{ inputs.api_name }}?version=${{ inputs.release_version }}&isPrivate=true" \
+          curl -X POST "https://api.swaggerhub.com/apis/${{ inputs.owner }}/${{ inputs.api_name }}?version=${{ inputs.release_version }}&isPrivate=${{ inputs.private }}" \
           -H "Authorization: Bearer ${{ secrets.API_KEY }}" \
           -H "Content-Type: application/yaml" \
           --data-binary @swagger.yaml
