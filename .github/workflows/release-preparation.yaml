@@ -174,11 +174,13 @@ jobs:
         if: ${{ steps.get_commits.outputs.commits != '' }}
         run: |
           
-          # Write commits to separate file
-          echo "${{ steps.get_commits.outputs.commits }}" > .commits.txt
-          
-          # Write release notes to markdown file
-          echo '${{ steps.changelog.outputs.changelog }}' > .release_notes.md
+          # Write commits safely
+          printf "%s\n" "${{ steps.get_commits.outputs.commits }}" > .commits.txt
+      
+          # Write release notes safely (multiline safe)
+          cat <<'EOF' > .release_notes.md
+          ${{ steps.changelog.outputs.changelog }}
+          EOF
 
           # Create JSON with basic metadata
           cat <<EOF > .release-meta.json
