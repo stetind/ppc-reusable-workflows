@@ -1,0 +1,2 @@
+ci: make release metadata generation robust to multiline changelog content (#129)|
+chore: add optional `private` input for release visibility in swagger-generate workflow (#128)|
