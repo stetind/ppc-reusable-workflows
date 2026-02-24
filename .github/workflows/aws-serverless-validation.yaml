@@ -55,19 +55,10 @@ on:
         required: false
         default: 'node:22.14'
         type: string
-      aws_account:
-        required: false
-        default: ''
-        type: string
-      aws_github_role:
-        required: false
-        default: ''
-        type: string
 
 env:
   AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1,
   AWS_SDK_LOAD_CONFIG: 1
-  REGION: ${{ inputs.region }}
   debugMode: 'false'
 
 jobs:
