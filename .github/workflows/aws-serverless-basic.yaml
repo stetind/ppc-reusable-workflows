@@ -64,6 +64,9 @@ jobs:
     name: Deploy
     environment: ${{ inputs.deploy_environment }}
     env:
+      AWS_ACCESS_KEY: ${{ env.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET: ${{ env.AWS_SECRET_ACCESS_KEY }}
+      AWS_SESSION_TOKEN: ${{ env.AWS_SESSION_TOKEN }}
       SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
       PPC_STAGE: ${{ vars.PPC_STAGE || vars.PPCENV_PPC_STAGE }}
       REGION: ${{ inputs.region || vars.PPCENV_REGION }}
@@ -89,6 +92,8 @@ jobs:
           # Use the App's identity to assume the role
           role-to-assume: arn:aws:iam::${{ env.ACCOUNT_ID }}:role/${{ env.GITHUB_ROLE_NAME }}
           aws-region: ${{ env.REGION }}
+          role-duration-seconds: 3600 # Explicitly set to 1 hour (up to 43200)
+          role-skip-session-tagging: true # Sometimes helps with provider stability
 
       - name: 🛫 Checkout
         uses: actions/checkout@v6
