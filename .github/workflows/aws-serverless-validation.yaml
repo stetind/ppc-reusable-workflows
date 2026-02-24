@@ -74,9 +74,6 @@ jobs:
   validate_serverless:
     name: Validate Serverless
     runs-on: ${{ inputs.runner }}
-    permissions:
-      id-token: write  # This is the "magic" line for OIDC
-      contents: read   # This is required to checkout your code
     environment: ${{ inputs.deploy_environment }}
     env:
       SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
@@ -98,12 +95,16 @@ jobs:
           app-id: ${{ secrets.PPC_CI_APP_ID }}
           private-key: ${{ secrets.PPC_CI_APP_PRIVATE_KEY }}
 
+      - name: Debug ARN
+        run: echo "Assuming role arn:aws:iam::${{ env.ACCOUNT_ID }}:role/${{ env.GITHUB_ROLE_NAME }}"
+
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           # Use the App's identity to assume the role
-          role-to-assume: arn:aws:iam::${{env.ACCOUNT_ID}}:role/${{env.GITHUB_ROLE_NAME}}
+          role-to-assume: arn:aws:iam::${{ env.ACCOUNT_ID }}:role/${{ env.GITHUB_ROLE_NAME }}
           aws-region: ${{ env.REGION }}
+          web-identity-token-file: ${{ steps.get_token.outputs.token }}
 
       - name: 🛫 Checkout
         uses: actions/checkout@v6
