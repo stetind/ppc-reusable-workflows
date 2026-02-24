@@ -64,7 +64,7 @@ jobs:
     name: Deploy
     environment: ${{ inputs.deploy_environment }}
     env:
-      SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
+#      SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
       PPC_STAGE: ${{ vars.PPC_STAGE || vars.PPCENV_PPC_STAGE }}
       REGION: ${{ inputs.region || vars.PPCENV_REGION }}
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
@@ -108,21 +108,21 @@ jobs:
           variables: ${{ toJSON(vars) }}
 
       - name: 🚅 Deploy to AWS (Force)
-        env:
-          AWS_ACCESS_KEY: ${{ env.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET: ${{ env.AWS_SECRET_ACCESS_KEY }}
-          AWS_SESSION_TOKEN: ${{ env.AWS_SESSION_TOKEN }}
-          ACCOUNT_ID: ${{ env.ACCOUNT_ID }}
+#        env:
+#          AWS_ACCESS_KEY: ${{ env.AWS_ACCESS_KEY_ID }}
+#          AWS_SECRET: ${{ env.AWS_SECRET_ACCESS_KEY }}
+#          AWS_SESSION_TOKEN: ${{ env.AWS_SESSION_TOKEN }}
+#          ACCOUNT_ID: ${{ env.ACCOUNT_ID }}
         if: ${{ inputs.force == 'true' }}
         run: |
           PPC_STAGE=$PPC_STAGE npm run sls-deploy --force
 
       - name: 🚅 Deploy to AWS
-        env:
-          AWS_ACCESS_KEY: ${{ env.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET: ${{ env.AWS_SECRET_ACCESS_KEY }}
-          AWS_SESSION_TOKEN: ${{ env.AWS_SESSION_TOKEN }}
-          ACCOUNT_ID: ${{ env.ACCOUNT_ID }}
+#        env:
+#          AWS_ACCESS_KEY: ${{ env.AWS_ACCESS_KEY_ID }}
+#          AWS_SECRET: ${{ env.AWS_SECRET_ACCESS_KEY }}
+#          AWS_SESSION_TOKEN: ${{ env.AWS_SESSION_TOKEN }}
+#          ACCOUNT_ID: ${{ env.ACCOUNT_ID }}
         if: ${{ inputs.force != 'true' }}
         run: |
           PPC_STAGE=$PPC_STAGE npm run sls-deploy
