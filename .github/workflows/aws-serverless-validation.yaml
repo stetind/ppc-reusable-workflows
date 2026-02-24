@@ -95,9 +95,6 @@ jobs:
           app-id: ${{ secrets.PPC_CI_APP_ID }}
           private-key: ${{ secrets.PPC_CI_APP_PRIVATE_KEY }}
 
-      - name: Debug ARN
-        run: echo "Assuming role arn:aws:iam::${{ env.ACCOUNT_ID }}:role/${{ env.GITHUB_ROLE_NAME }}"
-
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
