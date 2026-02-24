@@ -112,7 +112,7 @@ jobs:
           AWS_ACCESS_KEY: ${{ env.AWS_ACCESS_KEY_ID }}
           AWS_SECRET: ${{ env.AWS_SECRET_ACCESS_KEY }}
           AWS_SESSION_TOKEN: ${{ env.AWS_SESSION_TOKEN }}
-          AWS_ACCOUNT_ID: ${{ env.ACCOUNT_ID }}
+          ACCOUNT_ID: ${{ env.ACCOUNT_ID }}
         if: ${{ inputs.force == 'true' }}
         run: PPC_STAGE=$PPC_STAGE npm run sls-deploy --force
 
@@ -121,6 +121,6 @@ jobs:
           AWS_ACCESS_KEY: ${{ env.AWS_ACCESS_KEY_ID }}
           AWS_SECRET: ${{ env.AWS_SECRET_ACCESS_KEY }}
           AWS_SESSION_TOKEN: ${{ env.AWS_SESSION_TOKEN }}
-          AWS_ACCOUNT_ID: ${{ env.ACCOUNT_ID }}
+          ACCOUNT_ID: ${{ env.ACCOUNT_ID }}
         if: ${{ inputs.force != 'true' }}
         run: PPC_STAGE=$PPC_STAGE npm run sls-deploy
