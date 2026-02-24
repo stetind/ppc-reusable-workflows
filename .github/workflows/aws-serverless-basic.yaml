@@ -107,22 +107,31 @@ jobs:
           secrets: ${{ toJSON(secrets) }}
           variables: ${{ toJSON(vars) }}
 
+      - name: Verify Env
+        run: |
+          echo "Account ID is: ${{ env.ACCOUNT_ID }}"
+          echo "Region is: ${{ env.REGION }}"
+          if [ -z "$AWS_ACCESS_KEY_ID" ]; then echo "AWS_ACCESS_KEY_ID is EMPTY"; else echo "AWS_ACCESS_KEY_ID is set"; fi
+
       - name: 🚅 Deploy to AWS (Force)
-#        env:
-#          AWS_ACCESS_KEY: ${{ env.AWS_ACCESS_KEY_ID }}
-#          AWS_SECRET: ${{ env.AWS_SECRET_ACCESS_KEY }}
-#          AWS_SESSION_TOKEN: ${{ env.AWS_SESSION_TOKEN }}
+        env:
+          AWS_ACCESS_KEY: ${{ env.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET: ${{ env.AWS_SECRET_ACCESS_KEY }}
+          AWS_SESSION_TOKEN: ${{ env.AWS_SESSION_TOKEN }}
 #          ACCOUNT_ID: ${{ env.ACCOUNT_ID }}
         if: ${{ inputs.force == 'true' }}
         run: |
           PPC_STAGE=$PPC_STAGE npm run sls-deploy --force
 
       - name: 🚅 Deploy to AWS
-#        env:
-#          AWS_ACCESS_KEY: ${{ env.AWS_ACCESS_KEY_ID }}
-#          AWS_SECRET: ${{ env.AWS_SECRET_ACCESS_KEY }}
-#          AWS_SESSION_TOKEN: ${{ env.AWS_SESSION_TOKEN }}
-#          ACCOUNT_ID: ${{ env.ACCOUNT_ID }}
         if: ${{ inputs.force != 'true' }}
         run: |
+          # Unset any local config that might interfere
+          unset AWS_PROFILE
+          unset AWS_CONFIG_FILE
           PPC_STAGE=$PPC_STAGE npm run sls-deploy
+        env:
+          AWS_ACCESS_KEY_ID: ${{ env.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ env.AWS_SECRET_ACCESS_KEY }}
+          AWS_SESSION_TOKEN: ${{ env.AWS_SESSION_TOKEN }}
+          AWS_REGION: ${{ env.REGION }}
