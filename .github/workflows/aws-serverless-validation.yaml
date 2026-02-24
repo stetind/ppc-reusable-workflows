@@ -15,8 +15,8 @@
 # Required Secrets:
 #   - NPM_TOKEN
 #   - SERVERLESS_ACCESS_KEY
-#   - AWS_SECRET_ACCESS_KEY
-#   - AWS_ACCESS_KEY_ID
+#   - PPC_CI_APP_ID
+#   - PPC_CI_APP_PRIVATE_KEY
 #
 # Trigger: workflow_call
 # =============================================================================
@@ -30,9 +30,9 @@ on:
         required: true
       SERVERLESS_ACCESS_KEY:
         required: true
-      AWS_SECRET_ACCESS_KEY:
+      PPC_CI_APP_ID:
         required: true
-      AWS_ACCESS_KEY_ID:
+      PPC_CI_APP_PRIVATE_KEY:
         required: true
     inputs:
       deploy_environment:
@@ -55,11 +55,18 @@ on:
         required: false
         default: 'node:22.14'
         type: string
+      aws_account:
+        required: false
+        default: ''
+        type: string
+      aws_github_role:
+        required: false
+        default: ''
+        type: string
 
 env:
   AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1,
   AWS_SDK_LOAD_CONFIG: 1
-  AWS_REGION: ${{ inputs.region }}
   REGION: ${{ inputs.region }}
   debugMode: 'false'
 
@@ -69,18 +76,32 @@ jobs:
     runs-on: ${{ inputs.runner }}
     environment: ${{ inputs.deploy_environment }}
     env:
-      AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
       PPC_STAGE: ${{ vars.PPC_STAGE || vars.PPCENV_PPC_STAGE }}
       REGION: ${{ inputs.region || vars.PPCENV_REGION }}
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      ACCOUNT_ID: ${{ inputs.aws_account || vars.AWS_ACCOUNT_ID }}
+      GITHUB_ROLE_NAME: ${{ inputs.aws_github_role || vars.AWS_GITHUB_ROLE_NAME}}
 
     container:
       image: ${{ inputs.job_container }}
       volumes:
         - ${{ github.workspace }}:/workspace
     steps:
+      - name: Get GitHub App Token
+        id: get_token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.PPC_CI_APP_ID }}
+          private-key: ${{ secrets.PPC_CI_APP_PRIVATE_KEY }}
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          # Use the App's identity to assume the role
+          role-to-assume: arn:aws:iam::${{env.ACCOUNT_ID}}:role/${{env.GITHUB_ROLE_NAME}}
+          aws-region: ${{ env.REGION }}
+
       - name: 🛫 Checkout
         uses: actions/checkout@v6
 
