@@ -69,6 +69,9 @@ env:
 jobs:
   deploy:
     runs-on: ${{ inputs.runner }}
+    permissions:
+      id-token: write  # This is the "magic" line for OIDC
+      contents: read   # This is required to checkout your code
     name: Deploy
     environment: ${{ inputs.deploy_environment }}
     env:
