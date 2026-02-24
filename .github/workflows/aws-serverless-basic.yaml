@@ -115,22 +115,40 @@ jobs:
 
       - name: 🚅 Deploy to AWS (Force)
         env:
-          AWS_ACCESS_KEY: ${{ env.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET: ${{ env.AWS_SECRET_ACCESS_KEY }}
+          # Standard AWS Env Vars
+          AWS_ACCESS_KEY_ID: ${{ env.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ env.AWS_SECRET_ACCESS_KEY }}
           AWS_SESSION_TOKEN: ${{ env.AWS_SESSION_TOKEN }}
           AWS_REGION: ${{ env.REGION }}
+
+          # Force Serverless v4 to ignore dashboard/license credentials
+          # and use the Environment Variables provided above
+          SLS_INTERACTIVE_SETUP_ENABLE: false
+          SERVERLESS_ACCESS_KEY: ""
+
+          # Crucial for OIDC inside Containers
           AWS_WEB_IDENTITY_TOKEN_FILE: ${{ env.AWS_WEB_IDENTITY_TOKEN_FILE }}
         if: ${{ inputs.force == 'true' }}
         run: |
-          SLS_INTERACTIVE_SETUP_ENABLE=false PPC_STAGE=$PPC_STAGE npm run sls-deploy --force
+          # Use --region and --stage flags explicitly to bypass SLS internal resolution
+          PPC_STAGE=$PPC_STAGE npm run sls-deploy --force
 
       - name: 🚅 Deploy to AWS
-        if: ${{ inputs.force != 'true' }}
-        run: |
-          SLS_INTERACTIVE_SETUP_ENABLE=false PPC_STAGE=$PPC_STAGE npm run sls-deploy
         env:
-          AWS_ACCESS_KEY: ${{ env.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET: ${{ env.AWS_SECRET_ACCESS_KEY }}
+          # Standard AWS Env Vars
+          AWS_ACCESS_KEY_ID: ${{ env.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ env.AWS_SECRET_ACCESS_KEY }}
           AWS_SESSION_TOKEN: ${{ env.AWS_SESSION_TOKEN }}
           AWS_REGION: ${{ env.REGION }}
+
+          # Force Serverless v4 to ignore dashboard/license credentials
+          # and use the Environment Variables provided above
+          SLS_INTERACTIVE_SETUP_ENABLE: false
+          SERVERLESS_ACCESS_KEY: ""
+
+          # Crucial for OIDC inside Containers
           AWS_WEB_IDENTITY_TOKEN_FILE: ${{ env.AWS_WEB_IDENTITY_TOKEN_FILE }}
+        if: ${{ inputs.force != 'true' }}
+        run: |
+          # Use --region and --stage flags explicitly to bypass SLS internal resolution
+          PPC_STAGE=$PPC_STAGE npm run sls-deploy
