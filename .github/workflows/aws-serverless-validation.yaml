@@ -104,7 +104,6 @@ jobs:
           # Use the App's identity to assume the role
           role-to-assume: arn:aws:iam::${{ env.ACCOUNT_ID }}:role/${{ env.GITHUB_ROLE_NAME }}
           aws-region: ${{ env.REGION }}
-          web-identity-token-file: ${{ steps.get_token.outputs.token }}
 
       - name: 🛫 Checkout
         uses: actions/checkout@v6
