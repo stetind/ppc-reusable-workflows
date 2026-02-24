@@ -115,24 +115,21 @@ jobs:
 
       - name: 🚅 Deploy to AWS (Force)
         env:
+          # Serverless v4 License/Auth
           SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
-          AWS_ACCESS_KEY_ID: ${{ env.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ env.AWS_SECRET_ACCESS_KEY }}
-          AWS_SESSION_TOKEN: ${{ env.AWS_SESSION_TOKEN }}
-          AWS_REGION: ${{ env.REGION }}
-        if: ${{ inputs.force == 'true' }}
-        run: |
-          # Use --region and --stage flags explicitly to bypass SLS internal resolution
-          PPC_STAGE=$PPC_STAGE npm run sls-deploy --force
 
-      - name: 🚅 Deploy to AWS
-        env:
-          SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
+          # AWS OIDC Credentials
           AWS_ACCESS_KEY_ID: ${{ env.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ env.AWS_SECRET_ACCESS_KEY }}
           AWS_SESSION_TOKEN: ${{ env.AWS_SESSION_TOKEN }}
           AWS_REGION: ${{ env.REGION }}
-        if: ${{ inputs.force != 'true' }}
+
+          # CRITICAL for Docker containers + OIDC
+          AWS_WEB_IDENTITY_TOKEN_FILE: ${{ env.AWS_WEB_IDENTITY_TOKEN_FILE }}
         run: |
-          # Use --region and --stage flags explicitly to bypass SLS internal resolution
-          PPC_STAGE=$PPC_STAGE npm run sls-deploy
+          # Use --force if requested, otherwise standard deploy
+          if [ "${{ inputs.force }}" = "true" ]; then
+            PPC_STAGE=$PPC_STAGE npm run sls-deploy -- --force
+          else
+            PPC_STAGE=$PPC_STAGE npm run sls-deploy
+          fi
