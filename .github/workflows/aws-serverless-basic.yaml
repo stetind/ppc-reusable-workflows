@@ -114,7 +114,10 @@ jobs:
           AWS_SESSION_TOKEN: ${{ env.AWS_SESSION_TOKEN }}
           ACCOUNT_ID: ${{ env.ACCOUNT_ID }}
         if: ${{ inputs.force == 'true' }}
-        run: PPC_STAGE=$PPC_STAGE npm run sls-deploy --force
+        run: |
+          unset SERVERLESS_ACCESS_KEY
+          unset PPCENV_SERVERLESS_ACCESS_KEY
+          PPC_STAGE=$PPC_STAGE npm run sls-deploy --force
 
       - name: 🚅 Deploy to AWS
         env:
@@ -123,4 +126,7 @@ jobs:
           AWS_SESSION_TOKEN: ${{ env.AWS_SESSION_TOKEN }}
           ACCOUNT_ID: ${{ env.ACCOUNT_ID }}
         if: ${{ inputs.force != 'true' }}
-        run: PPC_STAGE=$PPC_STAGE npm run sls-deploy
+        run: |
+          unset SERVERLESS_ACCESS_KEY
+          unset PPCENV_SERVERLESS_ACCESS_KEY
+          PPC_STAGE=$PPC_STAGE npm run sls-deploy
