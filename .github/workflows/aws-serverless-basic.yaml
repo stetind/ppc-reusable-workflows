@@ -127,6 +127,13 @@ jobs:
           ACCOUNT_ID: ${{ env.ACCOUNT_ID }}
         if: ${{ inputs.force != 'true' }}
         run: |
+          # 1. Clean up non-standard variables that might shadow the real ones
+          unset AWS_ACCESS_KEY
+          unset AWS_SECRET
           unset SERVERLESS_ACCESS_KEY
-          unset PPCENV_SERVERLESS_ACCESS_KEY
+          
+          # 2. Verify that the standard OIDC variables are the ONLY ones active
+          aws sts get-caller-identity
+          
+          # 3. Run deploy with explicit account resolution
           PPC_STAGE=$PPC_STAGE npm run sls-deploy
