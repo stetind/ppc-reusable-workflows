@@ -25,6 +25,7 @@ jobs:
   metadata:
     name: Read Metadata & Trigger Reusable Release Workflow
     uses: stetind/ppc-reusable-workflows/.github/workflows/release-checkout.yaml@releases
+    secrets: inherit
     with:
       runner: ${{ vars.DEFAULT_RUNNER }}
 
