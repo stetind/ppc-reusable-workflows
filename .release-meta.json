@@ -1,7 +1,7 @@
 {
-  "previous_tag": "v8.2.0",
-  "new_tag": "v9.0.0",
+  "previous_tag": "v11.0.3",
+  "new_tag": "v11.0.4",
   "prerelease": "",
   "merge_option": "merge and delete",
-  "source_branch": "main"
+  "source_branch": "feat/use-app-credential-for-aws"
 }
