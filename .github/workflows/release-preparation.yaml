@@ -64,7 +64,7 @@ on:
           - 'ubuntu-latest'
   workflow_call:
     secrets:
-      APP_PRIVATE_KEY:
+      PPC_CI_APP_PRIVATE_KEY:
         required: true
     inputs:
       tag:

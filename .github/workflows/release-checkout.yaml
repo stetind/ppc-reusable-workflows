@@ -13,7 +13,7 @@
 # Outputs:
 #   • previous_tag: Last release tag
 #   • new_tag: Next release version
-#   • prerelease: Pre-release identifier
+#   • prerelease: Prerelease identifier
 #   • merge_option: Branch merge strategy
 #   • source_branch: Source branch for changes
 #
