@@ -15,8 +15,6 @@ on:
     secrets:
       NPM_TOKEN:
         required: true
-      SERVERLESS_ACCESS_KEY:
-        required: true
       PPC_CI_APP_ID:
         required: true
       PPC_CI_APP_PRIVATE_KEY:
@@ -42,16 +40,6 @@ on:
         required: false
         default: false
         type: boolean
-      runner:
-        description: 'Choose the runner'
-        required: false
-        default: 'ubuntu-latest'
-        type: string
-      job_container:
-        description: 'Select the docker container for the action'
-        required: false
-        default: 'node:22.14'
-        type: string
 
 env:
   AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1,
@@ -60,76 +48,52 @@ env:
 
 jobs:
   deploy:
-    runs-on: ${{ inputs.runner }}
+    runs-on: ubuntu-latest
     name: Deploy
     environment: ${{ inputs.deploy_environment }}
     env:
-#      SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
+      SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
       PPC_STAGE: ${{ vars.PPC_STAGE || vars.PPCENV_PPC_STAGE }}
       REGION: ${{ inputs.region || vars.PPCENV_REGION }}
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
       ACCOUNT_ID: ${{ vars.AWS_ACCOUNT_ID }}
       GITHUB_ROLE_NAME: ${{ vars.AWS_GITHUB_ROLE_NAME}}
 
-    container:
-      image: ${{ inputs.job_container }}
-      volumes:
-        - ${{ github.workspace }}:/workspace
     steps:
-      - name: Get GitHub App Token
-        id: get_token
-        uses: actions/create-github-app-token@v2
-        with:
-          app-id: ${{ secrets.PPC_CI_APP_ID }}
-          private-key: ${{ secrets.PPC_CI_APP_PRIVATE_KEY }}
-
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          # Use the App's identity to assume the role
-          role-to-assume: arn:aws:iam::${{ env.ACCOUNT_ID }}:role/${{ env.GITHUB_ROLE_NAME }}
-          aws-region: ${{ env.REGION }}
-          role-duration-seconds: 3600 # Explicitly set to 1 hour (up to 43200)
-          role-skip-session-tagging: true # Sometimes helps with provider stability
-
       - name: 🛫 Checkout
         uses: actions/checkout@v6
 
+      - name: 🟢 Setup Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.14'
+
       - name: 🧙 Install Node
-        uses: stetind/ppc-github-composite-actions/.github/actions/install-global-dependencies@v1.0.7
+        uses: stetind/ppc-github-composite-actions/.github/actions/install-global-dependencies@v1.1.0
         with:
           npm_token: $NPM_TOKEN
 
       - name: 📓 Create [dot] env
-        uses: stetind/ppc-github-composite-actions/.github/actions/create-dot-env@v1.0.7
+        uses: stetind/ppc-github-composite-actions/.github/actions/create-dot-env@v1.1.0
         with:
-          volume: '/workspace'
+          volume: ${{ github.workspace }}
           secrets: ${{ toJSON(secrets) }}
           variables: ${{ toJSON(vars) }}
 
-      - name: Verify Env
+      - name: 🔐 AWS OIDC Credentials
+        uses: stetind/ppc-github-composite-actions/.github/actions/aws-oidc@v1.1.0
+        with:
+          app_id: ${{ secrets.PPC_CI_APP_ID }}
+          app_private_key: ${{ secrets.PPC_CI_APP_PRIVATE_KEY }}
+          account_id: ${{ env.ACCOUNT_ID }}
+          github_role_name: ${{ env.GITHUB_ROLE_NAME }}
+          region: ${{ env.REGION }}
+
+      - name: 🚅 Deploy to AWS
+        shell: bash
         run: |
-          echo "Account ID is: ${{ env.ACCOUNT_ID }}"
-          echo "Region is: ${{ env.REGION }}"
-          if [ -z "$AWS_ACCESS_KEY_ID" ]; then echo "AWS_ACCESS_KEY_ID is EMPTY"; else echo "AWS_ACCESS_KEY_ID is set"; fi
+          # No manual token hunting! AWS credentials are already in the environment.
+          FORCE_FLAG=$([[ "${{ inputs.force }}" == "true" ]] && echo "--force" || echo "")
 
-      - name: 🚅 Deploy to AWS (Force)
-        env:
-          # Serverless v4 License/Auth
-          SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
-
-          # AWS OIDC Credentials
-          AWS_ACCESS_KEY_ID: ${{ env.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ env.AWS_SECRET_ACCESS_KEY }}
-          AWS_SESSION_TOKEN: ${{ env.AWS_SESSION_TOKEN }}
-          AWS_REGION: ${{ env.REGION }}
-
-          # CRITICAL for Docker containers + OIDC
-          AWS_WEB_IDENTITY_TOKEN_FILE: ${{ env.AWS_WEB_IDENTITY_TOKEN_FILE }}
-        run: |
-          # Use --force if requested, otherwise standard deploy
-          if [ "${{ inputs.force }}" = "true" ]; then
-            PPC_STAGE=$PPC_STAGE npm run sls-deploy -- --force
-          else
-            PPC_STAGE=$PPC_STAGE npm run sls-deploy
-          fi
+          echo "🚀 Deploying to $PPC_STAGE in $REGION"
+          npm run sls-deploy -- --stage $PPC_STAGE --region $REGION $FORCE_FLAG
