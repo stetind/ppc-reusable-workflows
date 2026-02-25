@@ -60,7 +60,7 @@ jobs:
       - name: 🛫 Checkout
         uses: actions/checkout@v6
         with:
-          token: ${{ steps.app-token.outputs.token }}
+          token: ${{ steps.get_token.outputs.token }}
 
       - name: 🔧 Setup Node and NPM
         uses: stetind/ppc-github-composite-actions/.github/actions/install-global-dependencies@v1.1.0

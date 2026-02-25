@@ -101,7 +101,7 @@ jobs:
       - name: 🛫 Checkout
         uses: actions/checkout@v6
         with:
-          token: ${{ steps.app-token.outputs.token }}
+          token: ${{ steps.get_token.outputs.token }}
           ref: ${{ inputs.branch }}
           fetch-depth: 0
 
