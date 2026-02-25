@@ -12,7 +12,6 @@
 #   • Temporary branch management
 #
 # Required Permissions:
-#   • WORKFLOW_TOKEN: Repository write access
 #   • Git: Full history access (fetch-depth: 0)
 #
 # Inputs:

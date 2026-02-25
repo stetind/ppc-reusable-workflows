@@ -36,9 +36,6 @@ on:
       PPC_CI_APP_PRIVATE_KEY:
         description: 'GitHub App private key for authentication'
         required: true
-      WORKFLOW_TOKEN:
-        description: 'GitHub token with permissions for PR creation, branch merging, and deletion'
-        required: true
     inputs:
       title:
         description: 'Title of the pull request to be created (typically includes version number)'
