@@ -61,5 +61,5 @@ jobs:
       - name: 🗑️ Delete `releases` Branch
         uses: stetind/ppc-github-composite-actions/.github/actions/delete-bracnh@v1.1.0
         with:
-          token: ${{ secrets.WORKFLOW_TOKEN }}
+          token: ${{ steps.get_token.outputs.token }}
           branch: releases

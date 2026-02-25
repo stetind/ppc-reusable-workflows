@@ -90,7 +90,7 @@ jobs:
         id: pr
         uses: stetind/ppc-github-composite-actions/.github/actions/pull-request-create@v1.1.0
         with:
-          token: ${{ secrets.WORKFLOW_TOKEN }}
+          token: ${{ steps.get_token.outputs.token }}
           title: ${{ inputs.title }}
           source: ${{ inputs.source }}
           target: ${{ inputs.target }}
@@ -101,12 +101,12 @@ jobs:
         if: ${{ inputs.merge_option != 'none' }}
         uses: stetind/ppc-github-composite-actions/.github/actions/pull-request-merge@v1.1.0
         with:
-          token: ${{ secrets.WORKFLOW_TOKEN }}
+          token: ${{ steps.get_token.outputs.token }}
           pr_url: ${{ steps.pr.outputs.pr_url }}
 
       - name: 🗑️ Delete `releases` Branch
         if: ${{ inputs.merge_option == 'merge and delete' && steps.merge.outcome == 'success' }}
         uses: stetind/ppc-github-composite-actions/.github/actions/delete-bracnh@v1.1.0
         with:
-          token: ${{ secrets.WORKFLOW_TOKEN }}
+          token: ${{ steps.get_token.outputs.token }}
           branch: ${{ inputs.source }}

@@ -99,7 +99,6 @@ jobs:
   prepare:
     name: Prepare & Push
     runs-on: ${{ inputs.runner || 'ubuntu-latest' }}
-#    container: 'ubuntu:latest'
 
     steps:
       - name: Get GitHub App Token
@@ -120,7 +119,7 @@ jobs:
         if: ${{ inputs.tag == '' }}
         uses: stetind/ppc-github-composite-actions/.github/actions/get-latest-tag@v1.1.0
         with:
-          token: ${{ secrets.WORKFLOW_TOKEN }}
+          token: ${{ steps.get_token.outputs.token }}
 
       - name: 📦 Get commits since selected tag
         id: get_commits

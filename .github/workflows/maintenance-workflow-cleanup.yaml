@@ -93,6 +93,6 @@ jobs:
       - name: Cleanup
         uses: stetind/ppc-github-composite-actions/.github/actions/maintenance-cleanup@v1.1.0
         with:
-          token: ${{ secrets.WORKFLOW_TOKEN || secrets.GITHUB_TOKEN }}
+          token: ${{ steps.get_token.outputs.token || secrets.GITHUB_TOKEN }}
           status: ${{ inputs.status }}
           workflow_name: ${{ inputs.workflow_name }}
