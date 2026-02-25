@@ -30,9 +30,6 @@ name: 🧹 Merge and clean branches
 on:
   workflow_call:
     secrets:
-      PPC_CI_APP_ID:
-        description: 'GitHub App ID used to generate authentication token'
-        required: true
       PPC_CI_APP_PRIVATE_KEY:
         description: 'GitHub App private key for authentication'
         required: true
