@@ -13,7 +13,7 @@
 # Outputs:
 #   • previous_tag: Last release tag
 #   • new_tag: Next release version
-#   • prerelease: Pre-release identifier
+#   • prerelease: Prerelease identifier
 #   • merge_option: Branch merge strategy
 #   • source_branch: Source branch for changes
 #
@@ -72,13 +72,21 @@ jobs:
       release_notes: ${{ steps.release_notes.outputs.release_notes }}
 
     steps:
-      - name: ⬇️ Checkout repository
+      - name: Get GitHub App Token
+        id: get_token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.PPC_CI_APP_ID }}
+          private-key: ${{ secrets.PPC_CI_APP_PRIVATE_KEY }}
+
+      - name: 🛫 Checkout
         uses: actions/checkout@v6
         with:
+          token: ${{ steps.get_token.outputs.token }}
           fetch-depth: 0
 
       - name: 🔧 Install Jq
-        uses: stetind/ppc-github-composite-actions/.github/actions/check-install-jq@v1.0.7
+        uses: stetind/ppc-github-composite-actions/.github/actions/check-install-jq@v1.1.0
 
       - name: 🔍 Read .release-meta.json
         id: read_meta

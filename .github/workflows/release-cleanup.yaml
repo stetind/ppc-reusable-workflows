@@ -30,8 +30,8 @@ name: 🧹 Merge and clean branches
 on:
   workflow_call:
     secrets:
-      WORKFLOW_TOKEN:
-        description: 'GitHub token with permissions for PR creation, branch merging, and deletion'
+      PPC_CI_APP_PRIVATE_KEY:
+        description: 'GitHub App private key for authentication'
         required: true
     inputs:
       title:
@@ -67,16 +67,24 @@ jobs:
     runs-on: ${{ inputs.runner }}
     container: 'node:22.14'
     steps:
-      - name: ⬇️ Checkout repository
+      - name: Get GitHub App Token
+        id: get_token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.PPC_CI_APP_ID }}
+          private-key: ${{ secrets.PPC_CI_APP_PRIVATE_KEY }}
+
+      - name: 🛫 Checkout
         uses: actions/checkout@v6
         with:
+          token: ${{ steps.get_token.outputs.token }}
           fetch-depth: 0
 
       - name: ⬇️ Create Pull Request
         id: pr
-        uses: stetind/ppc-github-composite-actions/.github/actions/pull-request-create@v1.0.7
+        uses: stetind/ppc-github-composite-actions/.github/actions/pull-request-create@v1.1.0
         with:
-          token: ${{ secrets.WORKFLOW_TOKEN }}
+          token: ${{ steps.get_token.outputs.token }}
           title: ${{ inputs.title }}
           source: ${{ inputs.source }}
           target: ${{ inputs.target }}
@@ -85,14 +93,14 @@ jobs:
       - name: 🧹 Merge
         id: merge
         if: ${{ inputs.merge_option != 'none' }}
-        uses: stetind/ppc-github-composite-actions/.github/actions/pull-request-merge@v1.0.7
+        uses: stetind/ppc-github-composite-actions/.github/actions/pull-request-merge@v1.1.0
         with:
-          token: ${{ secrets.WORKFLOW_TOKEN }}
+          token: ${{ steps.get_token.outputs.token }}
           pr_url: ${{ steps.pr.outputs.pr_url }}
 
       - name: 🗑️ Delete `releases` Branch
         if: ${{ inputs.merge_option == 'merge and delete' && steps.merge.outcome == 'success' }}
-        uses: stetind/ppc-github-composite-actions/.github/actions/delete-bracnh@v1.0.7
+        uses: stetind/ppc-github-composite-actions/.github/actions/delete-bracnh@v1.1.0
         with:
-          token: ${{ secrets.WORKFLOW_TOKEN }}
+          token: ${{ steps.get_token.outputs.token }}
           branch: ${{ inputs.source }}

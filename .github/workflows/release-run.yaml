@@ -25,6 +25,7 @@ jobs:
   metadata:
     name: Read Metadata & Trigger Reusable Release Workflow
     uses: stetind/ppc-reusable-workflows/.github/workflows/release-checkout.yaml@releases
+    secrets: inherit
     with:
       runner: ${{ vars.DEFAULT_RUNNER }}
 
@@ -58,8 +59,15 @@ jobs:
     runs-on: ${{ vars.DEFAULT_RUNNER }}
     container: 'node:22.14'
     steps:
-      - name: 🗑️ Delete `releases` Branch
-        uses: stetind/ppc-github-composite-actions/.github/actions/delete-bracnh@v1.0.7
+      - name: Get GitHub App Token
+        id: get_token
+        uses: actions/create-github-app-token@v2
         with:
-          token: ${{ secrets.WORKFLOW_TOKEN }}
+          app-id: ${{ vars.PPC_CI_APP_ID }}
+          private-key: ${{ secrets.PPC_CI_APP_PRIVATE_KEY }}
+
+      - name: 🗑️ Delete `releases` Branch
+        uses: stetind/ppc-github-composite-actions/.github/actions/delete-bracnh@v1.1.0
+        with:
+          token: ${{ steps.get_token.outputs.token }}
           branch: releases
