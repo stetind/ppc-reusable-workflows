@@ -48,6 +48,13 @@ jobs:
       group: ${{ github.workflow }}
       cancel-in-progress: true
     steps:
+      - name: Get GitHub App Token
+        id: get_token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ SECRET.PPC_CI_APP_ID }}
+          private-key: ${{ SECRET.PPC_CI_APP_PRIVATE_KEY }}
+
       - name: 🛫 Checkout
         uses: actions/checkout@v6
 

@@ -30,6 +30,12 @@ name: 🧹 Merge and clean branches
 on:
   workflow_call:
     secrets:
+      PPC_CI_APP_ID:
+        description: 'GitHub App ID used to generate authentication token'
+        required: true
+      PPC_CI_APP_PRIVATE_KEY:
+        description: 'GitHub App private key for authentication'
+        required: true
       WORKFLOW_TOKEN:
         description: 'GitHub token with permissions for PR creation, branch merging, and deletion'
         required: true
@@ -67,7 +73,14 @@ jobs:
     runs-on: ${{ inputs.runner }}
     container: 'node:22.14'
     steps:
-      - name: ⬇️ Checkout repository
+      - name: Get GitHub App Token
+        id: get_token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ SECRET.PPC_CI_APP_ID }}
+          private-key: ${{ SECRET.PPC_CI_APP_PRIVATE_KEY }}
+
+      - name: 🛫 Checkout
         uses: actions/checkout@v6
         with:
           fetch-depth: 0

@@ -70,6 +70,13 @@ jobs:
       GITHUB_ROLE_NAME: ${{ inputs.aws_github_role || vars.AWS_GITHUB_ROLE_NAME}}
 
     steps:
+      - name: Get GitHub App Token
+        id: get_token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ SECRET.PPC_CI_APP_ID }}
+          private-key: ${{ SECRET.PPC_CI_APP_PRIVATE_KEY }}
+
       - name: 🛫 Checkout
         uses: actions/checkout@v6
 
@@ -77,7 +84,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22.14'
-
 
       - name: 🧙 Install Node
         uses: stetind/ppc-github-composite-actions/.github/actions/install-global-dependencies@v1.1.0
@@ -90,15 +96,14 @@ jobs:
           volume: ${{ github.workspace }}
           secrets: ${{ toJSON(secrets) }}
           variables: ${{ toJSON(vars) }}
-
       - name: 🔐 AWS OIDC Credentials
-        uses: stetind/ppc-github-composite-actions/.github/actions/aws-oidc@v1.1.0
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          app_id: ${{ secrets.PPC_CI_APP_ID }}
-          app_private_key: ${{ secrets.PPC_CI_APP_PRIVATE_KEY }}
-          account_id: ${{ env.ACCOUNT_ID }}
-          github_role_name: ${{ env.GITHUB_ROLE_NAME }}
-          region: ${{ env.REGION }}
+          # Use the App's identity to assume the role
+          role-to-assume: arn:aws:iam::${{ env.ACCOUNT_ID }}:role/${{ env.GITHUB_ROLE_NAME }}
+          aws-region: ${{ env.REGION }}
+          role-duration-seconds: 3600
+          role-skip-session-tagging: true
 
       - name: 🚅 Serverless Validate
         run: npm run sls-print

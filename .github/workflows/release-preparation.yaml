@@ -99,7 +99,14 @@ jobs:
 #    container: 'ubuntu:latest'
 
     steps:
-      - name: ⬇️ Checkout repository
+      - name: Get GitHub App Token
+        id: get_token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ SECRET.PPC_CI_APP_ID }}
+          private-key: ${{ SECRET.PPC_CI_APP_PRIVATE_KEY }}
+
+      - name: 🛫 Checkout
         uses: actions/checkout@v6
         with:
           token: ${{ secrets.WORKFLOW_TOKEN }}
