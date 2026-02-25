@@ -31,7 +31,7 @@ jobs:
     env:
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
     steps:
-      - name: Get GitHub App Token
+      - name: 🔐 Get GitHub App Token
         id: get_token
         uses: actions/create-github-app-token@v2
         with:
@@ -45,7 +45,7 @@ jobs:
           fetch-depth: 0
 
       - name: 🔧 Setup Node and NPM
-        uses: stetind/ppc-github-composite-actions/.github/actions/install-global-dependencies@v1.1.0
+        uses: stetind/ppc-github-composite-actions/.github/actions/install-global-dependencies@v2.0.2
         with:
           npm_token: $NPM_TOKEN
 

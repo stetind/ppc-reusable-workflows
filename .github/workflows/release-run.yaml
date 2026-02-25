@@ -59,7 +59,7 @@ jobs:
     runs-on: ${{ vars.DEFAULT_RUNNER }}
     container: 'node:22.14'
     steps:
-      - name: Get GitHub App Token
+      - name: 🔐 Get GitHub App Token
         id: get_token
         uses: actions/create-github-app-token@v2
         with:
@@ -67,7 +67,7 @@ jobs:
           private-key: ${{ secrets.PPC_CI_APP_PRIVATE_KEY }}
 
       - name: 🗑️ Delete `releases` Branch
-        uses: stetind/ppc-github-composite-actions/.github/actions/delete-bracnh@v1.1.0
+        uses: stetind/ppc-github-composite-actions/.github/actions/delete-bracnh@v2.0.2
         with:
           token: ${{ steps.get_token.outputs.token }}
           branch: releases
