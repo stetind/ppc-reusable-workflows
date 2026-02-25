@@ -1,0 +1,22 @@
+chore!: remove aws-serverless-complete reusable workflow due to redundancy and streamline workflow configurations|
+chore: bump composite action versions to v1.1.0 across workflows for consistency|
+chore!: remove unused inputs and container configuration, streamline OIDC credentials and Node.js setup in serverless workflows|
+chore: refine OIDC credentials handling and unify force deploy logic in serverless workflow steps|
+chore: clean up unused env variables and refine Serverless access key usage in workflow deploy steps|
+chore: refine AWS credential configuration and enforce explicit env usage in serverless workflow deploy steps|
+chore: update AWS credential usage and disable interactive setup in serverless workflow deploy steps|
+chore: enable environment verification and refine AWS credential usage in serverless workflow deploy steps|
+chore: comment out unused env variables in serverless workflow deploy steps for cleaner configuration|
+chore: remove redundant `unset` commands from deploy steps in serverless workflow|
+chore: clean up non-standard variables and disable unused analysis step in serverless workflows|
+chore: unset unused Serverless access keys in deploy steps for cleaner environment in serverless workflow|
+chore: fix variable name from AWS_ACCOUNT_ID to ACCOUNT_ID in serverless workflow for consistency|
+chore: add AWS_ACCOUNT_ID to deploy steps in serverless workflow for consistency|
+chore: move AWS credentials to deploy steps in serverless workflow for better scoping|
+chore: update AWS credential configuration in serverless workflow for improved stability and explicit role settings|
+chore: remove unused inputs and references to `aws_account` and `aws_github_role` in serverless workflows|
+chore: remove redundant debug ARN step from serverless validation workflow|
+chore: remove unused `web-identity-token-file` from serverless workflows|
+chore: remove redundant OIDC permissions and update AWS credential configuration in serverless workflows|
+chore: add OIDC permissions to serverless workflows for improved auth handling|
+chore: replace AWS keys with GitHub App integration in workflows|
