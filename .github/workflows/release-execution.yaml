@@ -105,6 +105,13 @@ jobs:
     runs-on: ${{ inputs.runner }}
     container: 'node:22.14'
     steps:
+      - name: Get GitHub App Token
+        id: get_token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.PPC_CI_APP_ID }}
+          private-key: ${{ secrets.PPC_CI_APP_PRIVATE_KEY }}
+
       - name: 🗑️ Delete `${{ inputs.temporary }}` Branch
         uses: stetind/ppc-github-composite-actions/.github/actions/delete-bracnh@v1.1.0
         with:
