@@ -70,7 +70,7 @@ jobs:
       GITHUB_ROLE_NAME: ${{ inputs.aws_github_role || vars.AWS_GITHUB_ROLE_NAME}}
 
     steps:
-      - name: Get GitHub App Token
+      - name: 🔐 Get GitHub App Token
         id: get_token
         uses: actions/create-github-app-token@v2
         with:
@@ -88,12 +88,12 @@ jobs:
           node-version: '22.14'
 
       - name: 🧙 Install Node
-        uses: stetind/ppc-github-composite-actions/.github/actions/install-global-dependencies@v1.1.0
+        uses: stetind/ppc-github-composite-actions/.github/actions/install-global-dependencies@v2.0.2
         with:
           npm_token: $NPM_TOKEN
 
       - name: 📓 Create [dot] env
-        uses: stetind/ppc-github-composite-actions/.github/actions/create-dot-env@v1.1.0
+        uses: stetind/ppc-github-composite-actions/.github/actions/create-dot-env@v2.0.2
         with:
           volume: ${{ github.workspace }}
           secrets: ${{ toJSON(secrets) }}

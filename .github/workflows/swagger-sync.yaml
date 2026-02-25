@@ -40,7 +40,7 @@ jobs:
     container: 'node:22.14'
 
     steps:
-      - name: Get GitHub App Token
+      - name: 🔐 Get GitHub App Token
         id: get_token
         uses: actions/create-github-app-token@v2
         with:

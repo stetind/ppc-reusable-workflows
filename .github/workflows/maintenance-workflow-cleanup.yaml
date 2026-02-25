@@ -86,7 +86,7 @@ jobs:
     runs-on: ${{ inputs.runner }}
     container: 'node:22.14'
     steps:
-      - name: Get GitHub App Token
+      - name: 🔐 Get GitHub App Token
         id: get_token
         uses: actions/create-github-app-token@v2
         with:
@@ -94,7 +94,7 @@ jobs:
           private-key: ${{ secrets.PPC_CI_APP_PRIVATE_KEY }}
 
       - name: Cleanup
-        uses: stetind/ppc-github-composite-actions/.github/actions/maintenance-cleanup@v1.1.0
+        uses: stetind/ppc-github-composite-actions/.github/actions/maintenance-cleanup@v2.0.2
         with:
           token: ${{ steps.get_token.outputs.token }}
           status: ${{ inputs.status }}
