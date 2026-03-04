@@ -15,8 +15,6 @@ on:
     secrets:
       NPM_TOKEN:
         required: true
-      PPC_CI_APP_ID:
-        required: true
       PPC_CI_APP_PRIVATE_KEY:
         required: true
     inputs:
