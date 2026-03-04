@@ -88,7 +88,7 @@ jobs:
           variables: ${{ toJSON(vars) }}
 
       - name: 🔐 AWS OIDC Credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           # Use the App's identity to assume the role
           role-to-assume: arn:aws:iam::${{ env.ACCOUNT_ID }}:role/${{ env.GITHUB_ROLE_NAME }}
