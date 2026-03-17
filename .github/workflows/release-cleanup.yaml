@@ -65,7 +65,7 @@ jobs:
   release:
     name: Merge and clean branches
     runs-on: ${{ inputs.runner }}
-    container: 'node:22.14'
+    container: 'node:24.14'
     steps:
       - name: 🔐 Get GitHub App Token
         id: get_token

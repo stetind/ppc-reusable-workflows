@@ -57,7 +57,7 @@ jobs:
     name: 🧹 Clean Temporary branch
     needs: [ release, metadata ]
     runs-on: ${{ vars.DEFAULT_RUNNER }}
-    container: 'node:22.14'
+    container: 'node:24.14'
     steps:
       - name: 🔐 Get GitHub App Token
         id: get_token

@@ -27,7 +27,7 @@ jobs:
   testing:
     name: Run Sonar Cloud Coverage
     runs-on: ${{ inputs.runner }}
-    container: 'node:22.14'
+    container: 'node:24.14'
     env:
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
     steps:

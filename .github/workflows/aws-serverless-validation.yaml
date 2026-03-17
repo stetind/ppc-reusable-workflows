@@ -10,7 +10,7 @@
 #   - deploy_environment: Environment to validate (default: staging)
 #   - region: AWS region (default: us-east-1) 
 #   - runner: GitHub runner to use (default: self-hosted)
-#   - job_container: Docker container image (default: node:22.14)
+#   - job_container: Docker container image (default: node:24.14)
 #
 # Required Secrets:
 #   - NPM_TOKEN
@@ -79,10 +79,10 @@ jobs:
         with:
           token: ${{ steps.get_token.outputs.token }}
 
-      - name: 🟢 Setup Node 22
+      - name: 🟢 Setup Node 24
         uses: actions/setup-node@v4
         with:
-          node-version: '22.14'
+          node-version: '24.14'
 
       - name: 🧙 Install Node
         uses: stetind/ppc-github-composite-actions/.github/actions/install-global-dependencies@v2.0.2

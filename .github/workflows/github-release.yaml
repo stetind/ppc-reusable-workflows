@@ -115,7 +115,7 @@ jobs:
     name: Create Release
     needs: [ prepare ]
     runs-on: ${{ inputs.runner || 'ubuntu-latest' }}
-    container: ${{ vars.DEFAULT_CONTAINER || 'node:22.14' }}
+    container: ${{ vars.DEFAULT_CONTAINER || 'node:24.14' }}
     steps:
       - name: 🔐 Get GitHub App Token
         id: get_token

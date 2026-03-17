@@ -85,7 +85,7 @@ jobs:
   release:
     name: Create Release
     runs-on: ${{ inputs.runner }}
-    container: 'node:22.14'
+    container: 'node:24.14'
     outputs:
       prerelease: ${{ inputs.prerelease != '' && inputs.prerelease != 'none' }}
       prerelease_suffix: ${{ inputs.prerelease }}

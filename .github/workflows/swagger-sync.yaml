@@ -37,7 +37,7 @@ jobs:
   sync:
     name: Run Swagger Hub Sync
     runs-on: ${{ inputs.runner }}
-    container: 'node:22.14'
+    container: 'node:24.14'
 
     steps:
       - name: 🔐 Get GitHub App Token
