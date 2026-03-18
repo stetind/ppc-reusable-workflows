@@ -45,7 +45,7 @@ jobs:
           fetch-depth: 0
 
       - name: 🔧 Setup Node and NPM
-        uses: stetind/ppc-github-composite-actions/.github/actions/install-global-dependencies@v2.0.2
+        uses: stetind/ppc-github-composite-actions/.github/actions/install-global-dependencies@v2.0.3
         with:
           npm_token: $NPM_TOKEN
 
