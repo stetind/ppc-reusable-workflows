@@ -65,11 +65,11 @@ jobs:
   release:
     name: Merge and clean branches
     runs-on: ${{ inputs.runner }}
-    container: 'node:22.14'
+    container: 'node:24.14'
     steps:
       - name: 🔐 Get GitHub App Token
         id: get_token
-        uses: actions/create-github-app-token@v2
+        uses: actions/create-github-app-token@v3
         with:
           app-id: ${{ vars.PPC_CI_APP_ID }}
           private-key: ${{ secrets.PPC_CI_APP_PRIVATE_KEY }}
@@ -82,7 +82,7 @@ jobs:
 
       - name: ⬇️ Create Pull Request
         id: pr
-        uses: stetind/ppc-github-composite-actions/.github/actions/pull-request-create@v2.0.2
+        uses: stetind/ppc-github-composite-actions/.github/actions/pull-request-create@v2.0.3
         with:
           token: ${{ steps.get_token.outputs.token }}
           title: ${{ inputs.title }}
@@ -93,14 +93,14 @@ jobs:
       - name: 🧹 Merge
         id: merge
         if: ${{ inputs.merge_option != 'none' }}
-        uses: stetind/ppc-github-composite-actions/.github/actions/pull-request-merge@v2.0.2
+        uses: stetind/ppc-github-composite-actions/.github/actions/pull-request-merge@v2.0.3
         with:
           token: ${{ steps.get_token.outputs.token }}
           pr_url: ${{ steps.pr.outputs.pr_url }}
 
       - name: 🗑️ Delete `releases` Branch
         if: ${{ inputs.merge_option == 'merge and delete' && steps.merge.outcome == 'success' }}
-        uses: stetind/ppc-github-composite-actions/.github/actions/delete-bracnh@v2.0.2
+        uses: stetind/ppc-github-composite-actions/.github/actions/delete-bracnh@v2.0.3
         with:
           token: ${{ steps.get_token.outputs.token }}
           branch: ${{ inputs.source }}

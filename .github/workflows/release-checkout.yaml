@@ -61,7 +61,7 @@ jobs:
   metadata:
     name: Read Metadata
     runs-on: ${{ inputs.runner }}
-    container: 'node:22.14'
+    container: 'node:24.14'
 
     outputs:
       previous_tag: ${{ steps.read_meta.outputs.previous_tag }}
@@ -74,7 +74,7 @@ jobs:
     steps:
       - name: 🔐 Get GitHub App Token
         id: get_token
-        uses: actions/create-github-app-token@v2
+        uses: actions/create-github-app-token@v3
         with:
           app-id: ${{ vars.PPC_CI_APP_ID }}
           private-key: ${{ secrets.PPC_CI_APP_PRIVATE_KEY }}
@@ -86,7 +86,7 @@ jobs:
           fetch-depth: 0
 
       - name: 🔧 Install Jq
-        uses: stetind/ppc-github-composite-actions/.github/actions/check-install-jq@v2.0.2
+        uses: stetind/ppc-github-composite-actions/.github/actions/check-install-jq@v2.0.3
 
       - name: 🔍 Read .release-meta.json
         id: read_meta

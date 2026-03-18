@@ -57,17 +57,17 @@ jobs:
     name: 🧹 Clean Temporary branch
     needs: [ release, metadata ]
     runs-on: ${{ vars.DEFAULT_RUNNER }}
-    container: 'node:22.14'
+    container: 'node:24.14'
     steps:
       - name: 🔐 Get GitHub App Token
         id: get_token
-        uses: actions/create-github-app-token@v2
+        uses: actions/create-github-app-token@v3
         with:
           app-id: ${{ vars.PPC_CI_APP_ID }}
           private-key: ${{ secrets.PPC_CI_APP_PRIVATE_KEY }}
 
       - name: 🗑️ Delete `releases` Branch
-        uses: stetind/ppc-github-composite-actions/.github/actions/delete-bracnh@v2.0.2
+        uses: stetind/ppc-github-composite-actions/.github/actions/delete-bracnh@v2.0.3
         with:
           token: ${{ steps.get_token.outputs.token }}
           branch: releases
