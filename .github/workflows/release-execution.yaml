@@ -113,7 +113,7 @@ jobs:
           private-key: ${{ secrets.PPC_CI_APP_PRIVATE_KEY }}
 
       - name: 🗑️ Delete `${{ inputs.temporary }}` Branch
-        uses: stetind/ppc-github-composite-actions/.github/actions/delete-bracnh@v2.0.2
+        uses: stetind/ppc-github-composite-actions/.github/actions/delete-bracnh@v2.0.3
         with:
           token: ${{ steps.get_token.outputs.token }}
           branch: ${{ inputs.temporary }}

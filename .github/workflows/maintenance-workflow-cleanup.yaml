@@ -94,7 +94,7 @@ jobs:
           private-key: ${{ secrets.PPC_CI_APP_PRIVATE_KEY }}
 
       - name: Cleanup
-        uses: stetind/ppc-github-composite-actions/.github/actions/maintenance-cleanup@v2.0.2
+        uses: stetind/ppc-github-composite-actions/.github/actions/maintenance-cleanup@v2.0.3
         with:
           token: ${{ steps.get_token.outputs.token }}
           status: ${{ inputs.status }}

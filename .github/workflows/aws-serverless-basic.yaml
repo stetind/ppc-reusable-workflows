@@ -76,12 +76,12 @@ jobs:
           node-version: '24.14'
 
       - name: 🧙 Install Node
-        uses: stetind/ppc-github-composite-actions/.github/actions/install-global-dependencies@v2.0.2
+        uses: stetind/ppc-github-composite-actions/.github/actions/install-global-dependencies@v2.0.3
         with:
           npm_token: $NPM_TOKEN
 
       - name: 📓 Create [dot] env
-        uses: stetind/ppc-github-composite-actions/.github/actions/create-dot-env@v2.0.2
+        uses: stetind/ppc-github-composite-actions/.github/actions/create-dot-env@v2.0.3
         with:
           volume: ${{ github.workspace }}
           secrets: ${{ toJSON(secrets) }}
