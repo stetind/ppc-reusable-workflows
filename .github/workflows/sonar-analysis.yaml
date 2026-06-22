@@ -50,7 +50,7 @@ jobs:
           npm_token: $NPM_TOKEN
 
       - name: 🔧 Building Environment
-        run: npm run build --if-present && npx browserslist@latest --update-db
+        run: npm run build --if-present
 
       - name: 🔧 Run Tests
         id: run_test
