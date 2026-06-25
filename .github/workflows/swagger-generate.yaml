@@ -22,11 +22,6 @@ on:
       API_KEY:
         required: true
     inputs:
-      runner:
-        description: 'Choose the runner'
-        required: false
-        default: 'ubuntu-latest'
-        type: string
       owner:
         description: 'Set the swagger hub project owner'
         required: true
@@ -48,8 +43,7 @@ on:
 jobs:
   generate_and_sync:
     name: Generate and Sync Swagger
-    runs-on: ${{ inputs.runner }}
-    container: 'node:24.14'
+    runs-on: ubuntu-latest
 
     steps:
       - name: 🔐 Get GitHub App Token
@@ -83,3 +77,8 @@ jobs:
           -H "Authorization: Bearer ${{ secrets.API_KEY }}" \
           -H "Content-Type: application/yaml" \
           --data-binary @swagger.yaml
+
+      - name: Set version as default in SwaggerHub
+        run: |
+          curl -X PUT "https://api.swaggerhub.com/apis/${{ inputs.owner }}/${{ inputs.api_name }}/${{ inputs.release_version }}/settings/default" \
+          -H "Authorization: Bearer ${{ secrets.API_KEY }}"
