@@ -1,0 +1,1 @@
+feat: set SwaggerHub version as default after sync (#141)|
