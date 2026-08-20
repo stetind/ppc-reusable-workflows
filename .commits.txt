@@ -1,0 +1,6 @@
+chore: add `NODE_AUTH_TOKEN` env for npm-publication workflow|
+chore: update `actions/setup-node` to v7 in npm-publication workflow|
+chore: update npm-publication workflow to streamline node setup and remove redundant environment variables (#146)|
+chore(deps): bump actions/setup-node from 6 to 7 (#145)|
+chore(deps): bump SonarSource/sonarqube-scan-action from 8.1.0 to 8.2.1 (#144)|
+chore(deps): bump actions/checkout from 6 to 7 (#143)|
