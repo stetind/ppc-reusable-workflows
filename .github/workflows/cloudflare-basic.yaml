@@ -78,7 +78,7 @@ jobs:
           variables: ${{ toJSON(vars) }}
 
       - name: 📦 Publish app
-        uses: cloudflare/wrangler-action@v3.14.1
+        uses: cloudflare/wrangler-action@v4.0.0
         with:
           apiToken: ${{ secrets.CF_API_TOKEN }}
           environment: ${{ vars.env_environment }}
