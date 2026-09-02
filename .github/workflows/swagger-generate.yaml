@@ -19,7 +19,7 @@ run-name: >-
 on:
   workflow_call:
     secrets:
-      API_KEY:
+      SWAGGERHUB_API_KEY:
         required: true
     inputs:
       owner:
@@ -74,11 +74,11 @@ jobs:
       - name: Sync with SwaggerHub
         run: |
           curl -X POST "https://api.swaggerhub.com/apis/${{ inputs.owner }}/${{ inputs.api_name }}?version=${{ inputs.release_version }}&isPrivate=${{ inputs.private }}" \
-          -H "Authorization: Bearer ${{ secrets.API_KEY }}" \
+          -H "Authorization: Bearer ${{ secrets.SWAGGERHUB_API_KEY }}" \
           -H "Content-Type: application/yaml" \
           --data-binary @swagger.yaml
 
       - name: Set version as default in SwaggerHub
         run: |
           curl -X PUT "https://api.swaggerhub.com/apis/${{ inputs.owner }}/${{ inputs.api_name }}/${{ inputs.release_version }}/settings/default" \
-          -H "Authorization: Bearer ${{ secrets.API_KEY }}"
+          -H "Authorization: Bearer ${{ secrets.SWAGGERHUB_API_KEY }}"
