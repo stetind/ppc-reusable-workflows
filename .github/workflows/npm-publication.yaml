@@ -23,6 +23,11 @@ name: Npm - Publish
 
 on:
   workflow_call:
+    secrets:
+      NPM_TOKEN:
+        required: true
+      PPC_CI_APP_PRIVATE_KEY:
+        required: true
     inputs:
       release_version_name:
         description: The name of the version that will be used to publish release on NPM.
@@ -98,9 +103,9 @@ jobs:
         run: npm --no-git-tag-version version ${{ inputs.release_version_name }}
 
       - name: 🐱‍🚀 Publish Dev
-        if: "inputs.is_dev_release"
+        if: ${{ inputs.is_dev_release }}
         run: npm publish --tag ${{ needs.decuple_release_name.outputs.tag || 'dev' }}
 
       - name: 🐱‍🚀 Publish Release
-        if: "!inputs.is_dev_release"
+        if: ${{ !inputs.is_dev_release }}
         run: npm publish

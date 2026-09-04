@@ -5,4 +5,4 @@
 **/package-lock.json      @stetind/ppc
 
 # GitHub Actions updates
-.github/workflows/*.yml   @stetind/ppc
+.github/workflows/*.yaml  @stetind/ppc

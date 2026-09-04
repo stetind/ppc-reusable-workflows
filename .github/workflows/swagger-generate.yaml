@@ -2,10 +2,10 @@
 # 🔁 SwaggerHub Generate & Sync
 # Generates and syncs Swagger/OpenAPI specs to SwaggerHub.
 # Inputs:
-#   - api: API name in SwaggerHub
-#   - owner: SwaggerHub owner
-#   - version: API version
-#   - file: Path to OpenAPI spec file
+#   - owner: SwaggerHub project owner
+#   - api_name: API name in SwaggerHub
+#   - release_version: API release version or tag name
+#   - private: Whether the API should be private (default: 'false')
 # =============================================================================
 
 name: SwaggerHub Generate and Sync

@@ -2,8 +2,10 @@
 # ☁️ Cloudflare Wrangler Deploy
 # Deploys a Cloudflare Worker using Wrangler.
 # Inputs:
-#   - wrangler_environment: Target environment (e.g. production, staging)
-#   - secrets: Optional JSON object with key-value secrets to be injected
+#   - deploy_environment: Target environment to deploy to
+#   - debug: Enable debug mode (default: false)
+#   - runner: CI runner selection
+#   - job_container: Docker container for the job (default: node:24.14)
 # =============================================================================
 
 name: Cloudflare_Deploy

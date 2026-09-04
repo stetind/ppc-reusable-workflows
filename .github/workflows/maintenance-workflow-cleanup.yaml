@@ -3,6 +3,9 @@ run-name: 🧹 Delete all `${{ inputs.status }}` of (${{ inputs.workflow_name ||
 
 on:
   workflow_call:
+    secrets:
+      PPC_CI_APP_PRIVATE_KEY:
+        required: true
     inputs:
       status:
         description: |
