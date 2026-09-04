@@ -31,6 +31,9 @@ name: Read Metadata & Trigger Reusable Release Workflow
 
 on:
   workflow_call:
+    secrets:
+      PPC_CI_APP_PRIVATE_KEY:
+        required: true
     outputs:
       previous_tag:
         description: "Previous release tag"

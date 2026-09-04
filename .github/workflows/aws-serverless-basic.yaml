@@ -40,7 +40,7 @@ on:
         type: boolean
 
 env:
-  AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1,
+  AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
   AWS_SDK_LOAD_CONFIG: 1
   debugMode: ${{ inputs.debug }}
 
@@ -62,7 +62,7 @@ jobs:
         id: get_token
         uses: actions/create-github-app-token@v3
         with:
-          app-id: ${{ vars.PPC_CI_APP_ID }}
+          client-id: ${{ vars.PPC_CI_APP_ID }}
           private-key: ${{ secrets.PPC_CI_APP_PRIVATE_KEY }}
 
       - name: 🛫 Checkout

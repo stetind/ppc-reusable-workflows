@@ -34,6 +34,9 @@ name: 🚀 Release Execution Workflow
 
 on:
   workflow_call:
+    secrets:
+      PPC_CI_APP_PRIVATE_KEY:
+        required: true
     inputs:
       target:
         description: 'The target branch name for merge'

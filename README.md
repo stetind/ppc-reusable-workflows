@@ -6,23 +6,19 @@ Reusable workflows with pre-defined GitHub actions.
 ### Usage
 Add it directly in a job of your workflow with this syntax:
 
-* CI syntax
-
-* TODO check if we can use the secret.GITHUB_TOKEN instead COMPOSER_ACCESS_TOKEN
-* 
+* TypeScript CI syntax
 ```yaml
   job_name:
-    uses: stetind/ppc-reusable-workflows/.github/workflows/ci.yaml@main
-    secrets:
-      COMPOSER_ACCESS_TOKEN: ${{ secrets.COMPOSER_ACCESS_TOKEN }}
+    uses: stetind/ppc-reusable-workflows/.github/workflows/typescript-validation.yaml@main
+    secrets: inherit
 ```
-Where `COMPOSER_ACCESS_TOKEN` should be defined as a secret at
+Requires `NPM_TOKEN` and `SONAR_TOKEN` to be defined as secrets at
 the repository that calls the reusable workflow.
 
 * Sonar syntax
 ```yaml
   job_name:
-    uses: stetind/ppc-reusable-workflows/.github/workflows/sonar.yaml@main
+    uses: stetind/ppc-reusable-workflows/.github/workflows/sonar-analysis.yaml@main
     secrets: inherit
 ```
 * Sonar Secret Variable Requirements:

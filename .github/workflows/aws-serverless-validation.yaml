@@ -49,7 +49,7 @@ on:
         type: string
 
 env:
-  AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1,
+  AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
   AWS_SDK_LOAD_CONFIG: 1
   debugMode: 'false'
 
