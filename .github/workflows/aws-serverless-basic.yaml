@@ -73,12 +73,14 @@ jobs:
       - name: 🟢 Setup Node 24
         uses: actions/setup-node@v7
         with:
-          node-version: '24.14'
+          node-version: '24'
+          registry-url: 'https://registry.npmjs.org'
+          package-manager-cache: false
 
-      - name: 🧙 Install Node
+      - name: 🔧 Setup Node and NPM
         uses: stetind/ppc-github-composite-actions/.github/actions/install-global-dependencies@v2.0.5
-        with:
-          npm_token: $NPM_TOKEN
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: 📓 Create [dot] env
         uses: stetind/ppc-github-composite-actions/.github/actions/create-dot-env@v2.0.5
