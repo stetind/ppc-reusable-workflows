@@ -1,0 +1,2 @@
+chore: remove `NODE_AUTH_TOKEN` env and unused `NPM_TOKEN` secret from workflows|
+chore: fix workflow bugs and hygiene issues from maintainability review|
