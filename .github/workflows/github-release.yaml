@@ -2,6 +2,9 @@ name: Github Release
 
 on:
   workflow_call:
+    secrets:
+      PPC_CI_APP_PRIVATE_KEY:
+        required: true
     inputs:
       tag:
         description: 'Version tag to use for the release (e.g., v1.0.0). If not specified, will use the latest tag'
@@ -30,7 +33,7 @@ jobs:
     name: Prepare
     runs-on: ${{ inputs.runner || 'ubuntu-latest' }}
     outputs:
-      previous_tag: ${{ inputs.tag || steps.latest_tag.outputs.latest_tag }}"
+      previous_tag: ${{ inputs.tag || steps.latest_tag.outputs.latest_tag }}
       new_tag: ${{ steps.concat_release_tag.outputs.tag }}
       is_prelease: ${{ github.event.inputs.prerelease != 'none' && github.event.inputs.prerelease != '' }}
       prerelease: ${{ github.event.inputs.prerelease }}

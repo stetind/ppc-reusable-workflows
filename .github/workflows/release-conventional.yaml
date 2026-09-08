@@ -17,7 +17,6 @@
 #   - tag: The version name
 #   - prerelease: Whether this is a prerelease
 #   - prerelease_suffix: The prerelease suffix
-#   - has_changes: Whether there are changes to release
 #
 # Trigger: workflow_call
 # =============================================================================
@@ -35,6 +34,9 @@ run-name: >-
 
 on:
   workflow_call:
+    secrets:
+      PPC_CI_APP_PRIVATE_KEY:
+        required: true
     outputs:
       tag:
         description: "The version name"
@@ -45,9 +47,6 @@ on:
       prerelease_suffix:
         description: "The prerelease suffix"
         value: ${{ jobs.release.outputs.prerelease_suffix }}
-      has_changes:
-        description: "Describe if the release has changes or not"
-        value: ${{ jobs.release.outputs.has_changes }}
 
     inputs:
       tag:
@@ -68,7 +67,7 @@ on:
         type: string
         default: ''
       release_note_file:
-        required: true
+        required: false
         type: string
         default: ''
       draft:

@@ -1,10 +1,11 @@
 # =============================================================================
 # ☁️ Cloudflare Full Wrangler Deploy
-# Wrapper around Wrangler deploy that also sets up secrets and environment config.
+# Orchestrates typescript-validation.yaml then cloudflare-basic.yaml.
 # Inputs:
-#   - wrangler_environment
-#   - secrets
-#   - post_script: Optional post-deploy script
+#   - deploy_environment: Target environment to deploy to
+#   - debug: Enable debug mode (default: false)
+#   - runner: CI runner selection
+#   - job_container: Docker container for the job (default: node:24.14)
 # =============================================================================
 
 name: Cloudflare_Deploy
