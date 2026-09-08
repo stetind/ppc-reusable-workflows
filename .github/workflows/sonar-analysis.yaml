@@ -49,12 +49,9 @@ jobs:
         with:
           node-version: '24'
           registry-url: 'https://registry.npmjs.org'
-          package-manager-cache: false
 
       - name: 🔧 Setup Node and NPM
         uses: stetind/ppc-github-composite-actions/.github/actions/install-global-dependencies@v2.0.5
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: 🔧 Building Environment
         run: npm run build --if-present
