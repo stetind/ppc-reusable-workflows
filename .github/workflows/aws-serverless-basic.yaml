@@ -78,6 +78,8 @@ jobs:
 
       - name: 🔧 Setup Node and NPM
         uses: stetind/ppc-github-composite-actions/.github/actions/install-global-dependencies@v2.0.5
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: 📓 Create [dot] env
         uses: stetind/ppc-github-composite-actions/.github/actions/create-dot-env@v2.0.5
